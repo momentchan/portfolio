@@ -3,11 +3,24 @@ export default function HomePage() {
       <main className="max-w-3xl mx-auto py-20 px-6 text-center">
         {/* Hero 區塊 */}
         <h1 className="text-4xl font-bold mb-4">
-          Hi, I’m <span className="text-blue-600">Your Name</span>
+          Hi, I'm <span className="text-blue-600">Ming Jyun Hung</span>
         </h1>
         <p className="text-lg text-gray-600 mb-8">
           Creative Developer · Technical Artist · Interactive Designer
         </p>
+        
+        {/* Font Showcase */}
+        <div className="mb-12 p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-xl font-medium mb-4">Pragmatica Font Preview</h2>
+          <div className="space-y-2 text-left">
+            <p className="font-light">Light weight (300) - This is how light text will look</p>
+            <p className="font-normal">Book weight (400) - This is how regular text will look</p>
+            <p className="font-bold">Bold weight (700) - This is how bold text will look</p>
+            <p className="font-black">Black weight (900) - This is how black text will look</p>
+            <p className="italic">Italic style (400) - This is how italic text will look</p>
+            <p className="font-bold italic">Bold Italic (700) - This is how bold italic text will look</p>
+          </div>
+        </div>
   
         {/* 導航按鈕 */}
         <div className="flex justify-center gap-6">

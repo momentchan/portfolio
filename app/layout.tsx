@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const pragmatica = localFont({
+  src: [
+    { path: "../public/fonts/pragmatica/Pragmatica_Book.otf", weight: "400", style: "normal" },
+    { path: "../public/fonts/pragmatica/Pragmatica_Light.otf", weight: "300", style: "normal" },
+    { path: "../public/fonts/pragmatica/Pragmatica_Bold.otf", weight: "700", style: "normal" },
+    { path: "../public/fonts/pragmatica/Pragmatica_Black.otf", weight: "900", style: "normal" },
+    { path: "../public/fonts/pragmatica/Pragmatica_Book_Obl.otf", weight: "400", style: "italic" },
+    { path: "../public/fonts/pragmatica/Pragmatica_Bold_Obl.otf", weight: "700", style: "italic" },
+  ],
+  variable: "--font-pragmatica",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
+  preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+
 
 export const metadata: Metadata = {
   title: "Ming Jyun Hung",
@@ -24,9 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+     <body className={`${pragmatica.variable} antialiased`}>
         {/* Nav Bar */}
-        <header className="w-full border-b px-6 py-4 flex justify-between items-center">
+        <header className="w-full px-6 py-4 flex justify-between items-center">
           <a href="/" className="text-lg font-bold">Ming Jyun Hung</a>
           <nav className="flex gap-6">
             <a href="/projects" className="hover:underline">Projects</a>
