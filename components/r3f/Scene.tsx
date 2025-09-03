@@ -1,12 +1,13 @@
 'use client';
 
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { OrbitControls, MeshTransmissionMaterial, Environment } from '@react-three/drei';
-import { useRef, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { useRef } from 'react';
 import * as THREE from 'three';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { useControls, Leva } from 'leva';
-import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
+import EnvironmentSetup from './EnvironmentSetup';
+import Flower from './Flower';
+import Effects from './Effects';
 
 function SpinningBox() {
   const ref = useRef<THREE.Mesh>(null!);
@@ -19,55 +20,6 @@ function SpinningBox() {
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color="#4f46e5" />
     </mesh>
-  );
-}
-
-function Flower(){
-  const fbx = useLoader(FBXLoader, '/flower.fbx');
-  
-  const materialParams = useControls('Glass Material', {
-    transmission: { value: 0.9, min: 0, max: 1, step: 0.01 },
-    thickness: { value: 0.5, min: 0, max: 2, step: 0.01 },
-    roughness: { value: 0.1, min: 0, max: 1, step: 0.01 },
-    clearcoat: { value: 0.1, min: 0, max: 1, step: 0.01 },
-    clearcoatRoughness: { value: 0.1, min: 0, max: 1, step: 0.01 },
-    ior: { value: 1.5, min: 1, max: 5, step: 0.01 },
-    attenuationDistance: { value: 0.5, min: 0, max: 10, step: 0.01 },
-    attenuationColor: '#ffffff',
-    color: '#ffffff',
-    opacity: { value: 0.8, min: 0, max: 1, step: 0.01 }
-  });
-  
-  useEffect(() => {
-    // Create a single material instance
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-      transmission: materialParams.transmission,
-      thickness: materialParams.thickness,
-      roughness: materialParams.roughness,
-      clearcoat: materialParams.clearcoat,
-      clearcoatRoughness: materialParams.clearcoatRoughness,
-      ior: materialParams.ior,
-      attenuationDistance: materialParams.attenuationDistance,
-      attenuationColor: new THREE.Color(materialParams.attenuationColor),
-      color: new THREE.Color(materialParams.color),
-      opacity: materialParams.opacity,
-      side: THREE.DoubleSide
-    });
-    
-    // Apply the same material instance to all meshes
-    fbx.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.material = glassMaterial;
-      }
-    });
-  }, [fbx, materialParams]);
-  
-  return (
-    <primitive 
-      object={fbx} 
-      scale={0.01}
-      position={[0, -1, 0]}
-    />
   );
 }
 
@@ -127,19 +79,6 @@ function FullscreenQuad() {
 }
 
 export default function Scene() {
-  const bloomParams = useControls('Bloom Effect', {
-    intensity: { value: 1, min: 0, max: 3, step: 0.01 },
-    luminanceThreshold: { value: 0.9, min: 0, max: 1, step: 0.01 },
-    luminanceSmoothing: { value: 0.025, min: 0, max: 0.1, step: 0.001 },
-    mipmapBlur: false
-  });
-
-  const dofParams = useControls('Depth of Field', {
-    focusDistance: { value: 0, min: 0, max: 1, step: 0.01 },
-    focalLength: { value: 0.024, min: 0.001, max: 0.1, step: 0.001 },
-    bokehScale: { value: 2, min: 0, max: 10, step: 0.1 },
-    height: { value: 480, min: 100, max: 1000, step: 10 }
-  });
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -152,23 +91,9 @@ export default function Scene() {
         <Flower />
         <OrbitControls enableDamping />
 
-        <Environment preset="city" />
+        <EnvironmentSetup />
 
-
-        <EffectComposer>
-          <Bloom 
-            intensity={bloomParams.intensity}
-            luminanceThreshold={bloomParams.luminanceThreshold}
-            luminanceSmoothing={bloomParams.luminanceSmoothing}
-            mipmapBlur={bloomParams.mipmapBlur}
-          />
-          <DepthOfField 
-            focusDistance={dofParams.focusDistance}
-            focalLength={dofParams.focalLength}
-            bokehScale={dofParams.bokehScale}
-            height={dofParams.height}
-          />
-        </EffectComposer>
+        <Effects />
       </Canvas>
     </div>
   );
