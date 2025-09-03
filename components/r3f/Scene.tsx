@@ -93,7 +93,7 @@ export default function Scene() {
 
         <EnvironmentSetup />
 
-        <Effects />
+        {/* <Effects /> */}
       </Canvas>
     </div>
   );
