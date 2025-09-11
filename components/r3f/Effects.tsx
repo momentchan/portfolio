@@ -29,14 +29,14 @@ export default function Effects() {
         luminanceSmoothing={bloomParams.luminanceSmoothing}
         mipmapBlur={bloomParams.mipmapBlur}
       />
-      <DepthOfField 
+      {/* <DepthOfField 
         focusDistance={dofParams.focusDistance}
         focalLength={dofParams.focalLength}
         bokehScale={dofParams.bokehScale}
         height={dofParams.height}
         focusRange={dofParams.focusRange}
         blur={dofParams.blur}
-      />
+      /> */}
     </EffectComposer>
   );
 }

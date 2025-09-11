@@ -6,6 +6,7 @@ export default function HomePage() {
     <main className="max-w-3xl mx-auto py-20 px-6 text-center">
 
       {/* background canvas */}
+      {/* <div className="absolute inset-0 z-[-10]"> */}
       <div className="absolute inset-0">
         <Scene />
       </div>

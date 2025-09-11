@@ -6,7 +6,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useControls } from 'leva';
 import simplexNoise from '@/lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
-import fragment from '@/shaders/fragment.glsl';
+import gradientNoise from '@/lib/r3f-gist/shader/cginc/noise/gradientNoise.glsl';
+import fragment from '@/app/(site)/shaders/fragment.glsl';
+import utility from '@/lib/r3f-gist/shader/cginc/utility.glsl';
 
 export default function FullscreenPlane() {
 
@@ -14,15 +16,21 @@ export default function FullscreenPlane() {
     const [currentTextureIndex, setCurrentTextureIndex] = useState(0);
     const meshRef = useRef<THREE.Mesh>(null);
     const shaderMaterialRef = useRef<THREE.ShaderMaterial>(null);
+    const [debug, setDebug] = useState(0);
 
     const controls = useControls({
-        distortionStrength: { value: 0.8, min: 0, max: 1, step: 0.01 },
+        distortionStrength: { value: 0, min: 0, max: 1, step: 0.01 },
         tiling: { value: 15.0, min: 0, max: 100, step: 0.1 },
-        radius: { value: 0.5, min: 0, max: 1, step: 0.01 }
+        radius: { value: 0.5, min: 0, max: 1, step: 0.01 },
+        stripeStrength: { value: { x: 2, y: 0.8 }, step: 0.01 },
+        stripeFreqH: { value: { x: 10, y: 500 }, step: 1 },
+        stripeFreqV: { value: { x: 4, y: 500 }, step: 1 },
+        stripeSpeed: { value: { x: 0.1, y: 0.2 }, step: 0.01 },
     });
 
     // Define all available textures
     const texturePaths = [
+        '/textures/a3182e538f3204413fab4009b52075f6.jpg',
         '/textures/Anne-Hathaway.jpg',
         '/textures/ea05b622336a50e113eb57ed7603fa41.jpg',
         '/textures/198083adc5709adb2d785d4d58a87440.jpg',
@@ -56,6 +64,8 @@ export default function FullscreenPlane() {
                 setCurrentTextureIndex(prev =>
                     prev === texturePaths.length - 1 ? 0 : prev + 1
                 );
+            } else if (event.key === 'd') {
+                setDebug(prev => prev === 0 ? 1 : 0);
             }
         };
 
@@ -75,19 +85,26 @@ export default function FullscreenPlane() {
         if (meshRef.current && textures[currentTextureIndex]) {
             const material = meshRef.current.material as THREE.ShaderMaterial;
             material.uniforms.uTexture.value = textures[currentTextureIndex];
-            material.uniforms.uDistortionStrength.value = controls.distortionStrength;
-            material.uniforms.uTiling.value = controls.tiling;
-            material.uniforms.uRadius.value = controls.radius;
             material.needsUpdate = true;
         }
-    }, [currentTextureIndex, textures, controls]);
+    }, [currentTextureIndex, textures]);
+    
     useFrame((state) => {
         if (meshRef.current && textures[currentTextureIndex]) {
             const material = meshRef.current.material as THREE.ShaderMaterial;
             material.uniforms.uTime.value = state.clock.elapsedTime;
             material.needsUpdate = true;
+            material.uniforms.uStripeFreqH.value = new THREE.Vector2(controls.stripeFreqH.x, controls.stripeFreqH.y);
+            material.uniforms.uStripeFreqV.value = new THREE.Vector2(controls.stripeFreqV.x, controls.stripeFreqV.y);
+            material.uniforms.uStripeSpeed.value = new THREE.Vector2(controls.stripeSpeed.x, controls.stripeSpeed.y);
+            material.uniforms.uStripeStrength.value = new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y);
+            material.uniforms.uDistortionStrength.value = controls.distortionStrength;
+            material.uniforms.uTiling.value = controls.tiling;
+            material.uniforms.uRadius.value = controls.radius;
+            material.uniforms.debug.value = debug;
         }
     });
+
 
 
     const shaderMaterial = useMemo(() => {
@@ -102,6 +119,8 @@ export default function FullscreenPlane() {
             `,
             fragmentShader: /* glsl */`
                 ${simplexNoise}
+                ${gradientNoise}
+                ${utility}
                 ${fragment}
             `,
             uniforms: {
@@ -110,7 +129,12 @@ export default function FullscreenPlane() {
                 uDistortionStrength: { value: controls.distortionStrength },
                 uTiling: { value: controls.tiling },
                 uTime: { value: 0.0 },
-                uRadius: { value: 0.5 }
+                uRadius: { value: 0.5 },
+                uStripeFreqH: { value: new THREE.Vector2(controls.stripeFreqH.x, controls.stripeFreqH.y) },
+                uStripeFreqV: { value: new THREE.Vector2(controls.stripeFreqV.x, controls.stripeFreqV.y) },
+                uStripeSpeed: { value: new THREE.Vector2(controls.stripeSpeed.x, controls.stripeSpeed.y) },
+                uStripeStrength: { value: new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y) },
+                debug: { value: debug }
             },
             toneMapped: false
         });
