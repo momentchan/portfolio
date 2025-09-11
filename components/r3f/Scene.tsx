@@ -1,13 +1,15 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, OrthographicCamera } from '@react-three/drei';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { useControls, Leva } from 'leva';
 import EnvironmentSetup from './EnvironmentSetup';
 import Flower from './Flower';
 import Effects from './Effects';
+import Lines from './Lines';
+import FullscreenPlane from './FullscreenPlane';
 
 function SpinningBox() {
   const ref = useRef<THREE.Mesh>(null!);
@@ -25,18 +27,18 @@ function SpinningBox() {
 
 function FullscreenQuad() {
   const meshRef = useRef<THREE.Mesh>(null!);
-  
+
   // Vertex shader for fullscreen quad
-  const vertexShader = `
+  const vertexShader = /* glsl */ `
     varying vec2 vUv;
     void main() {
       vUv = uv;
       gl_Position = vec4(position, 1.0);
     }
   `;
-  
+
   // Fragment shader for animated background
-  const fragmentShader = `
+  const fragmentShader = /* glsl */ `
     uniform float time;
     varying vec2 vUv;
     
@@ -57,13 +59,13 @@ function FullscreenQuad() {
       gl_FragColor = vec4(finalColor, 1.0);
     }
   `;
-  
+
   useFrame((state) => {
     if (meshRef.current.material) {
       (meshRef.current.material as THREE.ShaderMaterial).uniforms.time.value = state.clock.elapsedTime;
     }
   });
-  
+
   return (
     <mesh ref={meshRef} position={[0, 0, -1]}>
       <planeGeometry args={[2, 2]} />
@@ -83,15 +85,29 @@ export default function Scene() {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Leva />
-      <Canvas camera={{ position: [0, 2, 3], fov: 50 }}>
+      <Canvas>
+        <OrthographicCamera
+          makeDefault
+          position={[0, 0, 10]}
+          zoom={50}
+          near={0.1}
+          far={1000}
+          left={-10}
+          right={10}
+          top={10}
+          bottom={-10}
+        />
+        {/* Fullscreen texture plane */}
+        <FullscreenPlane />
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
         {/* <SpinningBox /> */}
-        <Flower />
-        <OrbitControls enableDamping />
+        {/* <Flower /> */}
+        {/* <Lines /> */}
+        {/* <OrbitControls enableDamping /> */}
 
-        <EnvironmentSetup />
+        {/* <EnvironmentSetup /> */}
 
         {/* <Effects /> */}
       </Canvas>
