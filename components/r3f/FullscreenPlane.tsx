@@ -34,6 +34,8 @@ interface ShaderControls {
   pointerLerpSpeed: number;
   pointerSpeedMultiplier: number;
   pointerSpeedDecay: number;
+  distortionNoise: number;
+  offsetSpeed: number;
 }
 
 // Custom hooks
@@ -114,6 +116,8 @@ export default function FullscreenPlane() {
   const { camera } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [debug, setDebug] = useState(0);
+
+  const [offset, setOffset] = useState(0.0);
   
   // Interpolated pointer values
   const [interpolatedPointer, setInterpolatedPointer] = useState(new THREE.Vector2(0.5, 0.5));
@@ -121,9 +125,11 @@ export default function FullscreenPlane() {
   const previousPointerRef = useRef(new THREE.Vector2(0.5, 0.5));
 
   const controls = useControls({
-    distortionStrength: { value: 0, min: 0, max: 1, step: 0.01 },
-    tiling: { value: 15.0, min: 0, max: 100, step: 0.1 },
+    distortionStrength: { value: 0, min: 0, max: 10, step: 0.01 },
+    distortionNoise: { value: 1, min: 0, max: 1, step: 0.01 },
+    offsetSpeed: { value: 0.0, min: 0, max: 0.1, step: 0.01 },
     radius: { value: 0.5, min: 0, max: 1, step: 0.01 },
+    tiling: { value: 1.0, min: 0, max: 100, step: 0.1 },
     stripeStrength: { value: { x: 2, y: 0.8 }, step: 0.01 },
     stripeFreqH: { value: { x: 10, y: 500 }, step: 1 },
     stripeFreqV: { value: { x: 4, y: 500 }, step: 1 },
@@ -200,6 +206,9 @@ export default function FullscreenPlane() {
     uniforms.uStripeStrength.value = new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y);
     uniforms.uAspect.value = state.viewport.aspect;
 
+    setOffset(prev => prev + delta * controls.offsetSpeed);
+    uniforms.uOffset.value = offset;
+
     material.needsUpdate = true;
   });
 
@@ -223,6 +232,7 @@ export default function FullscreenPlane() {
         uOpacity: { value: 1.0 },
         uDistortionStrength: { value: controls.distortionStrength },
         uTiling: { value: controls.tiling },
+        uDistortionNoise: { value: controls.distortionNoise },
         uTime: { value: 0.0 },
         uRadius: { value: controls.radius },
         uStripeFreqH: { value: new THREE.Vector2(controls.stripeFreqH.x, controls.stripeFreqH.y) },
@@ -233,6 +243,7 @@ export default function FullscreenPlane() {
         uPointerSpeed: { value: 0.0 },
         debug: { value: debug },
         uAspect: { value: 1.0 },
+        uOffset: { value: 0.0 },
       },
       toneMapped: false,
     });
