@@ -1,8 +1,8 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, OrthographicCamera } from '@react-three/drei';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useControls, Leva } from 'leva';
 import EnvironmentSetup from './EnvironmentSetup';
@@ -10,6 +10,26 @@ import Flower from './Flower';
 import Effects from './Effects';
 import Lines from './Lines';
 import FullscreenPlane from './FullscreenPlane';
+import RectangleSpawner from './RectangleSpawner';
+
+function DynamicCamera() {
+  const { camera, size } = useThree();
+  
+  useEffect(() => {
+    if (camera instanceof THREE.OrthographicCamera) {
+      const aspect = size.width / size.height;
+      const frustumSize = 20; // Total height of the view
+      
+      camera.left = -frustumSize * aspect / 2;
+      camera.right = frustumSize * aspect / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, size]);
+  
+  return null;
+}
 
 function FullscreenQuad() {
   const meshRef = useRef<THREE.Mesh>(null!);
@@ -83,13 +103,15 @@ export default function Scene() {
           top={10}
           bottom={-10}
         />
+        <DynamicCamera />
         <FullscreenPlane />
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
         {/* <Flower /> */}
         {/* <Lines /> */}
-        <OrbitControls enableDamping />
+        <RectangleSpawner />
+        {/* <OrbitControls enableDamping /> */}
         <EnvironmentSetup />
       </Canvas>
     </div>

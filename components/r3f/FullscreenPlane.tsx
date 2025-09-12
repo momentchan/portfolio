@@ -31,6 +31,9 @@ interface ShaderControls {
   stripeFreqH: { x: number; y: number };
   stripeFreqV: { x: number; y: number };
   stripeSpeed: { x: number; y: number };
+  pointerLerpSpeed: number;
+  pointerSpeedMultiplier: number;
+  pointerSpeedDecay: number;
 }
 
 // Custom hooks
@@ -87,19 +90,35 @@ const useKeyboardControls = (onPrev: () => void, onNext: () => void, onDebug: ()
 };
 
 const usePlaneDimensions = (camera: THREE.Camera) => {
+  const { size } = useThree();
+  
   return useMemo(() => {
     const orthoCamera = camera as THREE.OrthographicCamera;
     const zoomFactor = orthoCamera.zoom;
-    const width = ((orthoCamera.right - orthoCamera.left) / zoomFactor) * 1;
-    const height = ((orthoCamera.top - orthoCamera.bottom) / zoomFactor) * 1;
+    
+    // Calculate the actual camera bounds (which are now dynamic)
+    const aspect = size.width / size.height;
+    const frustumSize = 20; // Same as in DynamicCamera
+    const actualLeft = -frustumSize * aspect / 2;
+    const actualRight = frustumSize * aspect / 2;
+    const actualTop = frustumSize / 2;
+    const actualBottom = -frustumSize / 2;
+    
+    const width = ((actualRight - actualLeft) / zoomFactor) * 1;
+    const height = ((actualTop - actualBottom) / zoomFactor) * 1;
     return { width, height };
-  }, [camera]);
+  }, [camera, size.width, size.height]);
 };
 
 export default function FullscreenPlane() {
   const { camera } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [debug, setDebug] = useState(0);
+  
+  // Interpolated pointer values
+  const [interpolatedPointer, setInterpolatedPointer] = useState(new THREE.Vector2(0.5, 0.5));
+  const [pointerSpeed, setPointerSpeed] = useState(0.0);
+  const previousPointerRef = useRef(new THREE.Vector2(0.5, 0.5));
 
   const controls = useControls({
     distortionStrength: { value: 0, min: 0, max: 1, step: 0.01 },
@@ -109,6 +128,9 @@ export default function FullscreenPlane() {
     stripeFreqH: { value: { x: 10, y: 500 }, step: 1 },
     stripeFreqV: { value: { x: 4, y: 500 }, step: 1 },
     stripeSpeed: { value: { x: 0.1, y: 0.2 }, step: 0.01 },
+    pointerLerpSpeed: { value: 8.0, min: 0.1, max: 20.0, step: 0.1 },
+    pointerSpeedMultiplier: { value: 1.0, min: 0.0, max: 5.0, step: 0.1 },
+    pointerSpeedDecay: { value: 0.95, min: 0.8, max: 0.99, step: 0.01 },
   }) as ShaderControls;
 
   const { currentTexture, nextTexture, prevTexture } = useTextureManager();
@@ -130,18 +152,40 @@ export default function FullscreenPlane() {
   }, [currentTexture]);
 
   // Update uniforms in animation frame
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!meshRef.current || !currentTexture) return;
 
     const material = meshRef.current.material as THREE.ShaderMaterial;
     const uniforms = material.uniforms;
 
-    // Time-based uniforms
-    uniforms.uTime.value = state.clock.elapsedTime;
-    uniforms.uPointer.value = new THREE.Vector2(
+    // Calculate pointer movement speed
+    const currentPointer = new THREE.Vector2(
       state.pointer.x * 0.5 + 0.5,
       state.pointer.y * 0.5 + 0.5
     );
+    
+    // Calculate distance moved since last frame
+    const movementDistance = currentPointer.distanceTo(previousPointerRef.current);
+    const currentSpeed = movementDistance / delta; // Speed in units per second
+    
+    // Apply speed multiplier and decay
+    const newSpeed = Math.max(
+      currentSpeed * controls.pointerSpeedMultiplier,
+      pointerSpeed * controls.pointerSpeedDecay
+    );
+    setPointerSpeed(newSpeed);
+    
+    // Update previous pointer position
+    previousPointerRef.current.copy(currentPointer);
+    
+    // Interpolate pointer position for smooth movement
+    const lerpFactor = Math.min(delta * controls.pointerLerpSpeed, 1.0);
+    interpolatedPointer.lerp(currentPointer, lerpFactor);
+    
+    // Time-based uniforms
+    uniforms.uTime.value = state.clock.elapsedTime;
+    uniforms.uPointer.value = interpolatedPointer.clone();
+    uniforms.uPointerSpeed.value = newSpeed;
 
     // Control-based uniforms
     uniforms.uDistortionStrength.value = controls.distortionStrength;
@@ -154,6 +198,7 @@ export default function FullscreenPlane() {
     uniforms.uStripeFreqV.value = new THREE.Vector2(controls.stripeFreqV.x, controls.stripeFreqV.y);
     uniforms.uStripeSpeed.value = new THREE.Vector2(controls.stripeSpeed.x, controls.stripeSpeed.y);
     uniforms.uStripeStrength.value = new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y);
+    uniforms.uAspect.value = state.viewport.aspect;
 
     material.needsUpdate = true;
   });
@@ -185,7 +230,9 @@ export default function FullscreenPlane() {
         uStripeSpeed: { value: new THREE.Vector2(controls.stripeSpeed.x, controls.stripeSpeed.y) },
         uStripeStrength: { value: new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y) },
         uPointer: { value: new THREE.Vector2(0.5, 0.5) },
+        uPointerSpeed: { value: 0.0 },
         debug: { value: debug },
+        uAspect: { value: 1.0 },
       },
       toneMapped: false,
     });

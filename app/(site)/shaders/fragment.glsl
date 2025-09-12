@@ -14,6 +14,8 @@ uniform float uRadius;
 // Time and interaction
 uniform float uTime;
 uniform vec2 uPointer;
+uniform float uPointerSpeed;
+uniform float uAspect;
 
 // Stripe effect parameters
 uniform vec2 uStripeFreqH;    // Horizontal stripe frequency
@@ -59,6 +61,11 @@ float calculateGradNoise(vec2 uv, float frequency, float speed, float power, flo
     return (pow(fbm2(uv * frequency, uTime * speed), power) + offset) * amplitude;
 }
 
+// Apply pointer speed influence to a value
+float applyPointerSpeed(float baseValue, float speedInfluence) {
+    return baseValue * (1.0 + uPointerSpeed * speedInfluence);
+}
+
 // ============================================================================
 // DISTORTION FUNCTIONS
 // ============================================================================
@@ -102,7 +109,7 @@ float calculateStripePattern(vec2 uv) {
     
     // Horizontal stripe (secondary)
     float hStripeS = calculateGradNoise(
-        vec2(0.5, uv.y), 
+        vec2(0.5, uv.y ), 
         uStripeFreqH.y, 
         uStripeSpeed.y, 
         1., 
@@ -151,6 +158,9 @@ void main() {
     
     // Calculate stripe pattern
     float stripe = calculateStripePattern(distortedUV);
+    
+    // Apply pointer speed influence to stripe intensity
+    //stripe = applyPointerSpeed(stripe, 0.5);
     
     // Calculate grain effect
     vec3 grain = calculateGrainEffect(distortedUV);
