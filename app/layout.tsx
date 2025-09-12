@@ -33,7 +33,7 @@ export default function RootLayout({
     <html lang="en">
      <body className={`${pragmatica.variable} antialiased`}>
         {/* Nav Bar */}
-        <header className="w-full px-6 py-4 flex justify-between items-center">
+        <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center">
           <a href="/" className="text-lg font-bold">Ming Jyun Hung</a>
           <nav className="flex gap-6">
             <a href="/projects" className="hover:underline">Projects</a>
@@ -42,9 +42,9 @@ export default function RootLayout({
           </nav>
         </header>
 
-        <main className="min-h-screen px-6">{children}</main>
+        <main className="relative z-10 min-h-screen px-6">{children}</main>
 
-        <footer className="border-t px-6 py-4 text-center text-sm text-gray-500">
+        <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
         </footer>
       </body>
