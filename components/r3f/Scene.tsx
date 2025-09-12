@@ -11,20 +11,6 @@ import Effects from './Effects';
 import Lines from './Lines';
 import FullscreenPlane from './FullscreenPlane';
 
-function SpinningBox() {
-  const ref = useRef<THREE.Mesh>(null!);
-  useFrame((_, dt) => {
-    ref.current.rotation.x += dt * 0.6;
-    ref.current.rotation.y += dt * 0.8;
-  });
-  return (
-    <mesh ref={ref}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="#4f46e5" />
-    </mesh>
-  );
-}
-
 function FullscreenQuad() {
   const meshRef = useRef<THREE.Mesh>(null!);
 
@@ -97,19 +83,14 @@ export default function Scene() {
           top={10}
           bottom={-10}
         />
-        {/* Fullscreen texture plane */}
         <FullscreenPlane />
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
-        {/* <SpinningBox /> */}
         {/* <Flower /> */}
         {/* <Lines /> */}
-        {/* <OrbitControls enableDamping /> */}
-
-        {/* <EnvironmentSetup /> */}
-
-        {/* <Effects /> */}
+        <OrbitControls enableDamping />
+        <EnvironmentSetup />
       </Canvas>
     </div>
   );
