@@ -1,16 +1,18 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, OrthographicCamera } from '@react-three/drei';
-import { useRef, useEffect } from 'react';
+import { OrbitControls, OrthographicCamera, CameraControls } from '@react-three/drei';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { useControls, Leva } from 'leva';
 import EnvironmentSetup from './EnvironmentSetup';
 import Flower from './Flower';
 import Effects from './Effects';
 import Lines from './Lines';
-import FullscreenPlane from './FullscreenPlane';
+import FullscreenPlaneWithFBO from './FullscreenPlaneWithFBO';
 import RectangleSpawner from './RectangleSpawner';
+import FBOScene from './FBOScene';
+import Model from './Model';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -86,7 +88,23 @@ function FullscreenQuad() {
   );
 }
 
+// Component to manage FBO texture inside Canvas
+function FBOTextureManager({ fboTestRef, onTextureUpdate }: { 
+  fboTestRef: React.RefObject<{ getFBOTexture: () => THREE.Texture | null } | null>;
+  onTextureUpdate: (texture: THREE.Texture | null) => void;
+}) {
+  useFrame(() => {
+    if (fboTestRef.current) {
+      const texture = fboTestRef.current.getFBOTexture();
+      onTextureUpdate(texture);
+    }
+  });
+  return null;
+}
+
 export default function Scene() {
+  const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
+  const [fboTexture, setFboTexture] = useState<THREE.Texture | null>(null);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -104,14 +122,21 @@ export default function Scene() {
           bottom={-10}
         />
         <DynamicCamera />
-        <FullscreenPlane />
+        <FBOScene ref={fboSceneRef} />
+        <FBOTextureManager fboTestRef={fboSceneRef} onTextureUpdate={setFboTexture} />
+        {/* <FullscreenPlane /> */}
+        <FullscreenPlaneWithFBO fboTexture={fboTexture} />
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
-        <Flower />
         {/* <Lines /> */}
         <RectangleSpawner />
+
+        {/* <CameraControls /> */}
+        {/* <Model path={'Astronaut.fbx'} pos={[0, 1.0, 0]} /> */}
+
         {/* <OrbitControls enableDamping /> */}
+        {/* <Effects /> */}
         <EnvironmentSetup />
       </Canvas>
     </div>

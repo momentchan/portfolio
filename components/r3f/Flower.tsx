@@ -200,7 +200,7 @@ export default function Flower(){
   // Animate rotation
   useFrame((state, delta) => {
     if (groupRef.current && rotationControls.enabled) {
-      groupRef.current.rotation.y += delta * rotationControls.speed;
+      // groupRef.current.rotation.y += delta * rotationControls.speed;
     }
   });
   

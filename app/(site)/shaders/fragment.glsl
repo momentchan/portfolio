@@ -32,40 +32,48 @@ uniform float debug;
 varying vec2 vUv;
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+#define MAX_STEPS 100
+#define MAX_DIST 100.0
+#define SURF_DIST 0.01
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
 // Color space conversion
 vec3 linearToSRGB(vec3 c) {
-      return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, 12.92 * c, step(c, vec3(0.0031308)));
+    return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, 12.92 * c, step(c, vec3(0.0031308)));
 }
 
 // Fractal Brownian Motion (2 octaves)
 float fbm2(vec2 p, float t) {
-      float f = 0.50000 * simplexNoise3d(vec3(p, t));
-      p = p * 2.01;
-      f += 0.25000 * simplexNoise3d(vec3(p, t));
-      return f * (1.0 / 0.75) * 0.5 + 0.5;
+    float f = 0.50000 * simplexNoise3d(vec3(p, t));
+    p = p * 2.01;
+    f += 0.25000 * simplexNoise3d(vec3(p, t));
+    return f * (1.0 / 0.75) * 0.5 + 0.5;
 }
 
 // Random number generation
 float random(vec2 st) {
-      return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
 // Grain noise generation
 float grainNoise(vec2 uv, float frequency, vec2 range) {
-      return remap(random(floor(uv * frequency)), vec2(0.0, 1.0), range);
+    return remap(random(floor(uv * frequency)), vec2(0.0, 1.0), range);
 }
 
 // Calculate gradient noise with parameters
 float calculateGradNoise(vec2 uv, float frequency, float speed, float power, float offset, float amplitude) {
-      return (pow(fbm2(uv * frequency, uTime * speed), power) + offset) * amplitude;
+    return (pow(fbm2(uv * frequency, uTime * speed), power) + offset) * amplitude;
 }
 
 // Apply pointer speed influence to a value
 float applyPointerSpeed(float baseValue, float speedInfluence) {
-      return baseValue * (1.0 + uPointerSpeed * speedInfluence);
+    return baseValue * (1.0 + uPointerSpeed * speedInfluence);
 }
 
 // ============================================================================
@@ -74,28 +82,23 @@ float applyPointerSpeed(float baseValue, float speedInfluence) {
 
 vec2 calculateDistortion(vec2 uv) {
     // Create tiling pattern
-      vec2 ft = (fract(uv * uTiling) - 0.5) * vec2(uAspect, 1.);
-      ft *= smoothstep(uRadius, 0., length(ft));
+    vec2 ft = (fract(uv * uTiling) - 0.5) * vec2(uAspect, 1.0);
+    ft *= smoothstep(uRadius, 0.0, length(ft));
 
     // Generate noise for distortion
-      float noise = fbm2(uv * 5.0, uTime * 0.2) * uDistortionNoise;
+    float noise = fbm2(uv * 5.0, uTime * 0.2) * uDistortionNoise;
 
-    // Apply distortion
+    // Apply grid-based distortion
+    float rep = 20.0;
+    vec2 aspectCorrectedUV = uv * vec2(uAspect, 1.0);
+    vec2 fv = (floor(aspectCorrectedUV * rep) + 0.5) / rep;
+    fv = fv / vec2(uAspect, 1.0);
+    
+    vec2 dist = (fv - uPointer) * vec2(1.0, 1.0 / uAspect);
+    float r = smoothstep(0.2, 0.0, length(dist));
+    uv = mix(uv, fv, 0.0);
 
-      float rep = 20.0;
-      // Compensate for aspect ratio to make grid squares
-      vec2 aspectCorrectedUV = uv * vec2(uAspect, 1.0);
-      vec2 fv = (floor(aspectCorrectedUV * rep) + 0.5) / rep;
-      fv = fv / vec2(uAspect, 1.0);
-      
-      vec2 dist = (fv - uPointer) * vec2(1.0, 1.0 / uAspect);
-      // dist *= smoothstep(0.2, 0., length(dist));
-
-      float r = smoothstep(0.2, 0., length(dist));
-      // r *= uPointerSpeed;
-      uv = mix(uv, fv, r);
-
-      return uv + ft * uDistortionStrength * (1. + noise) + vec2(uOffset, 0);// - dist;
+    return uv + ft * uDistortionStrength * (1.0 + noise) + vec2(uOffset, 0.0);
 }
 
 // ============================================================================
@@ -104,15 +107,15 @@ vec2 calculateDistortion(vec2 uv) {
 
 float calculateStripePattern(vec2 uv) {
     // Vertical stripe (background)
-      float vStripeB = calculateGradNoise(vec2(uv.x + 28.8, 0.5), uStripeFreqV.x, uStripeSpeed.x, 10., 0.0, uStripeStrength.x);
+    float vStripeB = calculateGradNoise(vec2(uv.x + 28.8, 0.5), uStripeFreqV.x, uStripeSpeed.x, 10.0, 0.0, uStripeStrength.x);
 
     // Horizontal stripe (background)
-      float hStripeB = calculateGradNoise(vec2(0.5, uv.y), uStripeFreqH.x, uStripeSpeed.y, 5., 0.5, uStripeStrength.y);
+    float hStripeB = calculateGradNoise(vec2(0.5, uv.y), uStripeFreqH.x, uStripeSpeed.y, 5.0, 0.5, uStripeStrength.y);
 
     // Horizontal stripe (secondary)
-      float hStripeS = calculateGradNoise(vec2(0.5, uv.y), uStripeFreqH.y, uStripeSpeed.y, 1., 1., uStripeStrength.y);
+    float hStripeS = calculateGradNoise(vec2(0.5, uv.y), uStripeFreqH.y, uStripeSpeed.y, 1.0, 1.0, uStripeStrength.y);
 
-      return vStripeB + hStripeB * hStripeS;
+    return vStripeB + hStripeB * hStripeS;
 }
 
 // ============================================================================
@@ -121,20 +124,90 @@ float calculateStripePattern(vec2 uv) {
 
 vec3 calculateGrainEffect(vec2 uv) {
     // Base grain noise
-      float gn1 = grainNoise(uv, 2000., vec2(0.8, 1.2));
+    float gn1 = grainNoise(uv, 2000.0, vec2(0.8, 1.2));
 
     // Positive grain spots
-      float gn3 = pow(smoothstep(0.8, 1.0, fbm2(uv * 60., uTime * 0.05)), 2.0) * 1.0;
+    float gn3 = pow(smoothstep(0.8, 1.0, fbm2(uv * 60.0, uTime * 0.05)), 2.0) * 1.0;
 
     // Negative grain spots
-      float gn4 = -pow(smoothstep(0.8, 1.0, fbm2(uv * 60. + 2356.8, uTime * 0.05)), 2.0) * 0.5;
+    float gn4 = -pow(smoothstep(0.8, 1.0, fbm2(uv * 60.0 + 2356.8, uTime * 0.05)), 2.0) * 0.5;
 
     // Combine grain effects
-      vec3 grain = vec3(gn1);
-      grain += gn3;
-      grain += gn4;
+    vec3 grain = vec3(gn1);
+    grain += gn3;
+    grain += gn4;
 
-      return grain;
+    return grain;
+}
+
+// ============================================================================
+// RAYMARCHING FUNCTIONS
+// ============================================================================
+
+float GetDist(vec3 p) {
+    // Animated space repetition pattern
+    p.z += uTime * 0.4;
+    
+    // Space repetition
+    p.xy = fract(p.xy) - 0.5;        // spacing: 1
+    p.z = mod(p.z, 0.25) - 0.125;    // spacing: 0.25
+
+    float box = sdOctahedron(p, 0.15);
+    return box;
+}
+
+vec3 GetNormal(vec3 p) {
+    float d = GetDist(p);
+    vec2 e = vec2(0.01, 0.0);
+    vec3 n = d - vec3(
+        GetDist(p - e.xyy),
+        GetDist(p - e.yxy),
+        GetDist(p - e.yyx)
+    );
+    return normalize(n);
+}
+
+float RayMarch(vec3 ro, vec3 rd) {
+    float ds = 0.0;
+    
+    for(int i = 0; i < MAX_STEPS; i++) {
+        vec3 p = ro + rd * ds;
+        float d = GetDist(p);
+        ds += d;
+        
+        if(ds > MAX_DIST || d < SURF_DIST) break;
+    }
+    
+    return ds;
+}
+
+float GetLight(vec3 p) {
+    vec3 lightPos = vec3(0.0, 5.0, 8.0);
+    vec3 l = normalize(lightPos - p);
+    vec3 n = GetNormal(p);
+    float dif = clamp(dot(n, l), 0.0, 1.0);
+
+    // Shadow
+    vec3 offset = n * SURF_DIST * 2.0;
+    float d = RayMarch(p + offset, l);
+    if(d < length(lightPos - p)) {
+        dif *= 0.1;
+    }
+        
+    return dif;
+}
+
+vec3 calculateRaymarching(vec3 ro, vec3 rd) {
+    vec3 col = vec3(0.0);
+    float ds = RayMarch(ro, rd);
+    
+    if(ds < MAX_DIST) {
+        vec3 p = ro + rd * ds;
+        float dif = GetLight(p);
+        col = vec3(dif);
+    }
+    
+    return col;
 }
 
 // ============================================================================
@@ -143,35 +216,39 @@ vec3 calculateGrainEffect(vec2 uv) {
 
 void main() {
     // Calculate distorted UV coordinates
-      vec2 distortedUV = calculateDistortion(vUv);
+    vec2 distortedUV = calculateDistortion(vUv);
 
     // Sample texture with distortion
-      vec4 tex = texture2D(uTexture, distortedUV);
+    vec4 tex = texture2D(uTexture, distortedUV);
 
     // Convert to sRGB color space
-      vec3 baseColor = linearToSRGB(tex.rgb);
+    vec3 baseColor = linearToSRGB(tex.rgb);
 
     // Calculate stripe pattern
-      float stripe = calculateStripePattern(distortedUV);
-
-    // Apply pointer speed influence to stripe intensity
-    //stripe = applyPointerSpeed(stripe, 0.5);
+    float stripe = calculateStripePattern(distortedUV);
 
     // Calculate grain effect
-      vec3 grain = calculateGrainEffect(distortedUV);
+    vec3 grain = calculateGrainEffect(distortedUV);
 
     // Apply grain to stripe pattern
-      vec3 stripeWithGrain = vec3(stripe) * grain;
+    vec3 stripeWithGrain = vec3(stripe) * grain;
 
     // Add noise modulation
-      float noiseModulation = pow(remap(fbm2(distortedUV * 2.0, uTime * 0.1), vec2(0.0, 1.0), vec2(0.5, 1.0)), 5.0);
-
-    // Apply noise modulation
-      stripeWithGrain *= noiseModulation;
+    float noiseModulation = pow(remap(fbm2(distortedUV * 2.0, uTime * 0.1), vec2(0.0, 1.0), vec2(0.5, 1.0)), 5.0);
+    stripeWithGrain *= noiseModulation;
 
     // Final color mixing
-      vec3 finalColor = mix(stripeWithGrain, baseColor, debug);
+    vec3 finalColor = mix(stripeWithGrain, baseColor, debug);
+
+    // Raymarching effect
+    vec2 worldUV = (vUv - 0.5) * 2.0;
+    vec3 ro = vec3(0.0, 0.0, -3.0);
+    vec3 rd = normalize(vec3(worldUV, 1.0));
+    vec3 raymarchColor = calculateRaymarching(ro, rd);
+
+    // Combine all effects
+    // finalColor = raymarchColor;
 
     // Output
-      gl_FragColor = vec4(finalColor, tex.a * uOpacity);
+    gl_FragColor = vec4(finalColor,  uOpacity);
 }
