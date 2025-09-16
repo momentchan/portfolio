@@ -108,7 +108,7 @@ export default function Scene() {
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
-        {/* <Flower /> */}
+        <Flower />
         {/* <Lines /> */}
         <RectangleSpawner />
         {/* <OrbitControls enableDamping /> */}

@@ -175,11 +175,17 @@ const ShaderMesh = ({ mesh }: {
 };
 
 export default function Flower(){
-  const fbx = useLoader(FBXLoader, '/flower.fbx');
+  const fbx = useLoader(FBXLoader, '/flower_Hibiscus_A01.FBX');
   const glassConfig = useGlassConfig();
+  const groupRef = useRef<THREE.Group>(null);
   
   const materialToggle = useControls('Material Selection', {
     materialType: { value: 'shader', options: ['glass', 'shader'] }
+  });
+  
+  const rotationControls = useControls('Rotation', {
+    speed: { value: 0.5, min: 0, max: 2, step: 0.1 },
+    enabled: true
   });
   
   // Extract meshes from the loaded FBX
@@ -190,9 +196,16 @@ export default function Flower(){
     });
     return arr;
   }, [fbx]);
+
+  // Animate rotation
+  useFrame((state, delta) => {
+    if (groupRef.current && rotationControls.enabled) {
+      groupRef.current.rotation.y += delta * rotationControls.speed;
+    }
+  });
   
   return (
-    <group scale={0.01} position={[0, -1, 0]}>
+    <group ref={groupRef} scale={0.0025} position={[0, -0.1, 0]} rotation={[Math.PI * 0.2, 0, 0]}>
       {materialToggle.materialType === 'glass' ? (
         // Render glass material
         meshes.map((mesh, i) => (

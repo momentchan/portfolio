@@ -81,7 +81,21 @@ vec2 calculateDistortion(vec2 uv) {
       float noise = fbm2(uv * 5.0, uTime * 0.2) * uDistortionNoise;
 
     // Apply distortion
-      return uv + ft * uDistortionStrength * (1. + noise) + vec2(uOffset, 0);
+
+      float rep = 20.0;
+      // Compensate for aspect ratio to make grid squares
+      vec2 aspectCorrectedUV = uv * vec2(uAspect, 1.0);
+      vec2 fv = (floor(aspectCorrectedUV * rep) + 0.5) / rep;
+      fv = fv / vec2(uAspect, 1.0);
+      
+      vec2 dist = (fv - uPointer) * vec2(1.0, 1.0 / uAspect);
+      // dist *= smoothstep(0.2, 0., length(dist));
+
+      float r = smoothstep(0.2, 0., length(dist));
+      // r *= uPointerSpeed;
+      uv = mix(uv, fv, r);
+
+      return uv + ft * uDistortionStrength * (1. + noise) + vec2(uOffset, 0);// - dist;
 }
 
 // ============================================================================
@@ -150,7 +164,7 @@ void main() {
       vec3 stripeWithGrain = vec3(stripe) * grain;
 
     // Add noise modulation
-      float noiseModulation = pow(remap(fbm2(distortedUV, uTime * 0.1), vec2(0.0, 1.0), vec2(0.5, 1.0)), 5.0);
+      float noiseModulation = pow(remap(fbm2(distortedUV * 2.0, uTime * 0.1), vec2(0.0, 1.0), vec2(0.5, 1.0)), 5.0);
 
     // Apply noise modulation
       stripeWithGrain *= noiseModulation;
