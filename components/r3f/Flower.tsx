@@ -34,9 +34,9 @@ const useGlassConfig = () => {
 
 
 // Component for individual mesh with glass material
-const GlassMesh = ({ mesh, config }: { 
-  mesh: THREE.Mesh; 
-  config: any; 
+const GlassMesh = ({ mesh, config }: {
+  mesh: THREE.Mesh;
+  config: any;
 }) => (
   <Float floatIntensity={0} rotationIntensity={0}>
     <mesh
@@ -58,11 +58,11 @@ const GlassMesh = ({ mesh, config }: {
 );
 
 // Component for individual mesh with shader material
-const ShaderMesh = ({ mesh }: { 
-  mesh: THREE.Mesh; 
+const ShaderMesh = ({ mesh }: {
+  mesh: THREE.Mesh;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  
+
   // Get controls directly in this component
   const config = useControls('Shader Material', {
     // Fresnel controls
@@ -73,7 +73,7 @@ const ShaderMesh = ({ mesh }: {
     fresnelRimStrength: { value: 0.5, min: 0.0, max: 2.0, step: 0.01 },
     fresnelFalloff: { value: 2, min: 0.1, max: 2.0, step: 0.01 }
   }, { collapsed: true });
-  
+
   // Create shader material once and update uniforms
   const shaderMaterial = useMemo(() => {
     const material = new THREE.ShaderMaterial({
@@ -141,10 +141,10 @@ const ShaderMesh = ({ mesh }: {
       side: THREE.DoubleSide,
       transparent: true
     });
-    
+
     return material;
   }, []); // Empty dependency array - create once
-  
+
   // Update uniforms when config changes
   useEffect(() => {
     // Update uniform values
@@ -154,10 +154,10 @@ const ShaderMesh = ({ mesh }: {
     shaderMaterial.uniforms.fresnelPower.value = config.fresnelPower;
     shaderMaterial.uniforms.fresnelRimStrength.value = config.fresnelRimStrength;
     shaderMaterial.uniforms.fresnelFalloff.value = config.fresnelFalloff;
-    
+
     shaderMaterial.needsUpdate = true;
   }, [config, shaderMaterial]);
-  
+
   return (
     <Float floatIntensity={0} rotationIntensity={0}>
       <mesh
@@ -174,24 +174,24 @@ const ShaderMesh = ({ mesh }: {
   );
 };
 
-export default function Flower(){
-  const fbx = useLoader(FBXLoader, '/flower_Hibiscus_A01.FBX');
+export default function Flower({ path, scale, position, rotation }: { path: string, scale: number, position: [number, number, number], rotation: [number, number, number]}) {
+  const fbx = useLoader(FBXLoader, path);
   const glassConfig = useGlassConfig();
   const groupRef = useRef<THREE.Group>(null);
-  
+
   const materialToggle = useControls('Material Selection', {
     materialType: { value: 'shader', options: ['glass', 'shader'] }
   });
-  
+
   const rotationControls = useControls('Rotation', {
     speed: { value: 0.5, min: 0, max: 2, step: 0.1 },
     enabled: true
   });
-  
+
   // Extract meshes from the loaded FBX
   const meshes = useMemo(() => {
     const arr: THREE.Mesh[] = [];
-    fbx.traverse((child) => { 
+    fbx.traverse((child) => {
       if (child instanceof THREE.Mesh) arr.push(child);
     });
     return arr;
@@ -205,7 +205,7 @@ export default function Flower(){
   });
   
   return (
-    <group ref={groupRef} scale={0.0025} position={[0, -0.1, 0]} rotation={[Math.PI * 0.2, 0, 0]}>
+    <group ref={groupRef} scale={scale} position={position} rotation={rotation}>
       {materialToggle.materialType === 'glass' ? (
         // Render glass material
         meshes.map((mesh, i) => (

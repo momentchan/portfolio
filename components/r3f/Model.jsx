@@ -41,14 +41,14 @@ export default function Model({ path, pos }) {
         action.play();
     }
 
-    useEffect(() => {
-        const action = actions[names[index]];
-        // Reset and fade in animation after an index has been changed
-        applyEasedFade(action, transT, true); // Eased fade in
+    // useEffect(() => {
+    //     const action = actions[names[index]];
+    //     // Reset and fade in animation after an index has been changed
+    //     applyEasedFade(action, transT, true); // Eased fade in
 
-        // In the clean-up phase, fade it out
-        return () => applyEasedFade(action, transT, false); // Eased fade out
-    }, [index, actions, names])
+    //     // In the clean-up phase, fade it out
+    //     return () => applyEasedFade(action, transT, false); // Eased fade out
+    // }, [index, actions, names])
 
     const bodyTex = useTexture({
         map: 'Textures/Body/Astronaut_Suit_Body_Albedo.png',

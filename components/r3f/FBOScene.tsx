@@ -31,34 +31,34 @@ const FBOScene = forwardRef<{ getFBOTexture: () => THREE.Texture | null }, FBOSc
         // Perspective camera for rendering the flower
         const flowerCamera = useMemo(() => new THREE.PerspectiveCamera(50, 1, 0.1, 1000), []);
 
-         // Controls
-         const controls = useControls('Flower FBO', {
-             flowerScale: { value: 1.0, min: 0.1, max: 3.0, step: 0.1 },
-             cameraDistance: { value: .5, min: 0.0, max: 20.0, step: 0.1 },
-         });
+        // Controls
+        const controls = useControls('Flower FBO', {
+            flowerScale: { value: 1.0, min: 0.1, max: 3.0, step: 0.1 },
+            cameraDistance: { value: .5, min: 0.0, max: 20.0, step: 0.1 },
+        });
 
-         // Expose FBO texture via ref
-         useImperativeHandle(ref, () => ({
-             getFBOTexture: () => fbo.texture,
-         }));
+        // Expose FBO texture via ref
+        useImperativeHandle(ref, () => ({
+            getFBOTexture: () => fbo.texture,
+        }));
 
-         // Force initial render to populate FBO
-         useEffect(() => {
-             if (flowerRef.current) {
-                 // Position flower camera
-                 flowerCamera.position.set(0, 0, controls.cameraDistance);
-                 flowerCamera.lookAt(0, 0, 0);
+        // Force initial render to populate FBO
+        useEffect(() => {
+            if (flowerRef.current) {
+                // Position flower camera
+                flowerCamera.position.set(0, 0, controls.cameraDistance);
+                flowerCamera.lookAt(0, 0, 0);
 
-                 // Render Flower to FBO immediately
-                 gl.setRenderTarget(fbo);
-                 gl.clear();
-                 gl.render(
-                     new THREE.Scene().add(flowerRef.current),
-                     flowerCamera
-                 );
-                 gl.setRenderTarget(null);
-             }
-         }, [gl, fbo, flowerCamera, controls.cameraDistance]);
+                // Render Flower to FBO immediately
+                gl.setRenderTarget(fbo);
+                gl.clear();
+                gl.render(
+                    new THREE.Scene().add(flowerRef.current),
+                    flowerCamera
+                );
+                gl.setRenderTarget(null);
+            }
+        }, [gl, fbo, flowerCamera, controls.cameraDistance]);
 
         useFrame((state, delta) => {
             if (!flowerRef.current) return;
@@ -85,13 +85,20 @@ const FBOScene = forwardRef<{ getFBOTexture: () => THREE.Texture | null }, FBOSc
             <group>
                 {/* Flower component (rendered to FBO) */}
                 <group ref={flowerRef} position={[0, 0, 0]}>
-                    {/* <Flower /> */}
+                    {/* <Flower path={'flower_Hibiscus_A01.FBX'} /> */}
+                    {/* <Flower path={'free_head.fbx'} scale={0.003} position={[0, -0.5, 0]} rotation={[Math.PI * 0,  Math.PI * 0.5, 0]} /> */}
+                    {/* <mesh>
+
+                        <sphereGeometry args={[0.05, 64]} />
+                        <circleGeometry args={[0.05, 64]} />
+                        <meshStandardMaterial color="#ff0000" />
+                    </mesh> */}
 
 
-                    <ambientLight intensity={1} />
+                    {/* <ambientLight intensity={1} /> */}
                     <directionalLight position={[1, 1, 1]} intensity={1} />
-                    <Environment preset="studio" environmentIntensity={10} />
-                    <Model path={'Astronaut.fbx'} pos={[0, -0.0, 0]} />
+                    <Environment preset="city" environmentIntensity={10} />
+                    {/* <Model path={'Free.fbx'} pos={[0, -0.0, 0]} /> */}
                 </group>
             </group>
         );

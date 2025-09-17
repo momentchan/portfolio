@@ -8,11 +8,11 @@ import { useControls, Leva } from 'leva';
 import EnvironmentSetup from './EnvironmentSetup';
 import Flower from './Flower';
 import Effects from './Effects';
-import Lines from './Lines';
 import FullscreenPlaneWithFBO from './FullscreenPlaneWithFBO';
 import RectangleSpawner from './RectangleSpawner';
 import FBOScene from './FBOScene';
 import Model from './Model';
+import MouseTraceFBO from '../../lib/r3f-gist/utility/MouseTrace';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -105,6 +105,7 @@ function FBOTextureManager({ fboTestRef, onTextureUpdate }: {
 export default function Scene() {
   const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
   const [fboTexture, setFboTexture] = useState<THREE.Texture | null>(null);
+  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void }>(null);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -125,7 +126,8 @@ export default function Scene() {
         <FBOScene ref={fboSceneRef} />
         <FBOTextureManager fboTestRef={fboSceneRef} onTextureUpdate={setFboTexture} />
         {/* <FullscreenPlane /> */}
-        <FullscreenPlaneWithFBO fboTexture={fboTexture} />
+        <MouseTraceFBO ref={traceRef} showDebug={true} dowwnsample={128}/>
+        <FullscreenPlaneWithFBO fboTexture={fboTexture} traceTexture={traceRef.current?.getFBOTexture()} />
         {/* <FullscreenQuad /> */}
         <ambientLight intensity={0.6} />
         {/* <directionalLight position={[3, 3, 3]} intensity={1} /> */}
