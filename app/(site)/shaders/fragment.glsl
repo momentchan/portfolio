@@ -21,6 +21,7 @@ uniform vec2 uPointer;
 uniform float uPointerSpeed;
 uniform float uAspect;
 uniform float uOffset;
+uniform vec2 uResolution;
 
 // Stripe effect parameters
 uniform vec2 uStripeFreqH;    // Horizontal stripe frequency
@@ -46,6 +47,7 @@ varying vec2 vUv;
 // UTILITY FUNCTIONS
 // ============================================================================
 
+
 // Color space conversion
 vec3 linearToSRGB(vec3 c) {
   return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, 12.92 * c, step(c, vec3(0.0031308)));
@@ -68,6 +70,25 @@ float random(vec2 st) {
 float grainNoise(vec2 uv, float frequency, vec2 range) {
   return remap(random(floor(uv * frequency)), vec2(0.0, 1.0), range);
 }
+
+// Calculate gradient using central difference method
+vec3 calculateGradient(sampler2D tex, vec2 uv) {
+  vec2 texelSize = 1.0 / uResolution;
+  float noise1 = (fbm2(uv * 2.0, 0.1 * uTime) - 0.5) * 0.5;
+
+  // Sample neighboring pixels for gradient calculation using .g channel
+  float gx = texture2D(tex, uv + vec2(texelSize.x, 0.0) + noise1).g - 
+             texture2D(tex, uv - vec2(texelSize.x, 0.0) + noise1).g;
+  float gy = texture2D(tex, uv + vec2(0.0, texelSize.y) + noise1).g - 
+             texture2D(tex, uv - vec2(0.0, texelSize.y) + noise1).g;
+  
+  // Calculate gradient magnitude
+  float gradientMagnitude = sqrt(gx * gx + gy * gy);
+  
+  // Return gradient as vec3: (gx, gy, magnitude)
+  return vec3(gx, gy, gradientMagnitude);
+}
+
 
 // Calculate gradient noise with parameters
 float calculateGradNoise(vec2 uv, float frequency, float speed, float power, float offset, float amplitude) {
@@ -215,12 +236,23 @@ vec3 calculateRaymarching(vec3 ro, vec3 rd) {
 // ============================================================================
 
 void main() {
-    // Calculate distorted UV coordinates
+  vec4 traceTex = texture2D(uTraceTexture, vUv);
+  
+  // Calculate gradient of traceTex using the function
+  vec3 gradientData = calculateGradient(uTraceTexture, vUv);
+  
+  // Extract gradient components
+  vec2 gradient = vec2(gradientData.x, gradientData.y) / max(gradientData.z, 1e-6);
+  float gradientMagnitude = gradientData.z;
+  
+  // gradient = vec2(gradient.y, -gradient.x);
+  
   vec2 distortedUV = calculateDistortion(vUv);
+  distortedUV += gradient * gradientMagnitude * 0.5;
 
     // Sample primary texture with distortion
   vec4 tex = texture2D(uTexture, distortedUV);
-  vec4 traceTex = texture2D(uTraceTexture, distortedUV);
+  // vec4 traceTex = texture2D(uTraceTexture, distortedUV);
 
     // Sample external texture if available
   vec4 externalTex = texture2D(uExternalTexture, distortedUV);
@@ -270,6 +302,7 @@ void main() {
     // finalColor = raymarchColor;
 
   finalColor += tex.rgb;
+  // finalColor.rg = mixedGradient * gradientMagnitude;
     // finalColor += externalTex.rgb * uTextureMix;
 
     // Output

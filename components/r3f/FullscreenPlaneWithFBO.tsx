@@ -56,7 +56,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture }: Ful
     // Distortion controls
     distortionStrength: { value: 0, min: 0, max: 10, step: 0.01 },
     distortionNoise: { value: 1, min: 0, max: 1, step: 0.01 },
-    offsetSpeed: { value: 0.0, min: 0, max: 0.1, step: 0.01 },
+    offsetSpeed: { value: 0.04, min: 0, max: 0.1, step: 0.01 },
     radius: { value: 0.5, min: 0, max: 1, step: 0.01 },
     tiling: { value: 1.0, min: 0, max: 100, step: 0.1 },
     
@@ -132,6 +132,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture }: Ful
         debug: { value: 0 },
         uAspect: { value: 1.0 },
         uOffset: { value: 0.0 },
+        uResolution: { value: new THREE.Vector2(size.width, size.height) },
       },
       toneMapped: false,
     });
@@ -144,7 +145,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture }: Ful
       shaderMaterial.uniforms.uTraceTexture.value = traceTexture;
       shaderMaterial.needsUpdate = true;
     }
-  }, [shaderMaterial, fboTexture, traceTexture]);
+  }, [shaderMaterial, fboTexture, traceTexture, size.width, size.height]);
 
   // Update uniforms in animation frame
   useFrame((state, delta) => {
@@ -192,7 +193,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture }: Ful
     uniforms.uStripeSpeed.value = new THREE.Vector2(controls.stripeSpeed.x, controls.stripeSpeed.y);
     uniforms.uStripeStrength.value = new THREE.Vector2(controls.stripeStrength.x, controls.stripeStrength.y);
     uniforms.uAspect.value = state.viewport.aspect;
-
+    uniforms.uResolution.value = new THREE.Vector2(size.width, size.height);
     setOffset(prev => prev + delta * controls.offsetSpeed);
     uniforms.uOffset.value = offset;
 
