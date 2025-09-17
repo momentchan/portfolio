@@ -6,6 +6,8 @@
 uniform sampler2D uTexture;
 uniform sampler2D uExternalTexture;
 uniform sampler2D uTraceTexture;
+uniform sampler2D uCausticsTexture;
+uniform float uTraceDistortion;
 uniform float uTextureMix;
 uniform float uOpacity;
 
@@ -74,13 +76,13 @@ float grainNoise(vec2 uv, float frequency, vec2 range) {
 // Calculate gradient using central difference method
 vec3 calculateGradient(sampler2D tex, vec2 uv) {
   vec2 texelSize = 1.0 / uResolution;
-  float noise1 = (fbm2(uv * 2.0, 0.1 * uTime) - 0.5) * 0.5;
+  float distortion = (fbm2(uv * 2.0, 0.1 * uTime) - 0.5) * 0.5;
 
   // Sample neighboring pixels for gradient calculation using .g channel
-  float gx = texture2D(tex, uv + vec2(texelSize.x, 0.0) + noise1).g - 
-             texture2D(tex, uv - vec2(texelSize.x, 0.0) + noise1).g;
-  float gy = texture2D(tex, uv + vec2(0.0, texelSize.y) + noise1).g - 
-             texture2D(tex, uv - vec2(0.0, texelSize.y) + noise1).g;
+  float gx = texture2D(tex, uv + vec2(texelSize.x, 0.0) + distortion).g - 
+             texture2D(tex, uv - vec2(texelSize.x, 0.0) + distortion).g;
+  float gy = texture2D(tex, uv + vec2(0.0, texelSize.y) + distortion).g - 
+             texture2D(tex, uv - vec2(0.0, texelSize.y) + distortion).g;
   
   // Calculate gradient magnitude
   float gradientMagnitude = sqrt(gx * gx + gy * gy);
@@ -237,7 +239,7 @@ vec3 calculateRaymarching(vec3 ro, vec3 rd) {
 
 void main() {
   vec4 traceTex = texture2D(uTraceTexture, vUv);
-  
+  vec4 causticsTex = texture2D(uCausticsTexture, vUv);
   // Calculate gradient of traceTex using the function
   vec3 gradientData = calculateGradient(uTraceTexture, vUv);
   
@@ -248,11 +250,10 @@ void main() {
   // gradient = vec2(gradient.y, -gradient.x);
   
   vec2 distortedUV = calculateDistortion(vUv);
-  distortedUV += gradient * gradientMagnitude * 0.5;
+  distortedUV += gradient * gradientMagnitude * 0.5 * uTraceDistortion;
 
     // Sample primary texture with distortion
   vec4 tex = texture2D(uTexture, distortedUV);
-  // vec4 traceTex = texture2D(uTraceTexture, distortedUV);
 
     // Sample external texture if available
   vec4 externalTex = texture2D(uExternalTexture, distortedUV);
@@ -277,33 +278,23 @@ void main() {
   float noiseModulation = pow(remap(noise, vec2(0.0, 1.0), vec2(0.5, 1.0)), 5.0);
   stripeWithGrain *= noiseModulation;
 
-    // Mouse Stripe
-  vec2 d = (distortedUV - uPointer) * vec2(1.0, 1.0 / uAspect);
-  float dd = 0.05;
-  float m = smoothstep(dd, 0.0, length(d.x)) + smoothstep(dd, 0.0, length(d.y));
-  m = smoothstep(0.1,0.0, abs(length(d)-0.1));
-  m = traceTex.r;
-
-  stripeWithGrain += (m * 5.0) * stripeWithGrain;
+  // Trace
+  stripeWithGrain += (traceTex.r * 5.0) * stripeWithGrain;
+  stripeWithGrain += (causticsTex.rgb * 5.0) * stripeWithGrain;
 
     // Final color mixing
   vec3 finalColor = mix(stripeWithGrain, baseColor, debug);
 
     // Raymarching effect
-  vec2 worldUV = (vUv - 0.5) * 2.0;
+  vec2 worldUV = (distortedUV - 0.5) * 2.0;
   vec3 ro = vec3(0.0, 0.0, -3.0);
   vec3 rd = normalize(vec3(worldUV, 1.0));
   vec3 raymarchColor = calculateRaymarching(ro, rd);
 
-  float noise2 = fbm2(distortedUV * 2.0, uTime * 0.01);
-  // finalColor += smoothstep(0.001, 0.0, abs(noise2-0.5)) * finalColor * 0.5;
-
-    // Combine all effects
-    // finalColor = raymarchColor;
-
   finalColor += tex.rgb;
-  // finalColor.rg = mixedGradient * gradientMagnitude;
-    // finalColor += externalTex.rgb * uTextureMix;
+  // finalColor = traceTex.rrr;
+  // finalColor += raymarchColor * traceTex.r;
+
 
     // Output
   gl_FragColor = vec4(finalColor, uOpacity);
