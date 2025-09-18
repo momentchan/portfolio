@@ -14,10 +14,11 @@ import raymarching from '@/lib/r3f-gist/shader/cginc/raymarching.glsl';
 interface FullscreenPlaneWithFBOProps {
   fboTexture?: THREE.Texture | null;
   traceTexture?: THREE.Texture | null;
+  scriptedTraceTexture?: THREE.Texture | null;
   causticsTexture?: THREE.Texture | null;
 }
 
-export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, causticsTexture }: FullscreenPlaneWithFBOProps) {
+export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, scriptedTraceTexture, causticsTexture }: FullscreenPlaneWithFBOProps) {
   const { camera, size } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -118,6 +119,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, caust
         uTexture: { value: fboTexture },
         uExternalTexture: { value: selectedExternalTexture },
         uTraceTexture: { value: traceTexture },
+        uScriptedTraceTexture: { value: scriptedTraceTexture },
         uCausticsTexture: { value: causticsTexture },
         uTextureMix: { value: controls.textureMix },
         uOpacity: { value: 1.0 },
@@ -140,17 +142,18 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, caust
       },
       toneMapped: false,
     });
-  }, [fboTexture, selectedExternalTexture, controls, traceTexture, causticsTexture]);
+  }, [fboTexture, selectedExternalTexture, controls, traceTexture, scriptedTraceTexture, causticsTexture]);
 
   // Update texture when FBO texture changes
   useEffect(() => {
-    if (shaderMaterial && fboTexture) {
+    if (shaderMaterial) {
       shaderMaterial.uniforms.uTexture.value = fboTexture;
       shaderMaterial.uniforms.uTraceTexture.value = traceTexture;
+      shaderMaterial.uniforms.uScriptedTraceTexture.value = scriptedTraceTexture;
       shaderMaterial.uniforms.uCausticsTexture.value = causticsTexture;
       shaderMaterial.needsUpdate = true;
     }
-  }, [shaderMaterial, fboTexture, traceTexture, causticsTexture, selectedExternalTexture, size.width, size.height]);
+  }, [shaderMaterial, fboTexture, traceTexture, scriptedTraceTexture, causticsTexture, selectedExternalTexture, size.width, size.height]);
 
   // Update uniforms in animation frame
   useFrame((state, delta) => {
@@ -192,6 +195,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, caust
     uniforms.uDistortionStrength.value = controls.distortionStrength;
     uniforms.uTiling.value = controls.tiling;
     uniforms.uRadius.value = controls.radius;
+    uniforms.uScriptedTraceTexture.value = scriptedTraceTexture;
     uniforms.uCausticsTexture.value = causticsTexture;    
     
     // Vector2 uniforms

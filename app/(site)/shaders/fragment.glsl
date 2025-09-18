@@ -6,6 +6,7 @@
 uniform sampler2D uTexture;
 uniform sampler2D uExternalTexture;
 uniform sampler2D uTraceTexture;
+uniform sampler2D uScriptedTraceTexture;
 uniform sampler2D uCausticsTexture;
 uniform float uTraceDistortion;
 uniform float uTextureMix;
@@ -240,6 +241,7 @@ vec3 calculateRaymarching(vec3 ro, vec3 rd) {
 void main() {
   vec4 traceTex = texture2D(uTraceTexture, vUv);
   vec4 causticsTex = texture2D(uCausticsTexture, vUv);
+  vec4 scriptedTraceTex = texture2D(uScriptedTraceTexture, vUv);
   // Calculate gradient of traceTex using the function
   vec3 gradientData = calculateGradient(uTraceTexture, vUv);
   
@@ -279,8 +281,9 @@ void main() {
   stripeWithGrain *= noiseModulation;
 
   // Trace
-  stripeWithGrain += (traceTex.r * 5.0) * stripeWithGrain;
-  stripeWithGrain += (causticsTex.rgb * 5.0) * stripeWithGrain;
+  stripeWithGrain += (traceTex.rrr) * 5.0 * stripeWithGrain;
+  stripeWithGrain += scriptedTraceTex.rgb * 2.0 * stripeWithGrain;
+  // stripeWithGrain += (causticsTex.rgb * 5.0) * stripeWithGrain;
 
     // Final color mixing
   vec3 finalColor = mix(stripeWithGrain, baseColor, debug);
@@ -292,6 +295,7 @@ void main() {
   vec3 raymarchColor = calculateRaymarching(ro, rd);
 
   finalColor += tex.rgb;
+
   // finalColor = traceTex.rrr;
   // finalColor += raymarchColor * traceTex.r;
 

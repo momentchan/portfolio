@@ -14,6 +14,7 @@ import FBOScene from './FBOScene';
 import Model from './Model';
 import MouseTraceFBO from '../../lib/r3f-gist/utility/MouseTrace';
 import CausticsPlane from './CausticsPlane';
+import ScriptedTrace from './ScriptedTrace';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -48,6 +49,7 @@ function FBOTextureManager({ ref, onTextureUpdate }: {
   return null;
 }
 
+
 export default function Scene() {
   const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
   const [fboTexture, setFboTexture] = useState<THREE.Texture | null>(null);
@@ -55,6 +57,8 @@ export default function Scene() {
   const [traceTexture, setTraceTexture] = useState<THREE.Texture | null>(null);
   const causticsRef = useRef<{ getMaterial: () => THREE.ShaderMaterial | null; getFBOTexture: () => THREE.Texture | null }>(null);
   const [causticsTexture, setCausticsTexture] = useState<THREE.Texture | null>(null);
+  const scriptedTraceRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
+  const [scriptedTraceTexture, setScriptedTraceTexture] = useState<THREE.Texture | null>(null);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -80,8 +84,11 @@ export default function Scene() {
         <FBOTextureManager ref={traceRef} onTextureUpdate={setTraceTexture} />
 
         <RectangleSpawner />
-        <FullscreenPlaneWithFBO fboTexture={fboTexture} traceTexture={traceTexture}
+        <FullscreenPlaneWithFBO fboTexture={fboTexture} traceTexture={traceTexture} scriptedTraceTexture={scriptedTraceTexture}
           causticsTexture={causticsTexture} />
+
+        <ScriptedTrace ref={scriptedTraceRef} showDebug={true} />
+        <FBOTextureManager ref={scriptedTraceRef} onTextureUpdate={setScriptedTraceTexture} />
 
         {/* <CameraControls /> */}
         {/* <Effects /> */}
