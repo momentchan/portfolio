@@ -59,7 +59,7 @@ const fragmentShader = /* glsl */`
     varying vec2 vUv;
     varying vec3 vWorldPosition;
     varying vec3 vNormal;
-    
+    float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
     // Dual-layer caustics sampler (inspired by HLSL version)
     float causticsSampler(vec2 uv, vec4 speed, float time) {
         // First layer with speed.xy
@@ -74,6 +74,29 @@ const fragmentShader = /* glsl */`
         // Take minimum for realistic caustics effect
         return min(c1, c2);
     }
+    float noise(vec2 st) { 
+        vec2 i = floor(st); 
+        vec2 f = fract(st); 
+        float a = random(i); 
+        float b = random(i + vec2(1.0, 0.0)); 
+        float c = random(i + vec2(0.0, 1.0)); 
+        float d = random(i + vec2(1.0, 1.0)); 
+        vec2 u = f * f * (3.0 - 2.0 * f); 
+        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y; 
+    } 
+        
+    float fbm(vec2 st, int octaves) { 
+        float value = 0.0; 
+        float amplitude = 0.5; 
+        float frequency = 1.0; 
+        for (int i = 0; i < octaves; i++) { 
+            value += amplitude * noise(st * frequency);
+            amplitude *= 0.5;
+            frequency *= 2.0; 
+        } 
+        return value; 
+    }
+    
     
     // Calculate physically correct caustics using dual-layer texture animation
     vec3 calculateCaustics(vec3 worldPos, vec3 normal, float time) {
@@ -104,6 +127,33 @@ const fragmentShader = /* glsl */`
         
         // Create bright spots and dark areas
         caustics = pow(caustics, 1.5) * falloff * angleIntensity * uCausticIntensity;
+
+
+
+        // Add time-based animation 
+        causticUV += vec2(sin(time * uCausticSpeed * 0.1), cos(time * uCausticSpeed * 0.08)) * 0.1; 
+        causticUV *= 3.;
+
+        float speed = uCausticSpeed * 10.;
+        // Create caustic patterns 
+        float caustic1 = sin(causticUV.x * 15.0) * cos(causticUV.y * 12.0) * 0.5 + 0.5;
+        float caustic2 = sin(causticUV.x * 8.0 + time * speed ) * cos(causticUV.y * 10.0 + time * speed) * 0.5 + 0.5; 
+        float caustic3 = sin(causticUV.x * 20.0 + time * speed ) * cos(causticUV.y * 18.0 + time * speed) * 0.5 + 0.5; 
+        // Combine layers 
+        float causticsFBM = caustic1 * 0.4 + caustic2 * 0.3 + caustic3 * 0.3; 
+        
+        // Add noise for organic feel 
+        float noise = fbm(causticUV * 3.0, 4) * 0.; 
+        causticsFBM += noise; 
+
+
+        caustics += causticsFBM * 0.5;
+        
+        
+        caustics = pow(caustics, 1.5) * falloff * angleIntensity * uCausticIntensity;
+
+
+
         
         return uCausticColor * caustics;
     }
@@ -311,16 +361,16 @@ const CausticsPlane = forwardRef<CausticsPlaneRef, CausticsPlaneProps>(({
             uniforms.uCausticSpeed.value = controls.causticSpeed;
             uniforms.uCausticScale.value = controls.causticScale;
             uniforms.uOpacity.value = controls.opacity;
-            
+
             // Update color uniform
             const color = new THREE.Color(controls.color);
             uniforms.uCausticColor.value.set(color.r, color.g, color.b);
-            
+
             // Update animation uniforms
             uniforms.uTextureScale.value = controls.textureScale;
             uniforms.uSpeed.value.set(controls.speed1X, controls.speed1Y, controls.speed2X, controls.speed2Y);
             uniforms.uLayerScale.value = controls.layerScale;
-            
+
             // Update fade uniforms
             uniforms.uUseDistanceFade.value = controls.useDistanceFade;
             uniforms.uUseAngleFade.value = controls.useAngleFade;
