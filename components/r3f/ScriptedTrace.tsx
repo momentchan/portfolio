@@ -22,7 +22,7 @@ interface ScriptedTraceRef {
 const DEFAULT_VALUES = {
   diffusion: 0.05,
   fadeSpeed: 0.98,
-  curl: 0.05,
+  curl: 1,
   traceOpacity: 0.8,
   minOpacity: 0.0,
   maxOpacity: 1.0,
@@ -139,9 +139,12 @@ const fragmentShader = /* glsl */`
     // Add teleportation "jump" effect - make it more dramatic
     float teleportJump = sin(completedCycles * 3.14159) * uTeleportJump; // Oscillating jump effect
     
-    // Base circular motion with teleportation
+    // Base circular motion with teleportation (aspect ratio corrected)
     float baseAngle = uTime * uRotationSpeed + teleportOffset; // Configurable rotation speed
     vec2 objectPosition = vec2(0.5 + 0.25 * cos(baseAngle), 0.5 + 0.25 * sin(baseAngle));
+    
+    // Apply aspect ratio correction to position to ensure circular motion
+    objectPosition.x = 0.5 + (objectPosition.x - 0.5) / uAspect;
     
     // Add teleportation jump to position
     objectPosition += vec2(teleportJump, teleportJump * 0.5);
@@ -150,7 +153,7 @@ const fragmentShader = /* glsl */`
     vec2 curlAspectUV = uv;
     curlAspectUV.x *= uAspect;
     vec2 curlAspectPos = objectPosition;
-    curlAspectPos.x *= uAspect;
+    curlAspectPos.x *= uAspect; // Apply aspect ratio to position for distance calculation
     float distToObject = distance(curlAspectUV, curlAspectPos);
     
     // ===== CURL INFLUENCE CALCULATION =====

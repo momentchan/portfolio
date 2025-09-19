@@ -56,7 +56,7 @@ export default function FullscreenPlaneWithFBO({ fboTexture, traceTexture, scrip
     textureMix: { value: 0, min: 0, max: 1, step: 0.01 },
     
     // Distortion controls
-    traceDistortion: { value: 0, min: 0, max: 1, step: 0.01 },
+    traceDistortion: { value: 1, min: 0, max: 1, step: 0.01 },
     distortionStrength: { value: 0, min: 0, max: 10, step: 0.01 },
     distortionNoise: { value: 1, min: 0, max: 1, step: 0.01 },
     offsetSpeed: { value: 0.04, min: 0, max: 0.1, step: 0.01 },

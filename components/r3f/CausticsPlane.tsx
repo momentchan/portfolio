@@ -225,7 +225,7 @@ const CausticsPlane = forwardRef<CausticsPlaneRef, CausticsPlaneProps>(({
     rotation = [0, 0, 0],
     scale = [1, 1, 1],
     size = [4, 4],
-    showDebug = true
+    showDebug = false
 }, ref) => {
     // ===== HOOKS =====
     const { size: viewportSize, gl } = useThree();

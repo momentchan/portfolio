@@ -32,7 +32,7 @@ export default function RectangleSpawner() {
         aspectRatioVariation: { value: 1.5, min: 0.0, max: 3.0, step: 0.1 },
         opacityVariation: { value: 1.0, min: 0.0, max: 1.0, step: 0.1 },
         sizeVariation: { value: 1.0, min: 0.0, max: 1.0, step: 0.1 },
-        opacity: { value: 0.05, min: 0.0, max: 1.0, step: 0.01 },
+        opacity: { value: 0.1, min: 0.0, max: 1.0, step: 0.01 },
         clearAll: { value: false, onChange: () => setSpawnedRectangles([]) }
     });
 

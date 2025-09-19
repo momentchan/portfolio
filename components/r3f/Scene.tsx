@@ -15,6 +15,8 @@ import Model from './Model';
 import MouseTraceFBO from '../../lib/r3f-gist/utility/MouseTrace';
 import CausticsPlane from './CausticsPlane';
 import ScriptedTrace from './ScriptedTrace';
+import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
+import { FBOTextureManager } from '../../lib/hooks/useFBOTextureManager';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -35,34 +37,41 @@ function DynamicCamera() {
   return null;
 }
 
-// Generic FBO texture manager
-function FBOTextureManager({ ref, onTextureUpdate }: {
-  ref: React.RefObject<{ getFBOTexture: () => THREE.Texture | null } | null>;
-  onTextureUpdate: (texture: THREE.Texture | null) => void;
-}) {
-  useFrame(() => {
-    if (ref.current) {
-      const texture = ref.current.getFBOTexture();
-      onTextureUpdate(texture);
-    }
-  });
-  return null;
-}
 
 
 export default function Scene() {
-  const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
-  const [fboTexture, setFboTexture] = useState<THREE.Texture | null>(null);
-  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void }>(null);
-  const [traceTexture, setTraceTexture] = useState<THREE.Texture | null>(null);
-  const causticsRef = useRef<{ getMaterial: () => THREE.ShaderMaterial | null; getFBOTexture: () => THREE.Texture | null }>(null);
-  const [causticsTexture, setCausticsTexture] = useState<THREE.Texture | null>(null);
-  const scriptedTraceRef = useRef<{ getFBOTexture: () => THREE.Texture | null }>(null);
-  const [scriptedTraceTexture, setScriptedTraceTexture] = useState<THREE.Texture | null>(null);
+  // Unified ref management with proper typing
+  const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null } | null>(null);
+  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void } | null>(null);
+  const causticsRef = useRef<{ getMaterial: () => THREE.ShaderMaterial | null; getFBOTexture: () => THREE.Texture | null } | null>(null);
+  const scriptedTraceRef = useRef<{ getFBOTexture: () => THREE.Texture | null } | null>(null);
+
+  // Unified texture state management
+  const [textures, setTextures] = useState<{
+    fbo: THREE.Texture | null;
+    trace: THREE.Texture | null;
+    caustics: THREE.Texture | null;
+    scriptedTrace: THREE.Texture | null;
+  }>({
+    fbo: null,
+    trace: null,
+    caustics: null,
+    scriptedTrace: null
+  });
+
+  // Unified FBO texture manager
+  const handleTextureUpdate = (newTextures: Array<THREE.Texture | null>) => {
+    setTextures({
+      fbo: newTextures[0] || null,
+      trace: newTextures[1] || null,
+      caustics: newTextures[2] || null,
+      scriptedTrace: newTextures[3] || null
+    });
+  };
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Leva />
+      <LevaWraper initialHidden={true} />
       <Canvas>
         <OrthographicCamera
           makeDefault
@@ -77,20 +86,25 @@ export default function Scene() {
         />
         <DynamicCamera />
         {/* <FBOScene ref={fboSceneRef} /> */}
-        {/* <FBOTextureManager fboTestRef={fboSceneRef} onTextureUpdate={setFboTexture} /> */}
-        <CausticsPlane ref={causticsRef} />
-        <FBOTextureManager ref={causticsRef} onTextureUpdate={setCausticsTexture} />
-        <MouseTraceFBO ref={traceRef} showDebug={true} dowwnsample={128} />
-        <FBOTextureManager ref={traceRef} onTextureUpdate={setTraceTexture} />
+        <CausticsPlane ref={causticsRef} showDebug={false} />
+        <MouseTraceFBO ref={traceRef} showDebug={false} dowwnsample={128} />
+        {/* <ScriptedTrace ref={scriptedTraceRef} showDebug={true} /> */}
+
+        {/* Single unified FBO texture manager */}
+        <FBOTextureManager
+          refs={[fboSceneRef, traceRef, causticsRef, scriptedTraceRef]}
+          onTextureUpdate={handleTextureUpdate}
+        />
 
         <RectangleSpawner />
-        <FullscreenPlaneWithFBO fboTexture={fboTexture} traceTexture={traceTexture} scriptedTraceTexture={scriptedTraceTexture}
-          causticsTexture={causticsTexture} />
+        <FullscreenPlaneWithFBO
+          fboTexture={textures.fbo}
+          traceTexture={textures.trace}
+          scriptedTraceTexture={textures.scriptedTrace}
+          causticsTexture={textures.caustics} />
+        <CameraControls />
 
-        <ScriptedTrace ref={scriptedTraceRef} showDebug={true} />
-        <FBOTextureManager ref={scriptedTraceRef} onTextureUpdate={setScriptedTraceTexture} />
 
-        {/* <CameraControls /> */}
         {/* <Effects /> */}
         <EnvironmentSetup />
       </Canvas>

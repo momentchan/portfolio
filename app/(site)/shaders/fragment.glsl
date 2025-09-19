@@ -281,8 +281,8 @@ void main() {
   stripeWithGrain *= noiseModulation;
 
   // Trace
-  stripeWithGrain += (traceTex.rrr) * 5.0 * stripeWithGrain;
-  stripeWithGrain += scriptedTraceTex.rgb * 2.0 * stripeWithGrain;
+  // stripeWithGrain += (traceTex.rrr) * 5.0 * stripeWithGrain;
+  // stripeWithGrain += scriptedTraceTex.rgb * 2.0 * stripeWithGrain;
   // stripeWithGrain += (causticsTex.rgb * 5.0) * stripeWithGrain;
 
     // Final color mixing
@@ -295,6 +295,10 @@ void main() {
   vec3 raymarchColor = calculateRaymarching(ro, rd);
 
   finalColor += tex.rgb;
+
+  finalColor = (traceTex.rrr) * 5.0 * stripeWithGrain;
+  finalColor += scriptedTraceTex.rgb * 2.0 * stripeWithGrain;
+  finalColor += (causticsTex.rgb * 2.0) * stripeWithGrain;
 
   // finalColor = traceTex.rrr;
   // finalColor += raymarchColor * traceTex.r;
