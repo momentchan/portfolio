@@ -4,3 +4,6 @@
 [submodule "lib/particle-system"]
 	path = lib/particle-system
 	url = https://github.com/momentchan/particle-system.git
+[submodule "lib/trail-gpu"]
+	path = lib/trail-gpu
+	url = https://github.com/momentchan/trail-gpu.git
