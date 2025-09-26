@@ -3,14 +3,6 @@ import { Lightformer, Environment } from "@react-three/drei";
 export default function EnvironmentSetup() {
     return (
         <>
-            <directionalLight
-                castShadow position={[-0.5, 0.5, 0.5]} intensity={0}
-                shadow-mapSize-width={2048}
-                shadow-mapSize-height={2048}
-                shadow-radius={0.5}
-                shadow-bias={-0.0001}
-            />
-            
             <Environment resolution={256}>
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />

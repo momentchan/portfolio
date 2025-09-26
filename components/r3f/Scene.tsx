@@ -51,6 +51,7 @@ function DirectionalLight() {
     intensity: { value: 1, min: 0, max: 10, step: 0.1 },
   });
   const directionalLightRef = useRef<THREE.DirectionalLight | null>(null);
+  const helperRef = useRef<THREE.DirectionalLightHelper | null>(null);
 
   useFrame((state) => {
     if (directionalLightRef.current) {
@@ -59,10 +60,9 @@ function DirectionalLight() {
       const xPosition = Math.cos(time * 0.3) * radius; // Circular motion on X
       const zPosition = Math.sin(time * 0.3) * radius; // Circular motion on Z
       directionalLightRef.current.position.set(xPosition, 10, zPosition);
-      
-      // Make the light face the origin (0,0,0)
-      directionalLightRef.current.target.position.set(0, 0, 0);
-      directionalLightRef.current.target.updateMatrixWorld();
+    }
+    if (helperRef.current) {
+      helperRef.current.update();
     }
   });
   return <><directionalLight
@@ -78,7 +78,7 @@ function DirectionalLight() {
     shadow-bias={-0.001} />
 
     {directionalLightRef.current && (
-      <directionalLightHelper args={[directionalLightRef.current, 2, 0xff0000]} />
+      <directionalLightHelper ref={helperRef} args={[directionalLightRef.current, 2, 0xff0000]} />
     )}
 
     {/* Ground plane to receive shadows */}
@@ -188,7 +188,7 @@ export default function Scene() {
         <DirectionalLight />
 
         {/* <Effects /> */}
-        {/* <EnvironmentSetup /> */}
+        <EnvironmentSetup />
       </Canvas>
     </div >
   );

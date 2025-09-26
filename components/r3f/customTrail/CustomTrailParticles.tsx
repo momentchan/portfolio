@@ -1,5 +1,5 @@
 import { GPUTrailParticles } from '../../../lib/trail-gpu/GPUTrailParticles';
-import { ParticleConfig } from '../../../lib/trail-gpu/types';
+import { ParticleConfig, ParticleShaderParams } from '../../../lib/trail-gpu/types';
 import { updateParticlesFrag } from '../../../lib/trail-gpu/shaders';
 
 import simplexNoise3d from '../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
@@ -18,7 +18,10 @@ uniform float uSpeed;                // Particle movement speed
 uniform float uNoiseScale;           // Scale factor for noise coordinates
 uniform float uTimeScale;            // Time scale for animation
 uniform float uParticleCount;        // Total number of particles
+uniform float uNoiseStrength;        // Strength of the noise
 
+uniform float uTest;
+uniform vec3 uAttractPos;
 varying vec2 vUv;
 
 /**
@@ -48,18 +51,12 @@ void main() {
     
     // Calculate flow field velocity
     float t = uTimeSec * uTimeScale;
-    vec3 curl = curlNoise(pos + t) * 0.5;
+    vec3 curl = curlNoise(pos * uNoiseScale) * uNoiseStrength;
     // vec3 velocity = curl(pos * uNoiseScale, t);
 
-    vec3 attract = -pos * 0.1;
+    vec3 attract = (uAttractPos - pos);
 
-    vec3 dir = vec3(-1,0,0);
-
-    vec3 velocity = normalize(curl + attract);
-    
-    curl.z = 0.0;
-
-    // velocity = normalize(dir + curl);
+    vec3 velocity = normalize( attract + curl );
     
 
     // Update position using Euler integration
@@ -80,13 +77,9 @@ export class CustomTrailParticles extends GPUTrailParticles {
   constructor(
     count: number,
     config: Partial<ParticleConfig> = {},
-    initialPositions?: Float32Array
+    initialPositions?: Float32Array,
+    uniforms: Partial<ParticleShaderParams> = {},
   ) {
-    super(count, customTrailParticlesFrag, config, initialPositions);
-  }
-
-  // Override to add custom trail specific methods
-  setCustomTrailParams(speed: number, noiseScale: number, timeScale: number) {
-    this.updateConfig({ speed, noiseScale, timeScale });
+    super(count, customTrailParticlesFrag, config, initialPositions, uniforms);
   }
 }

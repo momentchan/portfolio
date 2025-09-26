@@ -6,7 +6,7 @@ import { Ribbon } from '../../../lib/trail-gpu/Ribbon';
 import { ParticleDebugPoints } from '../../../lib/trail-gpu/ParticleDebugPoints';
 import { useTrailsWithParticles } from '../../../lib/trail-gpu/hooks/useTrailsWithParticles';
 import { useCustomTrailParticles } from './useCustomTrailParticles';
-import { TrailConfig, ParticleConfig } from '../../../lib/trail-gpu/types';
+import { TrailConfig, ParticleConfig, ParticleShaderParams } from '../../../lib/trail-gpu/types';
 import { customVertexShader, customFragmentShader } from './CustomShaders';
 
 export function CustomTrail() {
@@ -20,11 +20,12 @@ export function CustomTrail() {
     updateDistanceMin: { value: 0.005, min: 0.001, max: 0.5, step: 0.001 },
   });
 
-  // Custom trail particle configuration
-  const particleControls = useControls('Custom Trail Particles', {
+  // Custom trail particle uniforms (shader parameters)
+  const particleUniforms = useControls('Custom Trail Particles', {
     speed: { value: 0.1, min: 0.1, max: 2.0, step: 0.1 },
-    noiseScale: { value: 0.1, min: 0.1, max: 2.0, step: 0.1 },
+    noiseScale: { value: 0.5, min: 0.0, max: 2.0, step: 0.1 },
     timeScale: { value: 0.1, min: 0.1, max: 1.0, step: 0.1 },
+    noiseStrength: { value: 0.1, min: 0., max: 2.0, step: 0.1 },
   });
 
   const displayControls = useControls('Display', {
@@ -54,31 +55,26 @@ export function CustomTrail() {
     updateDistanceMin: trailControls.updateDistanceMin,
   }), [trailControls]);
 
+  // Particle system configuration (system setup only)
   const particleConfig: ParticleConfig = useMemo(() => ({
     count: trailControls.trailsNum,
-    speed: particleControls.speed,
-    noiseScale: particleControls.noiseScale,
-    timeScale: particleControls.timeScale,
-  }), [trailControls.trailsNum, particleControls]);
+  }), [trailControls.trailsNum]);
 
+  // Particle uniforms (shader parameters)
+  const uniforms: ParticleShaderParams = useMemo(() => ({
+    uSpeed: particleUniforms.speed,
+    uNoiseScale: particleUniforms.noiseScale,
+    uTimeScale: particleUniforms.timeScale,
+    uNoiseStrength: particleUniforms.noiseStrength,
+    uAttractPos: new THREE.Vector3(0, 0, 0),
+  }), [particleUniforms]);
 
-  const initialPositions = useMemo(() => {
-    const positions = new Float32Array(trailControls.trailsNum *4);
-    for (let i = 0; i < trailControls.trailsNum; i++) {
-      positions[i * 4] = (Math.random() - 0.5) * 0.1;
-      positions[i * 4 + 1] = (Math.random() - 0.5) * 0.5;
-      positions[i * 4 + 2] = (Math.random() - 0.5) * 0.1;
-      positions[i * 4 + 3] = 0;
-    }
-    return positions;
-
-  }, [trailControls.trailsNum]);
 
   // Create custom trail particle system
-  const { particles } = useCustomTrailParticles({
+  const { particles, AttractorDebug } = useCustomTrailParticles({
     count: trailControls.trailsNum,
     particleConfig,
-    initialPositions,
+    uniforms,
   });
 
   // Combine with trail system
@@ -135,6 +131,9 @@ export function CustomTrail() {
           color="#ff6b6b"
         />
       )}
+
+      {/* Debug attractor position */}
+      <AttractorDebug />
     </>
   );
 }
