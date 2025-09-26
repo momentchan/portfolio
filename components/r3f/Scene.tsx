@@ -77,16 +77,9 @@ function DirectionalLight() {
     shadow-camera-bottom={-10}
     shadow-bias={-0.001} />
 
-    {directionalLightRef.current && (
+    {/* {directionalLightRef.current && (
       <directionalLightHelper ref={helperRef} args={[directionalLightRef.current, 2, 0xff0000]} />
-    )}
-
-    {/* Ground plane to receive shadows */}
-    {/* <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial color="#333333" />
-    </mesh> */}
-
+    )} */}
   </>;
 }
 
@@ -143,7 +136,7 @@ export default function Scene() {
 
         <PerspectiveCamera
           makeDefault
-          position={[0, 0, 1]}
+          position={[0, 0, 0.5]}
           zoom={1}
           near={0.1}
           far={100}
@@ -182,13 +175,11 @@ export default function Scene() {
             }}
         /> */}
 
-
-
         <CustomTrail />
         <DirectionalLight />
 
-        {/* <Effects /> */}
-        <EnvironmentSetup />
+        <Effects />
+        {/* <EnvironmentSetup /> */}
       </Canvas>
     </div >
   );

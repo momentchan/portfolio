@@ -15,7 +15,7 @@ export function CustomTrail() {
 
   // Trail configuration
   const trailControls = useControls('Trail System', {
-    nodesPerTrail: { value: 100, min: 10, max: 200, step: 1 },
+    length: { value: 0.3, min: 0, max: 0.5, step: 0.01 },
     trailsNum: { value: 1000, min: 10, max: 2000, step: 1 },
     updateDistanceMin: { value: 0.005, min: 0.001, max: 0.5, step: 0.001 },
   });
@@ -50,7 +50,7 @@ export function CustomTrail() {
 
   // Create trail system configuration
   const trailConfig: TrailConfig = useMemo(() => ({
-    nodesPerTrail: trailControls.nodesPerTrail,
+    nodesPerTrail: trailControls.length / trailControls.updateDistanceMin,
     trailsNum: trailControls.trailsNum,
     updateDistanceMin: trailControls.updateDistanceMin,
   }), [trailControls]);
@@ -94,11 +94,11 @@ export function CustomTrail() {
     // Basic material properties
     wireframe: displayControls.wireframe,
     transparent: false,
-    
+
     // Textures and maps
     normalMap: normalTexture,
     normalScale: new THREE.Vector2(displayControls.normalMapIntensityX, displayControls.normalMapIntensityY),
-    
+
     // Material properties
     roughness: displayControls.roughness,
     metalness: displayControls.metalness,
@@ -119,7 +119,7 @@ export function CustomTrail() {
           customVertexShader={customVertexShader}
           customFragmentShader={customFragmentShader}
           customUniforms={customUniforms}
-          />
+        />
       )}
 
       {/* Debug points for particle positions */}
