@@ -22,10 +22,10 @@ export function CustomTrail() {
 
   // Custom trail particle uniforms (shader parameters)
   const particleUniforms = useControls('Custom Trail Particles', {
-    speed: { value: 0.1, min: 0.1, max: 2.0, step: 0.1 },
-    noiseScale: { value: 0.5, min: 0.0, max: 2.0, step: 0.1 },
+    speed: { value: 0.2, min: 0.1, max: 2.0, step: 0.1 },
+    noiseScale: { value: 2, min: 0.0, max: 2.0, step: 0.1 },
     timeScale: { value: 0.1, min: 0.1, max: 1.0, step: 0.1 },
-    noiseStrength: { value: 0.1, min: 0., max: 2.0, step: 0.1 },
+    noiseStrength: { value: 2, min: 0., max: 2.0, step: 0.1 },
   });
 
   const displayControls = useControls('Display', {
