@@ -20,7 +20,8 @@
     "react-dom": "19.1.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "three": "^0.179.1"
+    "three": "^0.179.1",
+    "three-custom-shader-material": "^6.3.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

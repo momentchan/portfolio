@@ -37,6 +37,7 @@ vec4 readParticle(int k) {
     return texture2D(uParticlesPrev, vec2(0.5, v));
 }
 
+
 void main() {
     int idx = pixelIndex();
     
@@ -47,11 +48,22 @@ void main() {
     
     // Calculate flow field velocity
     float t = uTimeSec * uTimeScale;
-    vec3 curl = curlNoise(pos * 0.2) * uNoiseScale;
+    vec3 curl = curlNoise(pos + t) * 0.5;
     // vec3 velocity = curl(pos * uNoiseScale, t);
+
+    vec3 attract = -pos * 0.1;
+
+    vec3 dir = vec3(-1,0,0);
+
+    vec3 velocity = normalize(curl + attract);
     
+    curl.z = 0.0;
+
+    // velocity = normalize(dir + curl);
+    
+
     // Update position using Euler integration
-    pos += curl * uSpeed * uDeltaTime;
+    pos += velocity * uSpeed * uDeltaTime;
     
     // Output new particle state
     gl_FragColor = vec4(pos, aux);
