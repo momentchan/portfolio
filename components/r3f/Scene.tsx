@@ -24,8 +24,10 @@ import AdvancedExamples from '@/lib/particle-system/examples/AdvancedExamples';
 import CustomExamples from '@/lib/particle-system/examples/CustomExamples';
 import CustomUniformExamples from '@/lib/particle-system/examples/CustomUniformExamples';
 import { OrbitalExample } from '@/lib/trail-gpu/examples/OrbitalExample';
-import { FlowFieldExample } from '@/lib/trail-gpu/examples/FlowFieldExample';
+import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
+
 import { CustomTrail } from './customTrail/CustomTrail';
+import { VelPosExample } from '@/lib/trail-gpu/examples/VelPosExample';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -175,9 +177,8 @@ export default function Scene() {
             }}
         /> */}
 
-        <CustomTrail />
+        <CustomTrail /> 
         <DirectionalLight />
-
         <Effects />
         {/* <EnvironmentSetup /> */}
       </Canvas>
