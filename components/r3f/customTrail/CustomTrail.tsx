@@ -97,11 +97,27 @@ export function CustomTrail() {
     shaderPack: DistanceShaderPack,
   });
 
-  const customUniforms = useMemo(() => ({
-    uRoughness: { value: displayControls.roughness },
-    uMetalness: { value: displayControls.metalness },
-    uNoiseScale: { value: displayControls.noiseScale },
-  }), [displayControls]);
+  // Material configuration for custom shader
+  const materialConfig = useMemo(() => ({
+    vertexShader: customVertexShader,
+    fragmentShader: customFragmentShader,
+    uniforms: {
+      // Standard uniforms (required)
+      uNodeTex: { value: trails.nodeTexture },
+      uTrailTex: { value: trails.trailTexture },
+      uBaseWidth: { value: displayControls.ribbonWidth },
+      uNodes: { value: trailControls.length / trailControls.updateDistanceMin },
+      uTrails: { value: trailControls.trailsNum },
+      uCameraPos: { value: new THREE.Vector3() },
+      uColor: { value: new THREE.Color(displayControls.ribbonColor) },
+      
+      // Custom uniforms
+      uRoughness: { value: displayControls.roughness },
+      uMetalness: { value: displayControls.metalness },
+      uNoiseScale: { value: displayControls.noiseScale },
+      uTest: { value: 0 }, // Debug uniform
+    }
+  }), [trails.nodeTexture, trails.trailTexture, displayControls, trailControls]);
 
   // Flexible material properties - you can add any Three.js material props here
   const materialProps = useMemo(() => ({
@@ -137,10 +153,9 @@ export function CustomTrail() {
           trails={trailControls.trailsNum}
           baseWidth={displayControls.ribbonWidth}
           color={displayControls.ribbonColor}
+          materialType="custom-shader"
+          materialConfig={materialConfig}
           materialProps={materialProps}
-          customVertexShader={customVertexShader}
-          customFragmentShader={customFragmentShader}
-          customUniforms={customUniforms}
         />
       )}
 

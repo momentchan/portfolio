@@ -28,6 +28,7 @@ import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
 
 import { CustomTrail } from './customTrail/CustomTrail';
 import { VelPosExample } from '@/lib/trail-gpu/examples/VelPosExample';
+import { RibbonExample } from '@/lib/trail-gpu/examples/RibbonExample';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -179,8 +180,9 @@ export default function Scene() {
 
         <CustomTrail /> 
         <DirectionalLight />
-        <Effects />
-        {/* <EnvironmentSetup /> */}
+        {/* <Effects /> */}
+        <EnvironmentSetup />
+        {/* <RibbonExample /> */}
       </Canvas>
     </div >
   );
