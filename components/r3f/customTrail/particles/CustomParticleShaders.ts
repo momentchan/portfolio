@@ -1,10 +1,7 @@
-import * as THREE from 'three';
-import { useParticles } from '../../../lib/trail-gpu';
-import { ParticleConfig, ParticleShaderConfig } from '../../../lib/trail-gpu/types';
+import simplexNoise3d from '../../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
 
-import simplexNoise3d from '../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
-
-// Velocity shader - calculates forces and updates velocity
+// Custom Velocity Shader for Particle System
+// Calculates forces and updates velocity for custom particle behavior
 export const customVelocityShader = /* glsl */ `
 ${simplexNoise3d}
 precision highp float;
@@ -85,7 +82,8 @@ void main() {
 }
 `;
 
-// Position shader - updates position using velocity
+// Custom Position Shader for Particle System
+// Updates position using velocity from the velocity shader
 export const customPositionShader = /* glsl */ `
 precision highp float;
 
@@ -127,4 +125,4 @@ void main() {
     
     gl_FragColor = vec4(pos, aux1);
 }
-`
+`;

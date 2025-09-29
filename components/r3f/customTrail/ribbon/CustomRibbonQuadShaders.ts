@@ -1,9 +1,10 @@
-// Custom shader examples for the ribbon system
-import simplexNoise from '../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
-import utility from '../../../lib/r3f-gist/shader/cginc/utility.glsl';
-import randomUtil from '../../../lib/r3f-gist/shader/cginc/noise/random.glsl';
+import simplexNoise from '../../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
+import utility from '../../../../lib/r3f-gist/shader/cginc/utility.glsl';
+import randomUtil from '../../../../lib/r3f-gist/shader/cginc/noise/random.glsl';
 
-export const customVertexShader = /* glsl */ `
+// Custom Ribbon Quad Vertex Shader
+// Renders trails as 3D ribbons with proper geometry and lighting
+export const customRibbonQuadVertexShader = /* glsl */ `
 // Ribbon Vertex Shader
 // Renders trails as 3D ribbons with proper geometry and lighting
 
@@ -131,7 +132,9 @@ void main() {
 }
 `;
 
-export const customFragmentShader = /* glsl */ `
+// Custom Ribbon Quad Fragment Shader
+// Renders trail ribbons with color and debug highlighting
+export const customRibbonQuadFragmentShader = /* glsl */ `
 // Ribbon Fragment Shader
 // Renders trail ribbons with color and debug highlighting
 ${simplexNoise}
@@ -176,4 +179,3 @@ void main() {
 }
 
 `;
-

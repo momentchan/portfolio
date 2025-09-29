@@ -23,13 +23,9 @@ import BasicExamples from '@/lib/particle-system/examples/BasicExamples';
 import AdvancedExamples from '@/lib/particle-system/examples/AdvancedExamples';
 import CustomExamples from '@/lib/particle-system/examples/CustomExamples';
 import CustomUniformExamples from '@/lib/particle-system/examples/CustomUniformExamples';
-import { OrbitalExample } from '@/lib/trail-gpu/examples/OrbitalExample';
-import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
+import { ParticleOrbital, ParticleFlowField, ParticleBasic, RibbonQuadDemo, RibbonTubeDemo } from '@/lib/trail-gpu';
 
 import { CustomTrail } from './customTrail/CustomTrail';
-import { VelPosExample } from '@/lib/trail-gpu/examples/VelPosExample';
-import { RibbonExample } from '@/lib/trail-gpu/examples/RibbonExample';
-
 function DynamicCamera() {
   const { camera, size } = useThree();
 
@@ -182,7 +178,11 @@ export default function Scene() {
         <DirectionalLight />
         {/* <Effects /> */}
         <EnvironmentSetup />
-        {/* <RibbonExample /> */}
+        {/* <ParticleFlowField /> */}
+        {/* <ParticleBasic /> */}
+        {/* <ParticleOrbital /> */}
+        {/* <RibbonQuadDemo /> */}
+        {/* <RibbonTubeDemo /> */}
       </Canvas>
     </div >
   );
