@@ -176,8 +176,8 @@ export default function Scene() {
 
         <CustomTrail /> 
         <DirectionalLight />
-        {/* <Effects /> */}
-        <EnvironmentSetup />
+        <Effects />
+        {/* <EnvironmentSetup /> */}
         {/* <ParticleFlowField /> */}
         {/* <ParticleBasic /> */}
         {/* <ParticleOrbital /> */}

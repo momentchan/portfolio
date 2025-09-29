@@ -110,8 +110,11 @@ void main() {
     }
     vec3 up = normalize(cross(side, tangent));
     
+    float t = aSeg/( float(valid)-1.0);
+
+
     // Calculate tube radius
-    float radius = uBaseWidth;
+    float radius = uBaseWidth * smoothstep(0.0, 0.1, t) * smoothstep(1.0, 0.9, t);
     
     // Position vertex around tube circumference
     float angle = (radial / float(uSegments)) * 2.0 * 3.14159265359;
@@ -151,6 +154,8 @@ precision highp float;
 // Uniforms
 uniform vec3 uColor;                 // Base color of the tube
 uniform float uTime;                 // Time for animations
+uniform float uRoughness;             // Roughness of the ribbon
+uniform float uMetalness;             // Metalness of the ribbon
 
 // Varyings
 varying float vSeg;                  // Segment index
@@ -164,12 +169,8 @@ void main() {
     // Bright color for visibility
     vec3 color = vec3(1.0); // Bright white
     
-    // Add some variation based on trail and segment
-    float variation = sin(vTrail * 0.5 + vSeg * 0.1 + uTime * 2.0) * 0.3 + 0.7;
-    color *= variation;
-    
     csm_DiffuseColor = vec4(color, 1.0);
-    csm_Roughness = 0.5;
-    csm_Metalness = 0.0;
+    csm_Roughness = uRoughness;
+    csm_Metalness = uMetalness;
 }
 `;
