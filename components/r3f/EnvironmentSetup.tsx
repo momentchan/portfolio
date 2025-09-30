@@ -1,9 +1,11 @@
 import { Lightformer, Environment } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 
 export default function EnvironmentSetup() {
     return (
         <>
-            <Environment resolution={256}>
+            {/* <Environment preset="city"> */}
+            <Environment resolution={256} environmentIntensity={1} >
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
                     {[2, 0, 2, 0, 2, 0, 2, 0].map((x, i) => (

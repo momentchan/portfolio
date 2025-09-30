@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { useControls } from 'leva';
 import { useTexture } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
 import { useRibbonGeometry, useRibbonMaterials } from '../../../../lib/trail-gpu';
-import { 
-  customRibbonQuadVertexShader, 
-  customRibbonQuadFragmentShader,
-  customRibbonTubeVertexShader,
-  customRibbonTubeFragmentShader
+import {
+  customRibbonQuadVertexShader,
+  customRibbonQuadFragmentShader
 } from '../ribbon';
 import * as THREE from 'three';
 
@@ -17,23 +16,22 @@ interface UseRibbonSystemProps {
   trailTexture: THREE.Texture;
 }
 
-export function useRibbonSystem({ 
-  trailsNum, 
-  nodesPerTrail, 
-  nodeTexture, 
-  trailTexture 
+export function useRibbonSystem({
+  trailsNum,
+  nodesPerTrail,
+  nodeTexture,
+  trailTexture
 }: UseRibbonSystemProps) {
   // Load normal texture
   const normalTexture = useTexture('/textures/Trail/rust_coarse_01_nor_dx_1k.png');
+  const { scene } = useThree();
 
   // Display controls
   const displayControls = useControls('Display', {
     showRibbon: { value: true },
     showParticlePoints: { value: false },
-    geometryType: { value: 'quad', options: ['quad', 'tube'] },
     ribbonColor: { value: '#ffffff' },
     ribbonWidth: { value: 0.001, min: 0.0001, max: 0.01, step: 0.0001 },
-    tubeSegments: { value: 16, min: 3, max: 32, step: 1 },
     wireframe: { value: false },
     roughness: { value: 0.3, min: 0.0, max: 1.0, step: 0.01 },
     metalness: { value: 0.8, min: 0.0, max: 1.0, step: 0.01 },
@@ -42,6 +40,7 @@ export function useRibbonSystem({
     normalMapIntensityY: { value: 1, min: 0.0, max: 1000.0, step: 0.01 },
     normalMapRepeatX: { value: 10, min: 0.0, max: 10.0, step: 0.01 },
     normalMapRepeatY: { value: 1, min: 0.0, max: 10.0, step: 0.01 },
+    envMapIntensity: { value: 0, min: 0.0, max: 1.0, step: 0.01 },
   });
 
   // Update normal texture repeat
@@ -50,47 +49,44 @@ export function useRibbonSystem({
   }, [normalTexture, displayControls.normalMapRepeatX, displayControls.normalMapRepeatY]);
 
   // Flexible material properties
-  const materialProps = useMemo(() => ({
+  const materialProps = useMemo(() => (
+    {
     // Basic material properties
     wireframe: displayControls.wireframe,
     transparent: false,
+    envMapIntensity: displayControls.envMapIntensity,
+    envMap: scene.environment,
 
-    // Textures and maps
     normalMap: normalTexture,
     normalScale: new THREE.Vector2(displayControls.normalMapIntensityX, displayControls.normalMapIntensityY),
 
-    // Material properties
     roughness: displayControls.roughness,
     metalness: displayControls.metalness,
-  }), [normalTexture, displayControls]);
+  }), [normalTexture, displayControls, scene.environment]);
 
-  // Create geometry based on selected type
+  // Create quad geometry
   const geometry = useRibbonGeometry({
-    geometryType: displayControls.geometryType as 'quad' | 'tube',
-    geometryConfig: displayControls.geometryType === 'tube' 
-      ? { 
-          nodes: nodesPerTrail, 
-          trails: trailsNum, 
-          segments: displayControls.tubeSegments,
-          radius: displayControls.ribbonWidth
-        }
-      : { 
-          nodes: nodesPerTrail, 
-          trails: trailsNum, 
-          width: displayControls.ribbonWidth 
-        },
+    geometryType: 'quad',
+    geometryConfig: {
+      nodes: nodesPerTrail,
+      trails: trailsNum,
+      width: displayControls.ribbonWidth
+    },
   });
 
-  // Create materials with appropriate shaders based on geometry type
+  // Create materials with quad shaders
   const materials = useRibbonMaterials({
-    materialType: 'custom-shader',
+    materialType: 'standard',
     materialConfig: {
-      vertexShader: displayControls.geometryType === 'tube' 
-        ? customRibbonTubeVertexShader 
-        : customRibbonQuadVertexShader,
-      fragmentShader: displayControls.geometryType === 'tube' 
-        ? customRibbonTubeFragmentShader 
-        : customRibbonQuadFragmentShader,
+      nodeTex: nodeTexture,
+      trailTex: trailTexture,
+      baseWidth: displayControls.ribbonWidth,
+      nodes: nodesPerTrail,
+      trails: trailsNum,
+      color: displayControls.ribbonColor,
+      materialProps,
+      vertexShader: customRibbonQuadVertexShader,
+      fragmentShader: customRibbonQuadFragmentShader,
       uniforms: {
         // Standard uniforms (required)
         uNodeTex: { value: nodeTexture },
@@ -100,30 +96,12 @@ export function useRibbonSystem({
         uTrails: { value: trailsNum },
         uCameraPos: { value: new THREE.Vector3() },
         uColor: { value: new THREE.Color(displayControls.ribbonColor) },
-        
-        // Tube-specific uniforms
-        ...(displayControls.geometryType === 'tube' && {
-          uSegments: { value: displayControls.tubeSegments },
-          uTime: { value: 0 },
-        }),
-        
+
         // Custom uniforms
-        uRoughness: { value: displayControls.roughness },
-        uMetalness: { value: displayControls.metalness },
         uNoiseScale: { value: displayControls.noiseScale },
         uTest: { value: 0 }, // Debug uniform
       },
-      nodeTex: nodeTexture,
-      trailTex: trailTexture,
-      baseWidth: displayControls.ribbonWidth,
-      nodes: nodesPerTrail,
-      trails: trailsNum,
-      color: displayControls.ribbonColor,
-      materialProps,
-      // Tube-specific config
-      ...(displayControls.geometryType === 'tube' && {
-        segments: displayControls.tubeSegments,
-      }),
+      
     },
   });
 

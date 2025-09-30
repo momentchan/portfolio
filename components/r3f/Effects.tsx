@@ -13,7 +13,7 @@ export default function Effects() {
 
   const dofParams = useControls('Depth of Field', {
     focusDistance: { value: 0.2, min: 0, max: 1, step: 0.01 },
-    focalLength: { value: 0.024, min: 0.001, max: 0.1, step: 0.001 },
+    focalLength: { value: 0.024, min: 0.001, max: 1, step: 0.001 },
     bokehScale: { value: 2, min: 0, max: 10, step: 0.1 },
     // Additional DOF controls
     focusRange: { value: 0.1, min: 0.01, max: 1, step: 0.01 },

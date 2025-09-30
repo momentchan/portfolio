@@ -42,13 +42,14 @@ export function CustomTrail() {
   // Update systems each frame
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
+    const dt = Math.min(delta, 1 / 30)
     if (!trails || !trailUpdateEnabled) return;
-
-    // Always update particles
-    particles.update(t, delta);
     
+    // Always update particles
+    particles.update(t, dt);
+
     // Only update trails if enabled by mouse control
-      trails.update(t, delta, particles.positionsTexture!);
+    trails.update(t, dt, particles.positionsTexture!);
 
     // Update time uniform for tube shader if using tube geometry
     if (materials.material && (materials.material as any).uniforms) {

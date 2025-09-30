@@ -180,7 +180,7 @@ export default function Flower({ path, scale, position, rotation }: { path: stri
   const groupRef = useRef<THREE.Group>(null);
 
   const materialToggle = useControls('Material Selection', {
-    materialType: { value: 'shader', options: ['glass', 'shader'] }
+    materialType: { value: 'glass', options: ['glass', 'shader'] }
   });
 
   const rotationControls = useControls('Rotation', {

@@ -24,8 +24,11 @@ import AdvancedExamples from '@/lib/particle-system/examples/AdvancedExamples';
 import CustomExamples from '@/lib/particle-system/examples/CustomExamples';
 import CustomUniformExamples from '@/lib/particle-system/examples/CustomUniformExamples';
 import { ParticleOrbital, ParticleFlowField, ParticleBasic, RibbonQuadDemo, RibbonTubeDemo } from '@/lib/trail-gpu';
-
 import { CustomTrail } from './customTrail/CustomTrail';
+import { ParticleTimeTrail } from '@/lib/trail-gpu/examples/ParticleTimeTrail';
+import { ParticleGravityTrail } from '@/lib/trail-gpu/examples/ParticleGravityTrail';
+// import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
+
 function DynamicCamera() {
   const { camera, size } = useThree();
 
@@ -138,7 +141,7 @@ export default function Scene() {
           position={[0, 0, 0.5]}
           zoom={1}
           near={0.1}
-          far={100}
+          far={5}
           fov={60}
         />
 
@@ -173,16 +176,18 @@ export default function Scene() {
               size: new UniformSizeConfig(1)
             }}
         /> */}
+        <EnvironmentSetup />
 
         <CustomTrail /> 
         <DirectionalLight />
+        <Flower path={'flower.FBX'} scale={0.001} position={[0, 0, 0]} rotation={[Math.PI * 0,  Math.PI * 0.5, 0]} />
         <Effects />
-        {/* <EnvironmentSetup /> */}
         {/* <ParticleFlowField /> */}
         {/* <ParticleBasic /> */}
         {/* <ParticleOrbital /> */}
         {/* <RibbonQuadDemo /> */}
         {/* <RibbonTubeDemo /> */}
+        {/* <ParticleGravityTrail />     */}
       </Canvas>
     </div >
   );

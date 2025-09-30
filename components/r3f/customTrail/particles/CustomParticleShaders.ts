@@ -23,6 +23,7 @@ uniform float uNoiseScale;
 uniform float uTimeScale;
 uniform float uNoiseStrength;
 uniform vec3 uAttractPos;
+uniform float uAttractStrength;
 
 varying vec2 vUv;
 
@@ -42,11 +43,11 @@ vec4 readParticleVel(int k) {
 }
 
 // Custom force calculation
-vec3 calculateCustomForces(vec3 pos, vec3 vel, float aux1, float aux2, float time) {
+vec3 calculateCustomForces(vec3 pos, vec3 vel, float time) {
     // Calculate flow field velocity
     float t = time * uTimeScale;
     vec3 curl = curlNoise(pos * uNoiseScale) * uNoiseStrength;
-    vec3 attract = (uAttractPos - pos);
+    vec3 attract = (uAttractPos - pos) * uAttractStrength;
     vec3 velocity = normalize(attract + curl);
     
     return velocity * uSpeed;
@@ -64,13 +65,13 @@ void main() {
     float aux1 = velData.w;
     
     // Apply forces and integrate velocity
-    vec3 totalForce = calculateCustomForces(pos, vel, aux1, 0.0, uTimeSec);
+    vec3 totalForce = calculateCustomForces(pos, vel, uTimeSec);
     
     // Integrate velocity
-    vel = totalForce;
+    vel +=  totalForce * uDeltaTime;
     
     // Apply damping
-    // vel *= (1.0 - uDamping * uDeltaTime);
+    vel *= (1.0 - uDamping * uDeltaTime);
     
     // // Limit speed
     // float speed = length(vel);

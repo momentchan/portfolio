@@ -148,8 +148,6 @@ precision highp float;
 // Uniforms
 uniform vec3 uColor;                 // Base color of the ribbon
 uniform float uTest;                  // Debug mode (highlights specific segments)
-uniform float uRoughness;             // Roughness of the ribbon
-uniform float uMetalness;             // Metalness of the ribbon
 
 uniform float uNoiseScale;           // Scale factor for noise coordinates
 
@@ -174,8 +172,6 @@ void main() {
     // color *= r;
 
     csm_DiffuseColor = vec4(color, 1.0);
-    csm_Roughness = uRoughness;
-    csm_Metalness = uMetalness;
 }
 
 `;
