@@ -26,7 +26,7 @@ import CustomUniformExamples from '@/lib/particle-system/examples/CustomUniformE
 import { ParticleOrbital, ParticleFlowField, ParticleBasic, RibbonQuadDemo, RibbonTubeDemo } from '@/lib/trail-gpu';
 import { CustomTrail } from './customTrail/CustomTrail';
 import { ParticleTimeTrail } from '@/lib/trail-gpu/examples/ParticleTimeTrail';
-import { ParticleGravityTrail } from '@/lib/trail-gpu/examples/ParticleGravityTrail';
+import { VATMesh } from './VATMesh';
 // import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
 
 function DynamicCamera() {
@@ -138,7 +138,7 @@ export default function Scene() {
 
         <PerspectiveCamera
           makeDefault
-          position={[0, 0, 0.5]}
+          position={[0, 2, 5]}
           zoom={1}
           near={0.1}
           far={5}
@@ -178,16 +178,21 @@ export default function Scene() {
         /> */}
         <EnvironmentSetup />
 
-        <CustomTrail /> 
+        <CustomTrail />
         <DirectionalLight />
-        <Flower path={'flower.FBX'} scale={0.001} position={[0, 0, 0]} rotation={[Math.PI * 0,  Math.PI * 0.5, 0]} />
+        {/* <Flower path={'flower.FBX'} scale={0.001} position={[0, 0, 0]} rotation={[Math.PI * 0,  Math.PI * 0.5, 0]} /> */}
         <Effects />
-        {/* <ParticleFlowField /> */}
-        {/* <ParticleBasic /> */}
-        {/* <ParticleOrbital /> */}
-        {/* <RibbonQuadDemo /> */}
-        {/* <RibbonTubeDemo /> */}
-        {/* <ParticleGravityTrail />     */}
+        <VATMesh
+          glb="vat/Dahlia Clean_basisMesh.gltf"
+          pos="vat/Dahlia Clean_pos.exr"
+          nrm="vat/Dahlia Clean_nrm.png"     // or omit if you didn't bake normals
+          meta="vat/Dahlia Clean_meta.json"
+          map="textures/tujlip.png"
+          mask="textures/blackanedwthioe.png"
+          position={[0, 0.1, 0]}
+          scale={5}
+          speed={1}
+        />
       </Canvas>
     </div >
   );

@@ -176,6 +176,7 @@ const ShaderMesh = ({ mesh }: {
 
 export default function Flower({ path, scale, position, rotation }: { path: string, scale: number, position: [number, number, number], rotation: [number, number, number]}) {
   const fbx = useLoader(FBXLoader, path);
+  
   const glassConfig = useGlassConfig();
   const groupRef = useRef<THREE.Group>(null);
 
