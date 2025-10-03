@@ -27,6 +27,7 @@ import { ParticleOrbital, ParticleFlowField, ParticleBasic, RibbonQuadDemo, Ribb
 import { CustomTrail } from './customTrail/CustomTrail';
 import { ParticleTimeTrail } from '@/lib/trail-gpu/examples/ParticleTimeTrail';
 import { VATMesh } from './VATMesh';
+import { VATMeshSpawner } from './VATMeshSpawner';
 // import FlowFieldExample from '@/lib/trail-gpu/examples/FlowFieldExample';
 
 function DynamicCamera() {
@@ -182,17 +183,7 @@ export default function Scene() {
         <DirectionalLight />
         {/* <Flower path={'flower.FBX'} scale={0.001} position={[0, 0, 0]} rotation={[Math.PI * 0,  Math.PI * 0.5, 0]} /> */}
         <Effects />
-        <VATMesh
-          glb="vat/Dahlia Clean_basisMesh.gltf"
-          pos="vat/Dahlia Clean_pos.exr"
-          nrm="vat/Dahlia Clean_nrm.png"     // or omit if you didn't bake normals
-          meta="vat/Dahlia Clean_meta.json"
-          map="textures/tujlip.png"
-          mask="textures/blackanedwthioe.png"
-          position={[0, 0.1, 0]}
-          scale={5}
-          speed={1}
-        />
+        <VATMeshSpawner />
       </Canvas>
     </div >
   );

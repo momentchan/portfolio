@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, createContext, useContext } from 'react'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
@@ -21,13 +21,14 @@ interface VATMeta {
   normalsCompressed: boolean
 }
 
-interface VATMeshProps {
-  glb: string
-  pos: string
-  nrm?: string | null
-  map?: string | null
-  mask?: string | null
-  meta: string
+export interface VATMeshProps {
+  // Preloaded resources
+  gltf: THREE.Group
+  posTex: THREE.Texture
+  nrmTex?: THREE.Texture | null
+  mapTex?: THREE.Texture | null
+  maskTex?: THREE.Texture | null
+  metaData: VATMeta
   speed?: number
   timeOffset?: number
   paused?: boolean
@@ -35,6 +36,23 @@ interface VATMeshProps {
   position?: [number, number, number]
   rotation?: [number, number, number]
   scale?: number | [number, number, number]
+  // External frame control
+  frame?: number
+}
+
+// Shared resource types
+interface VATResources {
+  gltf: THREE.Group
+  posTex: THREE.Texture
+  nrmTex: THREE.Texture | null
+  mapTex: THREE.Texture | null
+  maskTex: THREE.Texture | null
+  meta: VATMeta
+  refCount: number
+}
+
+interface VATResourceCache {
+  [key: string]: VATResources
 }
 
 interface MaterialControls {
@@ -88,6 +106,32 @@ const DEFAULT_MATERIAL_CONTROLS: MaterialControls = {
   noiseScale: 10,
   noiseStrength: 0.2,
   speed: 0.3,
+}
+
+// Global resource cache for sharing resources between instances
+const resourceCache: VATResourceCache = {}
+
+// Resource management functions
+function createResourceKey(glb: string, pos: string, nrm: string | null, map: string | null, mask: string | null, meta: string): string {
+  return `${glb}|${pos}|${nrm || 'null'}|${map || 'null'}|${mask || 'null'}|${meta}`
+}
+
+function releaseVATResources(glb: string, pos: string, nrm: string | null, map: string | null, mask: string | null, meta: string): void {
+  const key = createResourceKey(glb, pos, nrm, map, mask, meta)
+  
+  if (resourceCache[key]) {
+    resourceCache[key].refCount--
+    
+    if (resourceCache[key].refCount <= 0) {
+      // Dispose of textures when no longer needed
+      resourceCache[key].posTex.dispose()
+      if (resourceCache[key].nrmTex) resourceCache[key].nrmTex.dispose()
+      if (resourceCache[key].mapTex) resourceCache[key].mapTex.dispose()
+      if (resourceCache[key].maskTex) resourceCache[key].maskTex.dispose()
+      
+      delete resourceCache[key]
+    }
+  }
 }
 
 // Utility functions
@@ -281,7 +325,7 @@ function createVATMaterial(
   }
 
   // Filter out custom properties that aren't valid Three.js material properties
-  const { hueShift, iridescenceThicknessMin, iridescenceThicknessMax, noiseScale, noiseStrength, ...validMaterialProps } = materialProps
+  const { hueShift, iridescenceThicknessMin, iridescenceThicknessMax, noiseScale, noiseStrength, speed, ...validMaterialProps } = materialProps
 
   return new CustomShaderMaterial({
     baseMaterial: THREE.MeshPhysicalMaterial,
@@ -322,58 +366,6 @@ function createVATDepthMaterial(
   })
 }
 
-// Custom hooks
-function useVATAssets(glb: string, pos: string, nrm: string | null, map: string | null, mask: string | null, metaUrl: string) {
-  const gltf = useLoader(GLTFLoader, glb)
-
-  const posTex = useLoader(
-    getLoaderForExtension(pos),
-    pos,
-    configureEXRLoader
-  )
-
-  const nrmTex = nrm ? useLoader(
-    getLoaderForExtension(nrm),
-    nrm,
-    configureEXRLoader
-  ) : null
-
-  const mapTex = map ? useLoader(
-    getLoaderForExtension(map),
-    map,
-    configureEXRLoader
-  ) : null
-
-  const maskTex = mask ? useLoader(
-    getLoaderForExtension(mask),
-    mask,
-    configureEXRLoader
-  ) : null
-
-  const meta: VATMeta = useMemo(() => {
-    if (typeof window === 'undefined') {
-      throw new Error('Load meta JSON differently on SSR')
-    }
-
-    const xhr = new XMLHttpRequest()
-    xhr.open('GET', metaUrl, false)
-    xhr.send(null)
-
-    if (xhr.status !== 200) {
-      throw new Error(`Failed to load ${metaUrl}`)
-    }
-
-    return JSON.parse(xhr.responseText)
-  }, [metaUrl])
-
-  // Setup textures
-  setupVATTexture(posTex)
-  setupVATTexture(nrmTex)
-  setupMapTexture(mapTex)  // Use proper setup for diffuse textures
-  setupMapTexture(maskTex)
-
-  return { gltf, posTex, nrmTex, mapTex, maskTex, meta }
-}
 
 function useMaterialControls() {
   return useControls('VAT Physical Material', {
@@ -405,43 +397,48 @@ function useMaterialControls() {
 
 // Main component
 export function VATMesh({
-  glb,
-  pos,
-  nrm = null,
-  map = null,
-  mask = null,
-  meta: metaUrl,
+  gltf,
+  posTex,
+  nrmTex = null,
+  mapTex = null,
+  maskTex = null,
+  metaData,
   speed = 1,
   timeOffset = 0,
   paused = false,
   useDepthMaterial = true,
+  frame: externalFrame,
   ...rest
 }: VATMeshProps) {
   const materialControls = useMaterialControls()
-  const { gltf, posTex, nrmTex, mapTex, maskTex, meta } = useVATAssets(glb, pos, nrm, map, mask, metaUrl)
 
   const groupRef = useRef<THREE.Group>(null!)
   const materialsRef = useRef<CustomShaderMaterial[]>([])
   const startTimeRef = useRef<number>(0)
   const { scene } = useThree()
 
-  // Create materials
+
+  // Create materials and clone scene for this instance
   useEffect(() => {
     materialsRef.current.length = 0
 
-    gltf.scene.traverse((object: any) => {
+    // Clone the scene for this instance to avoid sharing geometry between instances
+    const clonedScene = gltf.clone()
+    
+    clonedScene.traverse((object: any) => {
       if (object.isMesh) {
         const mesh = object as THREE.Mesh
 
-        ensureUV2ForVAT(mesh.geometry, meta)
+        ensureUV2ForVAT(mesh.geometry, metaData)
 
-        const vatMaterial = createVATMaterial(posTex, nrmTex, mapTex, maskTex, scene.environment, meta, materialControls)
+        // Create unique materials for this instance
+        const vatMaterial = createVATMaterial(posTex, nrmTex, mapTex, maskTex, scene.environment, metaData, materialControls)
         mesh.material = vatMaterial
         materialsRef.current.push(vatMaterial)
 
         // Optionally add custom depth material
         if (useDepthMaterial) {
-          const vatDepthMaterial = createVATDepthMaterial(posTex, nrmTex, meta)
+          const vatDepthMaterial = createVATDepthMaterial(posTex, nrmTex, metaData)
           mesh.customDepthMaterial = vatDepthMaterial
           materialsRef.current.push(vatDepthMaterial)
         }
@@ -452,8 +449,14 @@ export function VATMesh({
       }
     })
 
+    // Store the cloned scene reference
+    if (groupRef.current) {
+      groupRef.current.clear()
+      groupRef.current.add(clonedScene)
+    }
+
     startTimeRef.current = performance.now() / 1000
-  }, [gltf.scene, posTex, nrmTex, meta, useDepthMaterial])
+  }, [gltf, posTex, nrmTex, metaData, useDepthMaterial])
 
   // Update material properties
   useEffect(() => {
@@ -509,23 +512,30 @@ export function VATMesh({
     if (paused) return
 
     const currentTime = state.clock.elapsedTime
-    const frame = currentTime * (meta.fps * speed) % meta.frameCount
-
+    
+    // Use external frame if provided, otherwise use normal animation
+    let frame: number
+    
+    if (externalFrame !== undefined) {
+      // External frame control
+      frame = Math.min(externalFrame * metaData.frameCount, metaData.frameCount - 5)
+    } else {
+      // Normal VAT animation
+      frame = currentTime * (metaData.fps * speed) % metaData.frameCount
+    }
+    
+    // Update materials
     for (const material of materialsRef.current) {
       if (material.uniforms?.uFrame) {
         material.uniforms.uFrame.value = frame
-        material.uniforms.uFrame.value = 40 // Reset to frame 0
       }
       if (material.uniforms?.uTime) {
         material.uniforms.uTime.value = currentTime * materialControls.speed
       }
     }
-
   })
 
   return (
-    <group ref={groupRef} {...rest}>
-      <primitive object={gltf.scene} />
-    </group>
+    <group ref={groupRef} {...rest} />
   )
 }
