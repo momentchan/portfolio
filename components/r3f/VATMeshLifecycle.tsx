@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { VATMesh, VATMeshProps } from './VATMesh'
 import * as THREE from 'three'
+import { gsap } from 'gsap'
 
 interface VATMeshLifecycleProps extends Omit<VATMeshProps, 'frame'> {
   maxScale?: number
@@ -12,6 +13,9 @@ interface VATMeshLifecycleProps extends Omit<VATMeshProps, 'frame'> {
   // Scaling timing (relative to frame timing)
   scaleInDuration?: number    // Duration for scale in (starts with frame forward)
   scaleOutDuration?: number   // Duration for scale out (ends with frame complete)
+  // Rotation timing (relative to frame timing)
+  rotateInDuration?: number   // Duration for rotation in (starts with frame forward)
+  rotateOutDuration?: number  // Duration for rotation out (ends with frame complete)
   onComplete?: () => void
 }
 
@@ -24,34 +28,125 @@ export function VATMeshLifecycle({
   // Scaling timing
   scaleInDuration = 1,      // Duration for scale in
   scaleOutDuration = 1,     // Duration for scale out
+  // Rotation timing
+  rotateInDuration = 1,     // Duration for rotation in
+  rotateOutDuration = 1,    // Duration for rotation out
   onComplete,
   ...vatMeshProps
 }: VATMeshLifecycleProps) {
   const groupRef = useRef<THREE.Group>(null!)
-  const [scalePhase, setScalePhase] = useState<'scaleIn' | 'scaleHold' | 'scaleOut' | 'complete'>('scaleIn')
-  const [framePhase, setFramePhase] = useState<'frameForward' | 'frameHold' | 'frameBackward' | 'complete'>('frameForward')
-  const [shouldRemove, setShouldRemove] = useState(false)
-  const lifecycleStartTimeRef = useRef<number>(0)
-  const [currentScale, setCurrentScale] = useState(0)
   const [currentFrame, setCurrentFrame] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const pauseStartTimeRef = useRef<number>(0)
-
-  // Initialize lifecycle animation
+  const [shouldRemove, setShouldRemove] = useState(false)
+  const timelineRef = useRef<gsap.core.Timeline | null>(null)
+  const scaleRef = useRef({ value: 0 })
+  const frameRef = useRef({ value: 0 })
+  const rotationRef = useRef({ value: 0 })
+  
+  // Initialize GSAP timeline (only once per instance)
   useEffect(() => {
-    setScalePhase('scaleIn')
-    setFramePhase('frameForward')
-    setShouldRemove(false)
-    setCurrentScale(0)
-    setCurrentFrame(0)
-  }, [])
+    if (!groupRef.current) return
+
+    // Kill existing timeline if it exists
+    if (timelineRef.current) {
+      timelineRef.current.kill()
+      timelineRef.current = null
+    }
+
+    // Create GSAP timeline for this specific VAT instance
+    const timeline = gsap.timeline({
+      onComplete: () => {
+        setShouldRemove(true)
+        if (onComplete) onComplete()
+      }
+    })
+
+    // Calculate total frame duration
+    const totalFrameDuration = frameForwardDuration + frameHoldDuration + frameBackwardDuration
+    const scaleOutStartTime = totalFrameDuration - scaleOutDuration
+    const rotateOutStartTime = totalFrameDuration - rotateOutDuration
+
+    // Frame animation sequence
+    timeline
+      // Frame forward phase
+      .to(frameRef.current, {
+        value: 1,
+        duration: frameForwardDuration,
+        ease: "none",
+        onUpdate: () => setCurrentFrame(frameRef.current.value)
+      })
+      // Frame hold phase
+      .to(frameRef.current, {
+        value: 1,
+        duration: frameHoldDuration,
+        ease: "none"
+      })
+      // Frame backward phase
+      .to(frameRef.current, {
+        value: 0,
+        duration: frameBackwardDuration,
+        ease: "none",
+        onUpdate: () => setCurrentFrame(frameRef.current.value)
+      }, frameForwardDuration + frameHoldDuration)
+
+    // Scale animation sequence
+    timeline
+      // Scale in phase (starts immediately)
+      .to(scaleRef.current, {
+        value: maxScale,
+        duration: scaleInDuration,
+        ease: "power2.out"
+      }, 0)
+      // Scale hold phase (between scale in complete and scale out start)
+      .to(scaleRef.current, {
+        value: maxScale,
+        duration: scaleOutStartTime - scaleInDuration,
+        ease: "none"
+      }, scaleInDuration)
+      // Scale out phase (ends with timeline complete)
+      .to(scaleRef.current, {
+        value: 0,
+        duration: scaleOutDuration,
+        ease: "power2.in"
+      }, scaleOutStartTime)
+
+    // Rotation animation sequence
+    timeline
+      // Rotate forward during rotate in phase
+      .to(rotationRef.current, {
+        value: -Math.PI,
+        duration: rotateInDuration,
+        ease: "power2.out"
+      }, 0)
+      // Hold rotation during hold phase
+      .to(rotationRef.current, {
+        value: -Math.PI,
+        duration: rotateOutStartTime - rotateInDuration,
+        ease: "none"
+      }, rotateInDuration)
+      // Rotate backward during rotate out phase
+      .to(rotationRef.current, {
+        value: 0, // Return to original rotation
+        duration: rotateOutDuration,
+        ease: "power2.in"
+      }, rotateOutStartTime)
+
+    timelineRef.current = timeline
+
+    return () => {
+      timeline.kill()
+    }
+  }, []) // Empty dependency array - only run once per instance
 
   // Keyboard controls for pause/unpause
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
+      if (event.code === 'Space' && timelineRef.current) {
         event.preventDefault()
-        setIsPaused(prev => !prev)
+        if (timelineRef.current.paused()) {
+          timelineRef.current.resume()
+        } else {
+          timelineRef.current.pause()
+        }
       }
     }
 
@@ -59,95 +154,11 @@ export function VATMeshLifecycle({
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [])
 
-  // Calculate current scale and frame based on lifecycle phase
-  const updateLifecycle = (currentTime: number) => {
-    // Set start time on first frame
-    if (lifecycleStartTimeRef.current === 0) {
-      lifecycleStartTimeRef.current = currentTime
-    }
-
-    // Handle pause/unpause timing
-    if (isPaused && pauseStartTimeRef.current === 0) {
-      // Just paused - record when pause started
-      pauseStartTimeRef.current = currentTime
-      return
-    } else if (!isPaused && pauseStartTimeRef.current > 0) {
-      // Just unpaused - adjust start time to account for pause duration
-      const pauseDuration = currentTime - pauseStartTimeRef.current
-      lifecycleStartTimeRef.current += pauseDuration
-      pauseStartTimeRef.current = 0
-    } else if (isPaused) {
-      // Still paused - don't update animation
-      return
-    }
-
-    const elapsed = currentTime - lifecycleStartTimeRef.current
-
-    // Safety check: if elapsed is negative, return early
-    if (elapsed < 0) return
-
-    // Calculate total duration for frame animation
-    const totalFrameDuration = frameForwardDuration + frameHoldDuration + frameBackwardDuration
-
-    // Update frame animation
-    if (elapsed >= totalFrameDuration) {
-      setFramePhase('complete')
-      setCurrentFrame(0)
-    } else if (elapsed < frameForwardDuration) {
-      // Frame forward phase
-      if (framePhase !== 'frameForward') setFramePhase('frameForward')
-      const progress = Math.max(0, Math.min(1, elapsed / frameForwardDuration))
-      setCurrentFrame(progress)
-    } else if (elapsed < frameForwardDuration + frameHoldDuration) {
-      // Frame hold phase
-      if (framePhase !== 'frameHold') setFramePhase('frameHold')
-      setCurrentFrame(1)
-    } else {
-      // Frame backward phase
-      if (framePhase !== 'frameBackward') setFramePhase('frameBackward')
-      const frameBackwardStart = frameForwardDuration + frameHoldDuration
-      const frameBackwardElapsed = elapsed - frameBackwardStart
-      const progress = Math.max(0, Math.min(1, frameBackwardElapsed / frameBackwardDuration))
-      setCurrentFrame(1 - progress)
-    }
-
-    // Update scaling animation with independent timing
-    const scaleOutStartTime = totalFrameDuration - scaleOutDuration
-    
-    if (elapsed >= totalFrameDuration) {
-      setScalePhase('complete')
-      setCurrentScale(0)
-    } else if (elapsed < scaleInDuration) {
-      // Scale in phase (starts with frame start)
-      if (scalePhase !== 'scaleIn') setScalePhase('scaleIn')
-      const progress = Math.max(0, Math.min(1, elapsed / scaleInDuration))
-      setCurrentScale(progress * maxScale)
-    } else if (elapsed < scaleOutStartTime) {
-      // Hold scale phase (between scale in complete and scale out start)
-      if (scalePhase !== 'scaleHold') setScalePhase('scaleHold')
-      setCurrentScale(maxScale)
-    } else {
-      // Scale out phase (ends with frame complete)
-      if (scalePhase !== 'scaleOut') setScalePhase('scaleOut')
-      const scaleOutElapsed = elapsed - scaleOutStartTime
-      const progress = Math.max(0, Math.min(1, scaleOutElapsed / scaleOutDuration))
-      setCurrentScale(maxScale * (1 - progress))
-    }
-
-    // Check if animation is complete
-    if (elapsed >= totalFrameDuration) {
-      setShouldRemove(true)
-      if (onComplete) onComplete()
-    }
-  }
-
-  // Animation frame update
-  useFrame((state) => {
-    updateLifecycle(state.clock.elapsedTime)
-    
-    // Apply scale to the group in local space
+  // Apply scale and rotation to the group
+  useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.scale.set(currentScale, currentScale, currentScale)
+      groupRef.current.scale.setScalar(scaleRef.current.value)
+      groupRef.current.rotation.y = rotationRef.current.value
     }
   })
 

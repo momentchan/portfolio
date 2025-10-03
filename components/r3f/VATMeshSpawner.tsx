@@ -4,7 +4,7 @@ import { useVATPreloader } from './VATPreloader'
 
 // VATMesh spawner with lifecycle animation
 export function VATMeshSpawner() {
-  const [spawnedMeshes, setSpawnedMeshes] = useState<number[]>([])
+  const [spawnedMeshes, setSpawnedMeshes] = useState<{id: number, position: [number, number, number]}[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
   
   // Preload VAT resources
@@ -25,12 +25,18 @@ export function VATMeshSpawner() {
     }
     console.log('Spawning VATMesh with ID:', meshCounter)
     const newId = meshCounter
-    setSpawnedMeshes(prev => [...prev, newId])
+    const currentCount = spawnedMeshes.length
+    const position: [number, number, number] = [
+      (currentCount % 3 - 1) * 0.1, // Spread horizontally
+      Math.random() * 0.1,           // Random height
+      (Math.floor(currentCount / 3) - 1) * 0.1 // Spread in depth
+    ]
+    setSpawnedMeshes(prev => [...prev, { id: newId, position }])
     setMeshCounter(prev => prev + 1)
   }
 
   const removeVATMesh = (id: number) => {
-    setSpawnedMeshes(prev => prev.filter(meshId => meshId !== id))
+    setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
   }
 
   return (
@@ -42,30 +48,29 @@ export function VATMeshSpawner() {
       </mesh>
 
       {/* Spawned VAT meshes with lifecycle animation */}
-      {spawnedMeshes.map((id, index) => (
+      {spawnedMeshes.map((mesh) => (
         <VATMeshLifecycle
-          key={id}
+          key={mesh.id}
           gltf={gltf.scene}
           posTex={posTex}
           nrmTex={nrmTex}
           mapTex={mapTex}
           maskTex={maskTex}
           metaData={meta}
-          position={[
-            (index % 3 - 1) * 0.1, // Spread horizontally
-            Math.random() * 0.1,   // Random height
-            (Math.floor(index / 3) - 1) * 0.1 // Spread in depth
-          ]}
+          position={mesh.position}
           // Lifecycle animation props
           maxScale={5}
           // Frame timing
-          frameForwardDuration={3}  // 1.5 seconds to play forward
-          frameHoldDuration={5.0}     // 5 seconds to hold at frame 1
-          frameBackwardDuration={3} // 1.5 seconds to play backward
+          frameForwardDuration={3}  // 3 seconds to play forward
+          frameHoldDuration={5.0}   // 5 seconds to hold at frame 1
+          frameBackwardDuration={3} // 3 seconds to play backward
           // Scaling timing
-          scaleInDuration={1}       // 2 seconds to scale in (starts with frame start)
-          scaleOutDuration={1}      // 2 seconds to scale out (ends with frame complete)
-          onComplete={() => removeVATMesh(id)}
+          scaleInDuration={1}       // 1 second to scale in (starts with frame start)
+          scaleOutDuration={1}      // 1 second to scale out (ends with frame complete)
+          // Rotation timing
+          rotateInDuration={2}    // 2 seconds to rotate in (starts with frame start)
+          rotateOutDuration={2}   // 2 seconds to rotate out (ends with frame complete)
+          onComplete={() => removeVATMesh(mesh.id)}
         />
       ))}
     </group>
