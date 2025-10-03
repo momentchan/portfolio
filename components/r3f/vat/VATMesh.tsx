@@ -5,8 +5,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { useControls } from 'leva'
-import photoshopMath from '../../lib/r3f-gist/shader/cginc/photoshopMath.glsl?raw'
-import simplexNoise from '../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl?raw'
+import photoshopMath from '@/lib/r3f-gist/shader/cginc/photoshopMath.glsl?raw'
+import simplexNoise from '@/lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl?raw'
 
 // Types
 interface VATMeta {
