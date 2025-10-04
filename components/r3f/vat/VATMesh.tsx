@@ -51,10 +51,6 @@ interface VATResources {
   refCount: number
 }
 
-interface VATResourceCache {
-  [key: string]: VATResources
-}
-
 interface MaterialControls {
   roughness: number
   metalness: number
@@ -108,56 +104,6 @@ const DEFAULT_MATERIAL_CONTROLS: MaterialControls = {
   speed: 0.3,
 }
 
-// Global resource cache for sharing resources between instances
-const resourceCache: VATResourceCache = {}
-
-// Resource management functions
-function createResourceKey(glb: string, pos: string, nrm: string | null, map: string | null, mask: string | null, meta: string): string {
-  return `${glb}|${pos}|${nrm || 'null'}|${map || 'null'}|${mask || 'null'}|${meta}`
-}
-
-function releaseVATResources(glb: string, pos: string, nrm: string | null, map: string | null, mask: string | null, meta: string): void {
-  const key = createResourceKey(glb, pos, nrm, map, mask, meta)
-  
-  if (resourceCache[key]) {
-    resourceCache[key].refCount--
-    
-    if (resourceCache[key].refCount <= 0) {
-      // Dispose of textures when no longer needed
-      resourceCache[key].posTex.dispose()
-      if (resourceCache[key].nrmTex) resourceCache[key].nrmTex.dispose()
-      if (resourceCache[key].mapTex) resourceCache[key].mapTex.dispose()
-      if (resourceCache[key].maskTex) resourceCache[key].maskTex.dispose()
-      
-      delete resourceCache[key]
-    }
-  }
-}
-
-// Utility functions
-function setupVATTexture(tex?: THREE.Texture | null): void {
-  if (!tex) return
-
-  tex.colorSpace = THREE.NoColorSpace
-  tex.generateMipmaps = false
-  tex.minFilter = THREE.NearestFilter
-  tex.magFilter = THREE.NearestFilter
-  tex.wrapS = THREE.ClampToEdgeWrapping
-  tex.wrapT = THREE.ClampToEdgeWrapping
-  tex.type = THREE.FloatType
-}
-
-function setupMapTexture(tex?: THREE.Texture | null): void {
-  if (!tex) return
-
-  tex.colorSpace = THREE.SRGBColorSpace
-  tex.generateMipmaps = true
-  tex.minFilter = THREE.LinearMipmapLinearFilter
-  tex.magFilter = THREE.LinearFilter
-  tex.wrapS = THREE.RepeatWrapping
-  tex.wrapT = THREE.RepeatWrapping
-}
-
 function ensureUV2ForVAT(geometry: THREE.BufferGeometry, meta: VATMeta): void {
   if (geometry.getAttribute('uv2')) return
 
@@ -177,16 +123,6 @@ function ensureUV2ForVAT(geometry: THREE.BufferGeometry, meta: VATMeta): void {
   }
 
   geometry.setAttribute('uv2', new THREE.BufferAttribute(uv2Array, 2))
-}
-
-function getLoaderForExtension(url: string) {
-  return url.toLowerCase().endsWith('.png') ? THREE.TextureLoader : EXRLoader
-}
-
-function configureEXRLoader(loader: any): void {
-  if (loader instanceof EXRLoader) {
-    loader.setDataType(THREE.FloatType)
-  }
 }
 
 // Shader code
@@ -368,7 +304,7 @@ function createVATDepthMaterial(
 
 
 function useMaterialControls() {
-  return useControls('VAT Physical Material', {
+  return useControls('VAT.Material', {
     roughness: { value: DEFAULT_MATERIAL_CONTROLS.roughness, min: 0, max: 1, step: 0.01 },
     metalness: { value: DEFAULT_MATERIAL_CONTROLS.metalness, min: 0, max: 1, step: 0.01 },
     transmission: { value: DEFAULT_MATERIAL_CONTROLS.transmission, min: 0, max: 1, step: 0.01 },
@@ -536,6 +472,6 @@ export function VATMesh({
   })
 
   return (
-    <group ref={groupRef} {...rest} />
+    <group ref={groupRef} {...rest}/>
   )
 }

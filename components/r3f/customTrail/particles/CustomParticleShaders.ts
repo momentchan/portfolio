@@ -1,9 +1,9 @@
-import simplexNoise3d from '../../../../lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl';
+import noise4D from '../../../../lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
 
 // Custom Velocity Shader for Particle System
 // Calculates forces and updates velocity for custom particle behavior
 export const customVelocityShader = /* glsl */ `
-${simplexNoise3d}
+${noise4D}
 precision highp float;
 
 uniform sampler2D uPositionsPrev;
@@ -46,7 +46,7 @@ vec4 readParticleVel(int k) {
 vec3 calculateCustomForces(vec3 pos, vec3 vel, float time) {
     // Calculate flow field velocity
     float t = time * uTimeScale;
-    vec3 curl = curlNoise(pos * uNoiseScale) * uNoiseStrength;
+    vec3 curl = curlNoise(vec4(pos * uNoiseScale + vec3(0.35), t)) * uNoiseStrength;
     vec3 attract = (uAttractPos - pos) * uAttractStrength;
     vec3 velocity = normalize(attract + curl);
     

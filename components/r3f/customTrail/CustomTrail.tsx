@@ -1,15 +1,40 @@
 import { Ribbon, ParticleDebugPoints } from '../../../lib/trail-gpu';
 import { useFrame } from '@react-three/fiber';
 import { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useControls } from 'leva';
+import { gsap } from 'gsap';
 
 export function CustomTrail() {
   // Trail update state - controlled by mouse
   const [trailUpdateEnabled, setTrailUpdateEnabled] = useState(true);
+  const [rate, setRate] = useState(0);
+  const rateRef = useRef({ value: 0 });
+
+  // Store rate in ref for GSAP animation
+  useEffect(() => {
+    rateRef.current.value = rate;
+  }, [rate]);
+
+  // Animate rate from 0 to 1 over 5 seconds using GSAP
+  useEffect(() => {
+    const tl = gsap.timeline();
+    tl.to(rateRef.current, {
+      value: 1,
+      duration: 3,
+      ease: "power2.in",
+      delay: 2,
+      onUpdate: () => {
+        setRate(rateRef.current.value);
+      }
+    });
+  }, []);
+
+
 
   // Use organized hooks for each system
   const { trailControls, trails } = useTrailSystem();
-  const { particles } = useParticleSystem(trailControls.trailsNum);
+  const { particles } = useParticleSystem(trailControls.trailsNum, rate);
   const { displayControls, geometry, materials } = useRibbonSystem({
     trailsNum: trailControls.trailsNum,
     nodesPerTrail: trailControls.length / trailControls.updateDistanceMin,
@@ -37,14 +62,14 @@ export function CustomTrail() {
     };
   }, [trailUpdateEnabled]);
 
-  
+
 
   // Update systems each frame
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 1 / 30)
     if (!trails || !trailUpdateEnabled) return;
-    
+
     // Always update particles
     particles.update(t, dt);
 

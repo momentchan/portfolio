@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { VATMesh, VATMeshProps } from './VATMesh'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
@@ -16,6 +16,9 @@ interface VATMeshLifecycleProps extends Omit<VATMeshProps, 'frame'> {
   // Rotation timing (relative to frame timing)
   rotateInDuration?: number   // Duration for rotation in (starts with frame forward)
   rotateOutDuration?: number  // Duration for rotation out (ends with frame complete)
+  // Camera tracking
+  trackCamera?: boolean       // Whether to continuously face camera
+  angleOffset?: number        // Offset angle in radians for camera-facing rotation
   onComplete?: () => void
 }
 
@@ -31,17 +34,50 @@ export function VATMeshLifecycle({
   // Rotation timing
   rotateInDuration = 1,     // Duration for rotation in
   rotateOutDuration = 1,    // Duration for rotation out
+  // Camera tracking
+  trackCamera = false,      // Whether to continuously face camera
   onComplete,
   ...vatMeshProps
 }: VATMeshLifecycleProps) {
+  const { camera } = useThree()
   const groupRef = useRef<THREE.Group>(null!)
   const [currentFrame, setCurrentFrame] = useState(0)
-  const [shouldRemove, setShouldRemove] = useState(false)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const scaleRef = useRef({ value: 0 })
   const frameRef = useRef({ value: 0 })
   const rotationRef = useRef({ value: 0 })
-  
+
+  const [rotateX, setRotateX] = useState(() => Math.random() * -45) // Range: (0, -45)
+  const [rotateZ, setRotateZ] = useState(() => (Math.random() - 0.5) * 90) // Range: (-45, 45)
+
+  const debugAxis = false
+
+  // Calculate initial rotation so Y-axis faces camera when spawned
+  useEffect(() => {
+    if (!groupRef.current || !vatMeshProps.position) return
+
+    // Calculate direction from group to camera
+    const direction = camera.position.clone().sub(groupRef.current.position).normalize()
+
+    // Create a quaternion that rotates the Y-axis to point toward camera
+    const up = new THREE.Vector3(0, 1, 0) // Y-axis (green axis)
+    const quaternion = new THREE.Quaternion()
+
+    // Set quaternion to rotate from current up axis to camera direction
+    quaternion.setFromUnitVectors(up, direction)
+
+    // Apply additional X and Z rotations in the local coordinate system
+    const xRotationQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(rotateX))
+    const zRotationQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(rotateZ))
+
+    // Combine all rotations (camera-facing + X rotation + Z rotation)
+    quaternion.multiply(xRotationQuaternion)
+    quaternion.multiply(zRotationQuaternion)
+    
+    // Apply combined rotation to group
+    groupRef.current.setRotationFromQuaternion(quaternion)
+  }, [camera, vatMeshProps.position, rotateX, rotateZ])
+
   // Initialize GSAP timeline (only once per instance)
   useEffect(() => {
     if (!groupRef.current) return
@@ -55,7 +91,6 @@ export function VATMeshLifecycle({
     // Create GSAP timeline for this specific VAT instance
     const timeline = gsap.timeline({
       onComplete: () => {
-        setShouldRemove(true)
         if (onComplete) onComplete()
       }
     })
@@ -154,26 +189,37 @@ export function VATMeshLifecycle({
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [])
 
-  // Apply scale and rotation to the group
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.scale.setScalar(scaleRef.current.value)
-      groupRef.current.rotation.y = rotationRef.current.value
-    }
-  })
-
-  // Remove component when lifecycle is complete
-  if (shouldRemove) {
-    return null
-  }
-
   return (
     <group ref={groupRef} position={vatMeshProps.position}>
+
       <VATMesh
         {...vatMeshProps}
         frame={currentFrame}
         position={[0, 0, 0]} // Reset position since it's now on the group
-      />
+        rotation={[0, rotationRef.current.value, 0]}
+        scale={[scaleRef.current.value, scaleRef.current.value, scaleRef.current.value]}
+        />
+
+        {/* Debug axes */}
+        {debugAxis && (
+          <group>
+            {/* X-axis (red) - extends along X from center */}
+            <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.01, 0.01, 1]} />
+              <meshBasicMaterial color="red" />
+            </mesh>
+            {/* Y-axis (green) - extends along Y from center */}
+            <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
+              <cylinderGeometry args={[0.01, 0.01, 1]} />
+              <meshBasicMaterial color="green" />
+            </mesh>
+            {/* Z-axis (blue) - extends along Z from center */}
+            <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.01, 0.01, 1]} />
+              <meshBasicMaterial color="blue" />
+            </mesh>
+          </group>
+        )}
     </group>
   )
 }

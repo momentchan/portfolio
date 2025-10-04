@@ -10,6 +10,7 @@ import Effects from './Effects';
 import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
 import { CustomTrail } from './customTrail/CustomTrail';
 import { VATMeshSpawner } from './vat/VATMeshSpawner';
+import CameraRotator from './CameraRotator';
 
 function DirectionalLight() {
   const controls = useControls('Directional Light', {
@@ -58,13 +59,14 @@ export default function Scene() {
 
         <PerspectiveCamera
           makeDefault
-          position={[0, 2, 1]}
+          position={[0, 0, 0.75]}
           zoom={1}
-          near={0.1}
+          near={0.01}
           far={5}
           fov={60}
         />
 
+        <CameraRotator />
         <CameraControls />
         <EnvironmentSetup />
         <CustomTrail />

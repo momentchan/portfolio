@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { VATMeshLifecycle } from './VATMeshLifecycle'
+import { VATMesh } from './VATMesh'
 import { useVATPreloader } from './VATPreloader'
 
 // VATMesh spawner with lifecycle animation
@@ -17,6 +18,16 @@ export function VATMeshSpawner() {
     "vat/Dahlia Clean_meta.json"
   )
 
+  // Pre-warm GPU by creating a hidden VATMesh when resources are loaded
+  const [preWarmed, setPreWarmed] = useState(false)
+  
+  useEffect(() => {
+    if (isLoaded && !preWarmed) {
+      console.log('Pre-warming GPU with hidden VATMesh...')
+      setPreWarmed(true)
+    }
+  }, [isLoaded, preWarmed])
+
   const spawnVATMesh = () => {
     if (!isLoaded) {
       console.log('Resources not loaded yet, cannot spawn')
@@ -26,10 +37,16 @@ export function VATMeshSpawner() {
     console.log('Spawning VATMesh with ID:', meshCounter)
     const newId = meshCounter
     const currentCount = spawnedMeshes.length
+    // Spawn inside sphere with uniform distribution
+    const radius = 0.5 // Sphere radius
+    const theta = Math.random() * Math.PI * 2 // 0 to 2π
+    const phi = Math.acos(2 * Math.random() - 1) // 0 to π
+    const r = Math.cbrt(Math.random()) * radius // Cube root for uniform volume distribution
+    
     const position: [number, number, number] = [
-      (currentCount % 3 - 1) * 0.1, // Spread horizontally
-      Math.random() * 0.1,           // Random height
-      (Math.floor(currentCount / 3) - 1) * 0.1 // Spread in depth
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.sin(phi) * Math.sin(theta),
+      r * Math.cos(phi)
     ]
     setSpawnedMeshes(prev => [...prev, { id: newId, position }])
     setMeshCounter(prev => prev + 1)
@@ -39,13 +56,35 @@ export function VATMeshSpawner() {
     setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
   }
 
+  // Keyboard event handler for F key spawning
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'KeyF') {
+        event.preventDefault()
+        spawnVATMesh()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isLoaded, meshCounter, spawnedMeshes.length])
+
   return (
     <group>
-      {/* Spawn button (you can trigger this from UI) */}
-      <mesh onClick={spawnVATMesh} position={[0, 0, 0]} scale={0.1}>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshBasicMaterial color={isLoaded ? "hotpink" : "gray"} />
-      </mesh>
+
+      {/* Pre-warm GPU with hidden VATMesh */}
+      {isLoaded && preWarmed && (
+        <VATMesh
+          gltf={gltf.scene}
+          posTex={posTex}
+          nrmTex={nrmTex}
+          mapTex={mapTex}
+          maskTex={maskTex}
+          metaData={meta}
+          position={[-1000, -1000, -1000]} // Hidden position
+          frame={0} // Start at frame 0
+        />
+      )}
 
       {/* Spawned VAT meshes with lifecycle animation */}
       {spawnedMeshes.map((mesh) => (

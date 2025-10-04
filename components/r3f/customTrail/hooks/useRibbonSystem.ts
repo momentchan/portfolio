@@ -27,7 +27,7 @@ export function useRibbonSystem({
   const { scene } = useThree();
 
   // Display controls
-  const displayControls = useControls('Display', {
+  const displayControls = useControls('Trails.Ribbon', {
     showRibbon: { value: true },
     showParticlePoints: { value: false },
     ribbonColor: { value: '#ffffff' },
