@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { VATMeshLifecycle } from './VATMeshLifecycle'
 import { VATMesh } from './VATMesh'
 import { useVATPreloader } from './VATPreloader'
+import { SpawnedMeshData } from './types'
+import { generateSpherePosition } from './utils'
+import { MathUtils } from 'three'
 
 // VATMesh spawner with lifecycle animation
 export function VATMeshSpawner() {
-  const [spawnedMeshes, setSpawnedMeshes] = useState<{id: number, position: [number, number, number]}[]>([])
+  const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
   
   // Preload VAT resources
@@ -36,19 +39,10 @@ export function VATMeshSpawner() {
     }
     console.log('Spawning VATMesh with ID:', meshCounter)
     const newId = meshCounter
-    const currentCount = spawnedMeshes.length
-    // Spawn inside sphere with uniform distribution
-    const radius = 0.5 // Sphere radius
-    const theta = Math.random() * Math.PI * 2 // 0 to 2π
-    const phi = Math.acos(2 * Math.random() - 1) // 0 to π
-    const r = Math.cbrt(Math.random()) * radius // Cube root for uniform volume distribution
+    const position = generateSpherePosition(0.5) // Radius of 0.5
+    const scale = MathUtils.randFloat(0.5, 1) * 5 // Random scale between 0.5 and 1.0
     
-    const position: [number, number, number] = [
-      r * Math.sin(phi) * Math.cos(theta),
-      r * Math.sin(phi) * Math.sin(theta),
-      r * Math.cos(phi)
-    ]
-    setSpawnedMeshes(prev => [...prev, { id: newId, position }])
+    setSpawnedMeshes(prev => [...prev, { id: newId, position, scale }])
     setMeshCounter(prev => prev + 1)
   }
 
@@ -98,7 +92,7 @@ export function VATMeshSpawner() {
           metaData={meta}
           position={mesh.position}
           // Lifecycle animation props
-          maxScale={5}
+          maxScale={mesh.scale}
           // Frame timing
           frameForwardDuration={3}  // 3 seconds to play forward
           frameHoldDuration={5.0}   // 5 seconds to hold at frame 1

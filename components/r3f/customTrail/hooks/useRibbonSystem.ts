@@ -41,7 +41,7 @@ export function useRibbonSystem({
     normalMapRepeatX: { value: 10, min: 0.0, max: 10.0, step: 0.01 },
     normalMapRepeatY: { value: 1, min: 0.0, max: 10.0, step: 0.01 },
     envMapIntensity: { value: 0, min: 0.0, max: 1.0, step: 0.01 },
-  });
+  }, { collapsed: true });
 
   // Update normal texture repeat
   useEffect(() => {

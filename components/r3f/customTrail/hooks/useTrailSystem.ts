@@ -10,7 +10,7 @@ export function useTrailSystem() {
     length: { value: 0.3, min: 0, max: 0.5, step: 0.01 },
     trailsNum: { value: 1000, min: 10, max: 2000, step: 1 },
     updateDistanceMin: { value: 0.005, min: 0.001, max: 0.5, step: 0.001 },
-  });
+  }, { collapsed: true });
 
   // Trail configuration
   const trailConfig: TrailConfig = useMemo(() => ({

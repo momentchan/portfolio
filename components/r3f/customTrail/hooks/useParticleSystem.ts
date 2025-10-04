@@ -26,7 +26,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
     attractStrength: { value: 1, min: 0.0, max: 10.0, step: 0.01 },
     damping: { value: 0.98, min: 0.0, max: 1.0, step: 0.01 },
     useGSAP: true // Toggle to use GSAP vs Leva controls
-  });
+  }, { collapsed: true });
 
   // Generate initial particle positions
   const radius = 0.02;
@@ -79,30 +79,8 @@ export function useParticleSystem(trailsNum: number, rate: number) {
     if (!particles.setUniform) return;
 
     const tl = gsap.timeline();
-
     // Animate multiple parameters in the same timeline step
-    tl
-    // .to(animatedParams, {
-    //   damping: 0.98,
-    //   speed: 0.2,
-    //   noiseScale: 10,
-    //   duration: 3,
-    //   ease: "power2.in",
-    //   delay: 1,
-    //   onUpdate: () => setAnimatedParams({ ...animatedParams })
-    // })
-    // .to(animatedParams, {
-    //   speed: 1,
-    //   noiseScale: 2,
-    //   // noiseStrength: 2,
-    //   attractStrength: 20,
-    //   damping: 0.8,
-    //   duration: 1,
-    //   ease: "power2.in",
-    //   // delay: 3,
-    //   onUpdate: () => setAnimatedParams({ ...animatedParams })
-    // })
-    .to(animatedParams, {
+    tl.to(animatedParams, {
       speed: 0.2,
       noiseScale: 1,
       noiseStrength: 2,
@@ -113,7 +91,6 @@ export function useParticleSystem(trailsNum: number, rate: number) {
       delay: 2,
       onUpdate: () => setAnimatedParams({ ...animatedParams })
     })
-    
 
   }, [particles]);
 
