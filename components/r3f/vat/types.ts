@@ -119,7 +119,7 @@ export const DEFAULT_MATERIAL_CONTROLS: VATMaterialControls = {
   attenuationColor: '#ffffff',
   bumpScale: 1.0,
   hueShift: 0.45,
-  noiseScale: 10,
-  noiseStrength: 0.2,
+  noiseScale: 1,
+  noiseStrength: 0.1,
   speed: 0.3,
 }

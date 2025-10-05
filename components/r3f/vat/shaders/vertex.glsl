@@ -4,6 +4,7 @@ uniform sampler2D uNrmTex;
 uniform sampler2D uMapTex;
 uniform float uFrame;
 uniform float uFrames;
+uniform float uTime;
 uniform float uTexW;
 uniform int uStoreDelta;
 uniform int uNormalsCompressed;
@@ -58,7 +59,10 @@ vec3 VAT_nrm(float f) {
 void main() {
   vec3 vatPos = VAT_pos(uFrame);
   vec3 basePos = position;
-  vatPos += snoiseVec3(vec3(uv, 0.0) * uNoiseScale) * uNoiseStrength * 0.001;
+
+  vec3 noise = snoiseVec3(vec3(uv * uNoiseScale + uv2 + fract(uSeed * 23.5), uTime * 1.0)) * uNoiseStrength * 0.01;
+  noise *= 1.0 - uv.y;  
+  vatPos += noise;
 
   vec3 position =(uStoreDelta == 1) ? (basePos + vatPos) : vatPos;
 
