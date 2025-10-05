@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { VATMeshLifecycle } from './VATMeshLifecycle'
 import { VATMesh } from './VATMesh'
 import { useVATPreloader } from './VATPreloader'
 import { SpawnedMeshData } from './types'
 import { generateSpherePosition } from './utils'
 import { MathUtils } from 'three'
+import * as THREE from 'three'
+import { useThree } from '@react-three/fiber'
+import { GPUSpawner } from './gpuSpawn'
+import { useTrailContext } from '../contexts/TrailContext'
 
 // VATMesh spawner with lifecycle animation
 export function VATMeshSpawner() {
+  const { gl } = useThree()
+  const { nodeTexture } = useTrailContext()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
-  
+  const gpuSpawnerRef = useRef<GPUSpawner | null>(null)
+
   // Preload VAT resources
   const { gltf, posTex, nrmTex, mapTex, maskTex, meta, isLoaded } = useVATPreloader(
     "vat/Dahlia Clean_basisMesh.gltf",
@@ -23,7 +30,18 @@ export function VATMeshSpawner() {
 
   // Pre-warm GPU by creating a hidden VATMesh when resources are loaded
   const [preWarmed, setPreWarmed] = useState(false)
-  
+
+  // Initialize GPU spawner when nodeTexture and gl are available
+  useEffect(() => {
+    if (nodeTexture && gl && !gpuSpawnerRef.current) {
+      gpuSpawnerRef.current = new GPUSpawner(gl, nodeTexture)
+    } else if (gpuSpawnerRef.current && nodeTexture) {
+      gpuSpawnerRef.current.updateNodeTexture(nodeTexture)
+    } else if (gpuSpawnerRef.current && gl) {
+      gpuSpawnerRef.current.updateRenderer(gl)
+    }
+  }, [nodeTexture, gl])
+
   useEffect(() => {
     if (isLoaded && !preWarmed) {
       console.log('Pre-warming GPU with hidden VATMesh...')
@@ -31,7 +49,8 @@ export function VATMeshSpawner() {
     }
   }, [isLoaded, preWarmed])
 
-  const spawnVATMesh = () => {
+
+  const spawnVATMeshAt = (position: THREE.Vector3) => {
     if (!isLoaded) {
       console.log('Resources not loaded yet, cannot spawn')
       console.log('Loaded state:', { gltf: !!gltf, posTex: !!posTex, nrmTex: !!nrmTex, mapTex: !!mapTex, maskTex: !!maskTex, meta: !!meta })
@@ -39,23 +58,45 @@ export function VATMeshSpawner() {
     }
     console.log('Spawning VATMesh with ID:', meshCounter)
     const newId = Date.now() + meshCounter // Use timestamp + counter for guaranteed uniqueness
-    const position = generateSpherePosition(0.5) // Radius of 0.5
     const scale = MathUtils.randFloat(0.5, 1) * 5 // Random scale between 0.5 and 1.0
-    
-    setSpawnedMeshes(prev => [...prev, { id: newId, position, scale }])
+
+    const positionArray: [number, number, number] = [position.x, position.y, position.z]
+    setSpawnedMeshes(prev => [...prev, { id: newId, position: positionArray, scale }])
     setMeshCounter(prev => prev + 1)
+  }
+
+  const spawnVATMesh = () => {
+    const position = generateSpherePosition(0.5) // Radius of 0.5
+    spawnVATMeshAt(new THREE.Vector3(position[0], position[1], position[2]))
   }
 
   const removeVATMesh = (id: number) => {
     setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
   }
 
-  // Keyboard event handler for F key spawning
+  const nodeIndex = useRef(0)
+
+  // Keyboard event handler for F key spawning and N key for node position testing
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'KeyF') {
         event.preventDefault()
         spawnVATMesh()
+      }
+      if (event.code === 'KeyG') {
+        event.preventDefault()
+        if (gpuSpawnerRef.current) {
+          // Get spawn data for target node (trail 0, nodeIndex)
+          const spawnData = gpuSpawnerRef.current.getSpawnData(0, nodeIndex.current)
+          if (spawnData) {
+            spawnVATMeshAt(spawnData.position)
+            nodeIndex.current = (nodeIndex.current + 5) % nodeTexture!.image.width
+          } else {
+            console.log('Failed to get target position')
+          }
+        } else {
+          console.log('GPU spawner not available')
+        }
       }
     }
 

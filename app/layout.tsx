@@ -44,9 +44,9 @@ export default function RootLayout({
 
         <main className="relative z-10 min-h-screen px-6">{children}</main>
 
-        <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
+        {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
-        </footer>
+        </footer> */}
       </body>
     </html>
   );

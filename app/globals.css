@@ -26,4 +26,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-pragmatica), system-ui, sans-serif;
+  overflow: hidden; /* Disable page scroll */
 }
