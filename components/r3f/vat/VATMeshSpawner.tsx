@@ -10,22 +10,48 @@ import { useThree } from '@react-three/fiber'
 import { GPUSpawner } from './gpuSpawn'
 import { useTrailContext } from '../contexts/TrailContext'
 
+export interface VATData {
+  gltfPath: string
+  posTexPath: string
+  nrmTexPath: string
+  mapTexPath: string
+  maskTexPath: string
+  metaPath: string
+}
+
+interface VATMeshSpawnerProps {
+  vatData?: VATData
+}
+
 // VATMesh spawner with lifecycle animation
-export function VATMeshSpawner() {
+export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
   const { gl } = useThree()
   const { nodeTexture } = useTrailContext()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
   const gpuSpawnerRef = useRef<GPUSpawner | null>(null)
 
+  // Default VAT data
+  const defaultVATData: VATData = {
+    gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
+    posTexPath: "vat/Dahlia Clean_pos.exr",
+    nrmTexPath: "vat/Dahlia Clean_nrm.png",
+    mapTexPath: "textures/tujlip.png",
+    maskTexPath: "textures/blackanedwthioe.png",
+    metaPath: "vat/Dahlia Clean_meta.json"
+  }
+
+  // Use provided VAT data or fall back to defaults
+  const currentVATData = vatData || defaultVATData
+
   // Preload VAT resources
   const { gltf, posTex, nrmTex, mapTex, maskTex, meta, isLoaded } = useVATPreloader(
-    "vat/Dahlia Clean_basisMesh.gltf",
-    "vat/Dahlia Clean_pos.exr",
-    "vat/Dahlia Clean_nrm.png",
-    "textures/tujlip.png",
-    "textures/blackanedwthioe.png",
-    "vat/Dahlia Clean_meta.json"
+    currentVATData.gltfPath,
+    currentVATData.posTexPath,
+    currentVATData.nrmTexPath,
+    currentVATData.mapTexPath,
+    currentVATData.maskTexPath,
+    currentVATData.metaPath
   )
 
   // Pre-warm GPU by creating a hidden VATMesh when resources are loaded
@@ -90,7 +116,7 @@ export function VATMeshSpawner() {
           const spawnData = gpuSpawnerRef.current.getSpawnData(0, nodeIndex.current)
           if (spawnData) {
             spawnVATMeshAt(spawnData.position)
-            nodeIndex.current = (nodeIndex.current + 5) % nodeTexture!.image.width
+            nodeIndex.current = (nodeIndex.current + 10) % nodeTexture!.image.width
           } else {
             console.log('Failed to get target position')
           }
@@ -143,6 +169,7 @@ export function VATMeshSpawner() {
           maskTex={maskTex}
           metaData={meta}
           position={mesh.position}
+          id={mesh.id}
           // Lifecycle animation props
           maxScale={mesh.scale}
           // Frame timing

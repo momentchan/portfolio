@@ -8,6 +8,9 @@ export interface GPUSpawnData {
 export class GPUSpawner {
   private nodeTexture: THREE.Texture | null = null
   private gl: THREE.WebGLRenderer | null = null
+  private cachedTextureData: Float32Array | null = null
+  private lastReadbackTime: number = 0
+  private readonly CACHE_DURATION = 100 // Cache for 100ms to avoid excessive readbacks
 
   constructor(gl: THREE.WebGLRenderer, nodeTexture: THREE.Texture) {
     this.gl = gl
@@ -61,6 +64,27 @@ export class GPUSpawner {
     }
   }
 
+  // Get cached texture data or read from GPU if cache is stale
+  private getTextureData = (): Float32Array | null => {
+    const now = Date.now()
+    
+    // Return cached data if it's still fresh
+    if (this.cachedTextureData && (now - this.lastReadbackTime) < this.CACHE_DURATION) {
+      return this.cachedTextureData
+    }
+
+    // Read fresh data from GPU
+    if (!this.nodeTexture) return null
+    
+    const freshData = this.readTextureToCPU(this.nodeTexture)
+    if (freshData) {
+      this.cachedTextureData = freshData
+      this.lastReadbackTime = now
+    }
+    
+    return freshData
+  }
+
   // Function to get position of a specific node given trail and node ID
   getNodePosition = (trailId: number, nodeId: number) => {
     if (!this.nodeTexture) {
@@ -82,7 +106,7 @@ export class GPUSpawner {
       return null
     }
 
-    const textureData = this.readTextureToCPU(this.nodeTexture)
+    const textureData = this.getTextureData()
 
     if (!textureData) {
       return null
@@ -122,5 +146,32 @@ export class GPUSpawner {
   // Update the WebGL renderer (for when it changes)
   updateRenderer = (gl: THREE.WebGLRenderer) => {
     this.gl = gl
+  }
+
+  // Get all cached texture data (useful for batch operations)
+  getAllTextureData = (): Float32Array | null => {
+    return this.getTextureData()
+  }
+
+  // Get texture dimensions
+  getTextureDimensions = () => {
+    if (!this.nodeTexture) return null
+    return {
+      width: this.nodeTexture.image.width,
+      height: this.nodeTexture.image.height
+    }
+  }
+
+  // Force refresh of cached data
+  refreshTextureData = () => {
+    this.cachedTextureData = null
+    this.lastReadbackTime = 0
+    return this.getTextureData()
+  }
+
+  // Check if cached data is available and fresh
+  hasCachedData = (): boolean => {
+    const now = Date.now()
+    return !!(this.cachedTextureData && (now - this.lastReadbackTime) < this.CACHE_DURATION)
   }
 }

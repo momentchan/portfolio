@@ -15,6 +15,7 @@ import DirectionalLights from './DirectionalLights';
 import { TrailProvider } from './contexts/TrailContext';
 
 export default function Scene() {
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <LevaWraper initialHidden={true} />
@@ -40,7 +41,14 @@ export default function Scene() {
           <CustomTrail />
           <DirectionalLights />
           <Effects />
-          <VATMeshSpawner />
+          <VATMeshSpawner vatData={{
+            gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
+            posTexPath: "vat/Dahlia Clean_pos.exr",
+            nrmTexPath: "vat/Dahlia Clean_nrm.png",
+            mapTexPath: "textures/tujlip.png",
+            maskTexPath: "textures/blackanedwthioe.png",
+            metaPath: "vat/Dahlia Clean_meta.json"
+          }} />
         </Canvas>
       </TrailProvider>
     </div >
