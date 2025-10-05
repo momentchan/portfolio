@@ -10,7 +10,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
   // GSAP animated parameters - using state to trigger re-renders
   const [animatedParams, setAnimatedParams] = useState({
     speed: 0.6,
-    noiseScale: 30,
+    noiseScale: 15,
     timeScale: 0.1,
     noiseStrength: 10,
     attractStrength: -2,
@@ -84,7 +84,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
       speed: 0.2,
       noiseScale: 1,
       noiseStrength: 2,
-      attractStrength: 1,
+      attractStrength: 1.5,
       damping: 0.98,
       duration: 5,
       ease: "power2.inOut",

@@ -38,7 +38,7 @@ export function VATMeshSpawner() {
       return
     }
     console.log('Spawning VATMesh with ID:', meshCounter)
-    const newId = meshCounter
+    const newId = Date.now() + meshCounter // Use timestamp + counter for guaranteed uniqueness
     const position = generateSpherePosition(0.5) // Radius of 0.5
     const scale = MathUtils.randFloat(0.5, 1) * 5 // Random scale between 0.5 and 1.0
     
@@ -62,6 +62,17 @@ export function VATMeshSpawner() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isLoaded, meshCounter, spawnedMeshes.length])
+
+  // Auto-spawn test function - spawns VAT every 2 seconds
+  useEffect(() => {
+    if (!isLoaded) return
+
+    const interval = setInterval(() => {
+      spawnVATMesh()
+    }, 5000) // 2 seconds
+
+    return () => clearInterval(interval)
+  }, [isLoaded])
 
   return (
     <group>

@@ -11,41 +11,7 @@ import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
 import { CustomTrail } from './customTrail/CustomTrail';
 import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
-
-function DirectionalLight() {
-  const controls = useControls('Directional Light', {
-    intensity: { value: 1, min: 0, max: 10, step: 0.1 },
-  });
-  const directionalLightRef = useRef<THREE.DirectionalLight | null>(null);
-  const helperRef = useRef<THREE.DirectionalLightHelper | null>(null);
-
-  useFrame((state) => {
-    if (directionalLightRef.current) {
-      const time = state.clock.elapsedTime * 2;
-      const radius = 8; // Circle radius
-      const xPosition = Math.cos(time * 0.3) * radius; // Circular motion on X
-      const zPosition = Math.sin(time * 0.3) * radius; // Circular motion on Z
-      directionalLightRef.current.position.set(xPosition, 10, zPosition);
-    }
-    if (helperRef.current) {
-      helperRef.current.update();
-    }
-  });
-  return <>
-    <directionalLight
-      ref={directionalLightRef}
-      position={[0, 10, 0]}
-      intensity={controls.intensity} castShadow
-      shadow-mapSize-width={4096}
-      shadow-mapSize-height={4096}
-      shadow-camera-left={-10}
-      shadow-camera-right={10}
-      shadow-camera-top={10}
-      shadow-camera-bottom={-10}
-      shadow-bias={-0.001} />
-  </>;
-}
-
+import DirectionalLights from './DirectionalLights';
 
 export default function Scene() {
   return (
@@ -70,7 +36,7 @@ export default function Scene() {
         <CameraControls />
         <EnvironmentSetup />
         <CustomTrail />
-        <DirectionalLight />
+        <DirectionalLights />
         <Effects />
         <VATMeshSpawner />
       </Canvas>

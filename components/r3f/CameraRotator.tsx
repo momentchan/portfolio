@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
+import { gsap } from 'gsap';
 
 export default function CameraRotator() {
   const { camera } = useThree();
@@ -15,13 +16,22 @@ export default function CameraRotator() {
     enabled: true
   });
 
+  const rotateLerpRef = useRef({ value: 0 });
+
+  useEffect(() => {
+    const tl = gsap.timeline();
+    tl.to(rotateLerpRef.current, {
+      value: 1,
+      duration: 5,
+    });
+  }, []);
+
   useFrame((state, delta) => {
     if (!controls.enabled) return;
 
-    // Update time based on speed and delta time (Unity-style)
-    timeRef.current += delta * controls.speed;
+    const speed = controls.speed * rotateLerpRef.current.value;
+    timeRef.current += delta * speed;
     
-    // Calculate camera position using Unity CameraMotion pattern
     const x = controls.radius * Math.cos(timeRef.current);
     const y = controls.radius * Math.sin(timeRef.current * 0.5) + controls.height;
     const z = controls.radius * Math.sin(timeRef.current);
