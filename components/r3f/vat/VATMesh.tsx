@@ -4,10 +4,11 @@ import { useFrame, useThree } from '@react-three/fiber'
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { useControls } from 'leva'
 import { VATMeshProps, VATMaterialControls, DEFAULT_MATERIAL_CONTROLS } from './types'
-import { createVATMaterial, createVATDepthMaterial, updateVATMaterial } from './materials'
+import { createVATMaterial, createVATDepthMaterial, updatePhysicalProperties, updateAdvancedProperties } from './materials'
 import { ensureUV2ForVAT } from './utils'
 
-function useMaterialControls() {
+// Material properties controls (physical + advanced combined)
+function useMaterialPropertiesControls() {
   return useControls('VAT.Material', {
     roughness: { value: DEFAULT_MATERIAL_CONTROLS.roughness, min: 0, max: 1, step: 0.01 },
     metalness: { value: DEFAULT_MATERIAL_CONTROLS.metalness, min: 0, max: 1, step: 0.01 },
@@ -18,6 +19,7 @@ function useMaterialControls() {
     clearcoatRoughness: { value: DEFAULT_MATERIAL_CONTROLS.clearcoatRoughness, min: 0, max: 1, step: 0.01 },
     reflectivity: { value: DEFAULT_MATERIAL_CONTROLS.reflectivity, min: 0, max: 1, step: 0.01 },
     envMapIntensity: { value: DEFAULT_MATERIAL_CONTROLS.envMapIntensity, min: 0, max: 2, step: 0.1 },
+    bumpScale: { value: DEFAULT_MATERIAL_CONTROLS.bumpScale, min: 0, max: 1, step: 0.01 },
     sheen: { value: DEFAULT_MATERIAL_CONTROLS.sheen, min: 0, max: 1, step: 0.01 },
     sheenRoughness: { value: DEFAULT_MATERIAL_CONTROLS.sheenRoughness, min: 0, max: 1, step: 0.01 },
     sheenColor: DEFAULT_MATERIAL_CONTROLS.sheenColor,
@@ -27,11 +29,15 @@ function useMaterialControls() {
     iridescenceThicknessMax: { value: DEFAULT_MATERIAL_CONTROLS.iridescenceThicknessMax, min: 0, max: 1000, step: 10 },
     attenuationDistance: { value: DEFAULT_MATERIAL_CONTROLS.attenuationDistance, min: 0.01, max: 10, step: 0.01 },
     attenuationColor: DEFAULT_MATERIAL_CONTROLS.attenuationColor,
-    bumpScale: { value: DEFAULT_MATERIAL_CONTROLS.bumpScale, min: 0, max: 1, step: 0.01 },
+  }, { collapsed: true })
+}
+
+function useShaderControls() {
+  return useControls('VAT.Shader', {
     hueShift: { value: DEFAULT_MATERIAL_CONTROLS.hueShift, min: -1, max: 1, step: 0.01 },
     noiseScale: { value: DEFAULT_MATERIAL_CONTROLS.noiseScale, min: 0, max: 10, step: 0.1 },
     noiseStrength: { value: DEFAULT_MATERIAL_CONTROLS.noiseStrength, min: 0, max: 1, step: 0.01 },
-    speed : {value: DEFAULT_MATERIAL_CONTROLS.speed, min: 0, max: 1, step: 0.01 },
+    speed: { value: DEFAULT_MATERIAL_CONTROLS.speed, min: 0, max: 1, step: 0.01 },
   }, { collapsed: true })
 }
 
@@ -50,22 +56,32 @@ export function VATMesh({
   frame: externalFrame,
   ...rest
 }: VATMeshProps) {
-  const materialControls = useMaterialControls()
+  const materialPropertiesControls = useMaterialPropertiesControls()
+  const shaderControls = useShaderControls()
+
+  // Combined controls for backward compatibility
+  const materialControls = {
+    ...materialPropertiesControls,
+    ...shaderControls
+  }
 
   const groupRef = useRef<THREE.Group>(null!)
   const materialsRef = useRef<CustomShaderMaterial[]>([])
   const startTimeRef = useRef<number>(0)
   const { scene } = useThree()
-  
-  const [seed] = useState(() => THREE.MathUtils.randFloat(0, 1000))
+
+  const seedRef = useRef(THREE.MathUtils.randFloat(0, 1000))
+  const spawnTimeRef = useRef(performance.now() / 1000) // Global spawn time
+  const hueCycle = 120
 
   // Create materials and clone scene for this instance
   useEffect(() => {
+
     materialsRef.current.length = 0
 
     // Clone the scene for this instance to avoid sharing geometry between instances
     const clonedScene = gltf.clone()
-    
+
     clonedScene.traverse((object: any) => {
       if (object.isMesh) {
         const mesh = object as THREE.Mesh
@@ -74,16 +90,12 @@ export function VATMesh({
 
         // Create unique materials for this instance
         const vatMaterial = createVATMaterial(posTex, nrmTex, mapTex, maskTex, scene.environment, metaData, materialControls)
-        vatMaterial.uniforms.uSeed.value = seed
-        vatMaterial.uniforms.uHueShift.value = DEFAULT_MATERIAL_CONTROLS.hueShift
         mesh.material = vatMaterial
         materialsRef.current.push(vatMaterial)
 
         // Optionally add custom depth material
         if (useDepthMaterial) {
           const vatDepthMaterial = createVATDepthMaterial(posTex, nrmTex, metaData)
-          vatDepthMaterial.uniforms.uSeed.value = seed
-          vatDepthMaterial.uniforms.uHueShift.value = DEFAULT_MATERIAL_CONTROLS.hueShift
           mesh.customDepthMaterial = vatDepthMaterial
           materialsRef.current.push(vatDepthMaterial)
         }
@@ -101,14 +113,14 @@ export function VATMesh({
     }
 
     startTimeRef.current = performance.now() / 1000
-  }, [gltf, posTex, nrmTex, metaData, useDepthMaterial, seed])
+  }, [gltf, posTex, nrmTex, metaData, useDepthMaterial])
 
-  // Update material properties
   useEffect(() => {
     for (const material of materialsRef.current) {
-      updateVATMaterial(material, materialControls)
+      updatePhysicalProperties(material, materialPropertiesControls)
+      updateAdvancedProperties(material, materialPropertiesControls)
     }
-  }, [materialControls])
+  }, [materialPropertiesControls])
 
   // Update depth material properties (frame animation)
   useEffect(() => {
@@ -125,10 +137,10 @@ export function VATMesh({
     if (paused) return
 
     const currentTime = state.clock.elapsedTime
-    
+
     // Use external frame if provided, otherwise use normal animation
     let frame: number
-    
+
     if (externalFrame !== undefined) {
       // External frame control
       frame = Math.min(externalFrame * metaData.frameCount, metaData.frameCount - 5)
@@ -136,7 +148,7 @@ export function VATMesh({
       // Normal VAT animation
       frame = currentTime * (metaData.fps * speed) % metaData.frameCount
     }
-    
+
     // Update materials
     for (const material of materialsRef.current) {
       if (material.uniforms?.uFrame) {
@@ -145,10 +157,16 @@ export function VATMesh({
       if (material.uniforms?.uTime) {
         material.uniforms.uTime.value = currentTime * materialControls.speed
       }
+
+       // Update shader uniforms in real-time
+       material.uniforms.uSeed.value = seedRef.current
+       material.uniforms.uNoiseScale.value = shaderControls.noiseScale
+       material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
+       material.uniforms.uHueShift.value = shaderControls.hueShift + (spawnTimeRef.current / hueCycle) % 1
     }
   })
 
   return (
-    <group ref={groupRef} {...rest}/>
+    <group ref={groupRef} {...rest} />
   )
 }

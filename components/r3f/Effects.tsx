@@ -1,6 +1,6 @@
 'use client';
 
-import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, DepthOfField, FXAA } from '@react-three/postprocessing';
 import { useControls } from 'leva';
 
 export default function Effects() {

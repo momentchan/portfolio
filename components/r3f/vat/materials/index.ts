@@ -23,15 +23,36 @@ export function createVATMaterial(
     uTexW: { value: meta.texWidth },
     uStoreDelta: { value: meta.storeDelta ? 1 : 0 },
     uNormalsCompressed: { value: meta.normalsCompressed ? 1 : 0 },
-    uHueShift: { value: 0.0 },
     uTime: { value: 0.0 },
-    uNoiseScale: { value: 0.1 },
-    uNoiseStrength: { value: 0.1 },
     uSeed: { value: 0.0 },
+    // Shader uniforms from material controls
+    uHueShift: { value: materialProps.hueShift },
+    uNoiseScale: { value: materialProps.noiseScale },
+    uNoiseStrength: { value: materialProps.noiseStrength },
+    uSpeed: { value: materialProps.speed },
   }
 
-  // Filter out custom properties that aren't valid Three.js material properties
-  const { hueShift, iridescenceThicknessMin, iridescenceThicknessMax, noiseScale, noiseStrength, speed, ...validMaterialProps } = materialProps
+  // Only pass valid Three.js material properties
+  const threeJsMaterialProps = {
+    roughness: materialProps.roughness,
+    metalness: materialProps.metalness,
+    transmission: materialProps.transmission,
+    thickness: materialProps.thickness,
+    ior: materialProps.ior,
+    clearcoat: materialProps.clearcoat,
+    clearcoatRoughness: materialProps.clearcoatRoughness,
+    reflectivity: materialProps.reflectivity,
+    envMapIntensity: materialProps.envMapIntensity,
+    sheen: materialProps.sheen,
+    sheenRoughness: materialProps.sheenRoughness,
+    sheenColor: new THREE.Color(materialProps.sheenColor),
+    iridescence: materialProps.iridescence,
+    iridescenceIOR: materialProps.iridescenceIOR,
+    iridescenceThicknessRange: [materialProps.iridescenceThicknessMin, materialProps.iridescenceThicknessMax] as [number, number],
+    attenuationDistance: materialProps.attenuationDistance,
+    attenuationColor: new THREE.Color(materialProps.attenuationColor),
+    bumpScale: materialProps.bumpScale,
+  }
 
   return new CustomShaderMaterial({
     baseMaterial: THREE.MeshPhysicalMaterial,
@@ -41,7 +62,7 @@ export function createVATMaterial(
     envMap: envMap,
     bumpMap: mapTex,
     side: THREE.DoubleSide,
-    ...validMaterialProps,
+    ...threeJsMaterialProps,
   })
 }
 
@@ -74,41 +95,75 @@ export function createVATDepthMaterial(
   })
 }
 
-// Update material properties
+// Update shader uniforms
+export function updateShaderUniforms(
+  material: CustomShaderMaterial,
+  shaderControls: Pick<VATMaterialControls, 'hueShift' | 'noiseScale' | 'noiseStrength'>
+): void {
+  material.uniforms.uHueShift.value = shaderControls.hueShift
+  material.uniforms.uNoiseScale.value = shaderControls.noiseScale
+  material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
+}
+
+// Update physical material properties
+export function updatePhysicalProperties(
+  material: CustomShaderMaterial,
+  physicalControls: Pick<VATMaterialControls, 
+    'roughness' | 'metalness' | 'transmission' | 'thickness' | 'ior' | 
+    'clearcoat' | 'clearcoatRoughness' | 'reflectivity' | 'envMapIntensity' | 'bumpScale'
+  >
+): void {
+  // Only update physical material properties, skip depth materials
+  if (material.uniforms?.uNrmTex) {
+    Object.assign(material, {
+      roughness: physicalControls.roughness,
+      metalness: physicalControls.metalness,
+      transmission: physicalControls.transmission,
+      thickness: physicalControls.thickness,
+      ior: physicalControls.ior,
+      clearcoat: physicalControls.clearcoat,
+      clearcoatRoughness: physicalControls.clearcoatRoughness,
+      reflectivity: physicalControls.reflectivity,
+      envMapIntensity: physicalControls.envMapIntensity,
+      bumpScale: physicalControls.bumpScale,
+    })
+    material.needsUpdate = true
+  }
+}
+
+// Update advanced material properties
+export function updateAdvancedProperties(
+  material: CustomShaderMaterial,
+  advancedControls: Pick<VATMaterialControls,
+    'sheen' | 'sheenRoughness' | 'sheenColor' | 'iridescence' | 'iridescenceIOR' |
+    'iridescenceThicknessMin' | 'iridescenceThicknessMax' | 'attenuationDistance' | 'attenuationColor'
+  >
+): void {
+  // Only update physical material properties, skip depth materials
+  if (material.uniforms?.uNrmTex) {
+    Object.assign(material, {
+      sheen: advancedControls.sheen,
+      sheenRoughness: advancedControls.sheenRoughness,
+      sheenColor: new THREE.Color(advancedControls.sheenColor),
+      iridescence: advancedControls.iridescence,
+      iridescenceIOR: advancedControls.iridescenceIOR,
+      iridescenceThicknessRange: [
+        advancedControls.iridescenceThicknessMin,
+        advancedControls.iridescenceThicknessMax
+      ] as [number, number],
+      attenuationDistance: advancedControls.attenuationDistance,
+      attenuationColor: new THREE.Color(advancedControls.attenuationColor),
+    })
+    material.needsUpdate = true
+  }
+}
+
+// Update material properties (legacy function for backward compatibility)
 export function updateVATMaterial(
   material: CustomShaderMaterial,
   materialControls: VATMaterialControls
 ): void {
-  material.uniforms.uHueShift.value = materialControls.hueShift
-  material.uniforms.uNoiseScale.value = materialControls.noiseScale
-  material.uniforms.uNoiseStrength.value = materialControls.noiseStrength
-
-  // Only update physical material properties, skip depth materials
-  if (material.uniforms?.uNrmTex) {
-    Object.assign(material, {
-      roughness: materialControls.roughness,
-      metalness: materialControls.metalness,
-      transmission: materialControls.transmission,
-      thickness: materialControls.thickness,
-      ior: materialControls.ior,
-      clearcoat: materialControls.clearcoat,
-      clearcoatRoughness: materialControls.clearcoatRoughness,
-      reflectivity: materialControls.reflectivity,
-      envMapIntensity: materialControls.envMapIntensity,
-      sheen: materialControls.sheen,
-      sheenRoughness: materialControls.sheenRoughness,
-      sheenColor: new THREE.Color(materialControls.sheenColor),
-      iridescence: materialControls.iridescence,
-      iridescenceIOR: materialControls.iridescenceIOR,
-      iridescenceThicknessRange: [
-        materialControls.iridescenceThicknessMin,
-        materialControls.iridescenceThicknessMax
-      ],
-      attenuationDistance: materialControls.attenuationDistance,
-      attenuationColor: new THREE.Color(materialControls.attenuationColor),
-      bumpScale: materialControls.bumpScale,
-    })
-
-    material.needsUpdate = true
-  }
+  updateShaderUniforms(material, materialControls)
+  updatePhysicalProperties(material, materialControls)
+  updateAdvancedProperties(material, materialControls)
 }

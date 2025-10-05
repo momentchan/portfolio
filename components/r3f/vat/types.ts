@@ -120,6 +120,6 @@ export const DEFAULT_MATERIAL_CONTROLS: VATMaterialControls = {
   bumpScale: 1.0,
   hueShift: 0.45,
   noiseScale: 1,
-  noiseStrength: 0.1,
+  noiseStrength: 0.3,
   speed: 0.3,
 }
