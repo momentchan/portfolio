@@ -25,6 +25,7 @@ export function createVATMaterial(
     uNormalsCompressed: { value: meta.normalsCompressed ? 1 : 0 },
     uTime: { value: 0.0 },
     uSeed: { value: 0.0 },
+    uTriggerRate: { value: 0.0 },
     // Shader uniforms from material controls
     uHueShift: { value: materialProps.hueShift },
     uNoiseScale: { value: materialProps.noiseScale },
@@ -76,6 +77,7 @@ export function createVATDepthMaterial(
     uPosTex: { value: posTex },
     uNrmTex: { value: nrmTex },
     uFrame: { value: 0.0 },
+    uTime: { value: 0.0 },
     uFrames: { value: meta.frameCount },
     uTexW: { value: meta.texWidth },
     uStoreDelta: { value: meta.storeDelta ? 1 : 0 },
@@ -83,6 +85,7 @@ export function createVATDepthMaterial(
     uHueShift: { value: 0.0 },
     uNoiseScale: { value: 0.1 },
     uNoiseStrength: { value: 0.1 },
+    uTriggerRate: { value: 0.0 },
     uSeed: { value: 0.0 },
   }
 

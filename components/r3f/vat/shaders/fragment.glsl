@@ -3,6 +3,7 @@ uniform sampler2D uMaskTex;
 uniform float uHueShift;
 uniform float uTime;
 uniform float uSeed;
+uniform float uTriggerRate;
 
 varying vec2 vUv;
 varying vec2 vUv2;
@@ -16,6 +17,7 @@ void main() {
   }
 
   float shift = uHueShift + fract(uSeed) * 0.2;
+  shift += uTriggerRate;
   color.rgb = HSVShift(color.rgb, vec3(shift, 0.0, 0.0));
   
   csm_DiffuseColor = color;
@@ -28,5 +30,5 @@ void main() {
   float distance3 = abs(l - (animatedPos - 1.0));
   float distance = min(min(distance1, distance2), distance3);
   float gradient = smoothstep(0.2, 0.0, distance);
-  csm_Emissive = gradient * color.rgb * 0.5;
+  csm_Emissive = gradient * color.rgb * (0.5 + uTriggerRate * 0.5);
 }

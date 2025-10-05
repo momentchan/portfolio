@@ -10,6 +10,7 @@ uniform int uStoreDelta;
 uniform int uNormalsCompressed;
 uniform float uNoiseScale;
 uniform float uNoiseStrength;
+
 uniform float uSeed;
 varying vec2 vUv;
 varying vec2 vUv2;

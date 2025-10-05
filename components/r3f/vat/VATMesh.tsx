@@ -6,6 +6,8 @@ import { useControls } from 'leva'
 import { VATMeshProps, VATMaterialControls, DEFAULT_MATERIAL_CONTROLS } from './types'
 import { createVATMaterial, createVATDepthMaterial, updatePhysicalProperties, updateAdvancedProperties } from './materials'
 import { ensureUV2ForVAT } from './utils'
+import { InteractiveTrigger } from './InteractiveTrigger'
+import { gsap } from 'gsap'
 
 // Material properties controls (physical + advanced combined)
 function useMaterialPropertiesControls() {
@@ -54,6 +56,9 @@ export function VATMesh({
   paused = false,
   useDepthMaterial = true,
   frame: externalFrame,
+  interactive = false,
+  triggerSize = 1,
+  id,
   ...rest
 }: VATMeshProps) {
   const materialPropertiesControls = useMaterialPropertiesControls()
@@ -73,6 +78,32 @@ export function VATMesh({
   const seedRef = useRef(THREE.MathUtils.randFloat(0, 1000))
   const spawnTimeRef = useRef(performance.now() / 1000) // Global spawn time
   const hueCycle = 120
+
+  const triggerRate = useRef({ value: 0 })
+  const timeRef = useRef({ value: 0 })
+  const [hovering, setHovering] = useState(false)
+
+  // Custom trigger handler for VATMesh-specific behavior
+  const handleVATMeshTrigger = (triggerType: 'click' | 'hover' | 'collision', data?: any) => {
+    switch (triggerType) {
+      case 'click':
+        // console.log(`VATMesh ${id} was clicked!`)
+        break
+
+      case 'hover':
+        if (data?.data?.isHovered) {
+          // console.log(`VATMesh ${id} hover entered`)
+          setHovering(true)
+        } else {
+          // console.log(`VATMesh ${id} hover exited`)
+          setHovering(false)
+        }
+        break
+
+      case 'collision':
+        break
+    }
+  }
 
   // Create materials and clone scene for this instance
   useEffect(() => {
@@ -106,9 +137,19 @@ export function VATMesh({
       }
     })
 
-    // Store the cloned scene reference
     if (groupRef.current) {
-      groupRef.current.clear()
+      // Clear only VAT objects, keep interactive elements
+      const vatObjects = groupRef.current.children.filter(child =>
+        child.userData.isVAT !== false // Keep non-VAT objects
+      )
+      vatObjects.forEach(child => groupRef.current!.remove(child))
+
+      // Mark the cloned scene as VAT
+      clonedScene.userData.isVAT = true
+      clonedScene.traverse((child) => {
+        child.userData.isVAT = true
+      })
+
       groupRef.current.add(clonedScene)
     }
 
@@ -133,7 +174,7 @@ export function VATMesh({
   }, [useDepthMaterial])
 
   // Animation frame update
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (paused) return
 
     const currentTime = state.clock.elapsedTime
@@ -149,24 +190,44 @@ export function VATMesh({
       frame = currentTime * (metaData.fps * speed) % metaData.frameCount
     }
 
+    // interactive
+    triggerRate.current.value += hovering ? delta * 2.0 : 0
+    triggerRate.current.value -= delta;
+    triggerRate.current.value = Math.max(0, Math.min(triggerRate.current.value, 1))
+
+    timeRef.current.value += delta * materialControls.speed * (1 + triggerRate.current.value * 1)
+
     // Update materials
     for (const material of materialsRef.current) {
-      if (material.uniforms?.uFrame) {
-        material.uniforms.uFrame.value = frame
-      }
-      if (material.uniforms?.uTime) {
-        material.uniforms.uTime.value = currentTime * materialControls.speed
-      }
+      material.uniforms.uFrame.value = frame
+      material.uniforms.uTime.value = timeRef.current.value
 
-       // Update shader uniforms in real-time
-       material.uniforms.uSeed.value = seedRef.current
-       material.uniforms.uNoiseScale.value = shaderControls.noiseScale
-       material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
-       material.uniforms.uHueShift.value = shaderControls.hueShift + (spawnTimeRef.current / hueCycle) % 1
+      // Update shader uniforms in real-time
+      material.uniforms.uSeed.value = seedRef.current
+      material.uniforms.uNoiseScale.value = shaderControls.noiseScale
+      material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
+      material.uniforms.uHueShift.value = shaderControls.hueShift + (spawnTimeRef.current / hueCycle) % 1
+      material.uniforms.uTriggerRate.value = triggerRate.current.value
     }
+
   })
 
   return (
-    <group ref={groupRef} {...rest} />
+    <>
+      <group ref={groupRef} {...rest}>
+        {interactive && (
+          <InteractiveTrigger
+            size={triggerSize}
+            position={[0, 0, 0]}
+            onTrigger={handleVATMeshTrigger}
+            id={id}
+            visible={true}
+            color="#ffffff"
+            opacity={0.2}
+            wireframe={true}
+          />
+        )}
+      </group>
+    </>
   )
 }

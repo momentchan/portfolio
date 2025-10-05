@@ -163,10 +163,12 @@ export function VATMeshLifecycle({
         position={[0, 0, 0]} // Reset position since it's now on the group
         rotation={[0, rotationRef.current.value, 0]}
         scale={[scaleRef.current.value, scaleRef.current.value, scaleRef.current.value]}
-        />
+        interactive={true}
+        triggerSize={0.05}
+      />
 
-        {/* Debug axes */}
-        <DebugAxes visible={false} size={1} />
+      {/* Debug axes */}
+      <DebugAxes visible={false} size={1} />
     </group>
   )
 }

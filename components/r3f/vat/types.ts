@@ -69,6 +69,11 @@ export interface VATMeshProps {
   scale?: number | [number, number, number]
   // External frame control
   frame?: number
+  // Interactive trigger props
+  interactive?: boolean
+  onTrigger?: (triggerType: 'click' | 'hover' | 'collision', data?: any) => void
+  triggerSize?: number
+  id?: string | number
 }
 
 // VATMeshLifecycle props interface
