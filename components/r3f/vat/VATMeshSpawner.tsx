@@ -6,9 +6,6 @@ import { SpawnedMeshData } from './types'
 import { generateSpherePosition } from './utils'
 import { MathUtils } from 'three'
 import * as THREE from 'three'
-import { useThree } from '@react-three/fiber'
-import { GPUSpawner } from './gpuSpawn'
-import { useTrailContext } from '../contexts/TrailContext'
 
 export interface VATData {
   gltfPath: string
@@ -25,11 +22,8 @@ interface VATMeshSpawnerProps {
 
 // VATMesh spawner with lifecycle animation
 export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
-  const { gl } = useThree()
-  const { nodeTexture } = useTrailContext()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
-  const gpuSpawnerRef = useRef<GPUSpawner | null>(null)
 
   // Default VAT data
   const defaultVATData: VATData = {
@@ -56,17 +50,6 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
 
   // Pre-warm GPU by creating a hidden VATMesh when resources are loaded
   const [preWarmed, setPreWarmed] = useState(false)
-
-  // Initialize GPU spawner when nodeTexture and gl are available
-  useEffect(() => {
-    if (nodeTexture && gl && !gpuSpawnerRef.current) {
-      gpuSpawnerRef.current = new GPUSpawner(gl, nodeTexture)
-    } else if (gpuSpawnerRef.current && nodeTexture) {
-      gpuSpawnerRef.current.updateNodeTexture(nodeTexture)
-    } else if (gpuSpawnerRef.current && gl) {
-      gpuSpawnerRef.current.updateRenderer(gl)
-    }
-  }, [nodeTexture, gl])
 
   useEffect(() => {
     if (isLoaded && !preWarmed) {
@@ -100,32 +83,11 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
     setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
   }
 
-  const nodeIndex = useRef(0)
-
-  // Keyboard event handler for F key spawning and N key for node position testing
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'KeyF') {
         event.preventDefault()
         spawnVATMesh()
-      }
-      if (event.code === 'KeyG') {
-        event.preventDefault()
-        if (gpuSpawnerRef.current) {
-          // Get spawn data for target node (trail 0, nodeIndex) - async for better performance
-          gpuSpawnerRef.current.getSpawnDataAsync(0, nodeIndex.current).then((spawnData) => {
-            if (spawnData) {
-              spawnVATMeshAt(spawnData.position)
-              nodeIndex.current = (nodeIndex.current + 10) % nodeTexture!.image.width
-            } else {
-              console.log('Failed to get target position')
-            }
-          }).catch((error) => {
-            console.error('Error getting spawn data:', error)
-          })
-        } else {
-          console.log('GPU spawner not available')
-        }
       }
     }
 
