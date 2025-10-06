@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import CustomBehavior from "./customBehavior";
 import gsap from "gsap";
 import { useControls } from "leva";
+import photoshopMath from '@/lib/r3f-gist/shader/cginc/photoshopMath.glsl?raw'
 
 // Custom position config for random positions inside a sphere
 class RandomSpherePositionConfig extends ParticlePositionConfig {
@@ -44,8 +45,9 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
             sizeMultiplier: { value: 1.0 },
             minSize: { value: 1.0 },
             opacity: { value: 0.8 },
-            glowColor: { value: new THREE.Color('#00ff88') },
+            glowColor: { value: new THREE.Color('#ffffff') },
             glowIntensity: { value: 0.5 },
+            hueShift: { value: 0.0 },
         },
         vertexShader: /*glsl*/ `
             uniform sampler2D positionTex;
@@ -73,12 +75,15 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
             }
         `,
         fragmentShader: /*glsl*/ `
+            ${photoshopMath}
             uniform float opacity;
             uniform float time;
             uniform float glowIntensity;
             varying vec3 vColor;
             varying float vSize;
-            
+            uniform vec3 glowColor;
+            uniform float hueShift;
+
             void main() {
                 // Create circular particles with anti-flickering
                 vec2 center = gl_PointCoord - vec2(0.5);
@@ -93,7 +98,8 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
                 sizeFade = pow(sizeFade, 0.8);
                 // fade *= sizeFade;
                 
-                vec3 color = vColor * glowIntensity;
+                vec3 color = vColor * glowIntensity * glowColor;
+                color = HSVShift(color, vec3(hueShift, 0.0, 0.0));
                 
                 gl_FragColor = vec4(color, opacity * fade);
             }
@@ -106,6 +112,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
 
 export default function CustomParticle() {
     const controls = useControls('Particle', {
+        glowColor: { value: '#ffd3d3' },
         glowIntensity: { value: 0.4, min: 0, max: 10, step: 0.01 },
         sizeMultiplier: { value: 0.4, min: 0, max: 2, step: 0.01 },
         minSize: { value: 2.0, min: 1.0, max: 5.0, step: 0.1 },
@@ -119,6 +126,8 @@ export default function CustomParticle() {
         color: new UniformColorConfig([1, 1, 1]),
         size: new RandomSizeConfig([0.01, 0.02])
     }), []);
+
+    const hueCycle = 120;
 
     const behavior = useMemo(() => new CustomBehavior(), []);
 
@@ -152,6 +161,8 @@ export default function CustomParticle() {
         if (particleSystemRef.current) {
             const time = state.clock.elapsedTime;
 
+            
+
             // Get the position texture and update custom material
             const positionTex = particleSystemRef.current.getParticleTexture?.();
             if (positionTex && customMaterial.uniforms.positionTex.value !== positionTex) {
@@ -163,6 +174,8 @@ export default function CustomParticle() {
             customMaterial.uniforms.glowIntensity.value = controls.glowIntensity;
             customMaterial.uniforms.sizeMultiplier.value = controls.sizeMultiplier;
             customMaterial.uniforms.minSize.value = controls.minSize;
+            customMaterial.uniforms.glowColor.value = new THREE.Color(controls.glowColor);
+            customMaterial.uniforms.hueShift.value = (performance.now() / 1000 / hueCycle) % 1;
         }
     });
 

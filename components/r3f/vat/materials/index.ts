@@ -27,7 +27,7 @@ export function createVATMaterial(
     uSeed: { value: 0.0 },
     uTriggerRate: { value: 0.0 },
     // Shader uniforms from material controls
-    uHueShift: { value: materialProps.hueShift },
+    uHueShift: { value: 0.0 },
     uNoiseScale: { value: materialProps.noiseScale },
     uNoiseStrength: { value: materialProps.noiseStrength },
     uSpeed: { value: materialProps.speed },
@@ -101,9 +101,9 @@ export function createVATDepthMaterial(
 // Update shader uniforms
 export function updateShaderUniforms(
   material: CustomShaderMaterial,
-  shaderControls: Pick<VATMaterialControls, 'hueShift' | 'noiseScale' | 'noiseStrength'>
+  shaderControls: Pick<VATMaterialControls, 'noiseScale' | 'noiseStrength'>
 ): void {
-  material.uniforms.uHueShift.value = shaderControls.hueShift
+  material.uniforms.uHueShift.value = 0.0
   material.uniforms.uNoiseScale.value = shaderControls.noiseScale
   material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
 }

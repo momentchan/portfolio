@@ -36,7 +36,6 @@ function useMaterialPropertiesControls() {
 
 function useShaderControls() {
   return useControls('VAT.Shader', {
-    hueShift: { value: DEFAULT_MATERIAL_CONTROLS.hueShift, min: -1, max: 1, step: 0.01 },
     noiseScale: { value: DEFAULT_MATERIAL_CONTROLS.noiseScale, min: 0, max: 10, step: 0.1 },
     noiseStrength: { value: DEFAULT_MATERIAL_CONTROLS.noiseStrength, min: 0, max: 1, step: 0.01 },
     speed: { value: DEFAULT_MATERIAL_CONTROLS.speed, min: 0, max: 1, step: 0.01 },
@@ -206,7 +205,7 @@ export function VATMesh({
       material.uniforms.uSeed.value = seedRef.current
       material.uniforms.uNoiseScale.value = shaderControls.noiseScale
       material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
-      material.uniforms.uHueShift.value = shaderControls.hueShift + (spawnTimeRef.current / hueCycle) % 1
+      material.uniforms.uHueShift.value = (spawnTimeRef.current / hueCycle) % 1
       material.uniforms.uTriggerRate.value = triggerRate.current.value
     }
 

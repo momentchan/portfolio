@@ -112,14 +112,17 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
       if (event.code === 'KeyG') {
         event.preventDefault()
         if (gpuSpawnerRef.current) {
-          // Get spawn data for target node (trail 0, nodeIndex)
-          const spawnData = gpuSpawnerRef.current.getSpawnData(0, nodeIndex.current)
-          if (spawnData) {
-            spawnVATMeshAt(spawnData.position)
-            nodeIndex.current = (nodeIndex.current + 10) % nodeTexture!.image.width
-          } else {
-            console.log('Failed to get target position')
-          }
+          // Get spawn data for target node (trail 0, nodeIndex) - async for better performance
+          gpuSpawnerRef.current.getSpawnDataAsync(0, nodeIndex.current).then((spawnData) => {
+            if (spawnData) {
+              spawnVATMeshAt(spawnData.position)
+              nodeIndex.current = (nodeIndex.current + 10) % nodeTexture!.image.width
+            } else {
+              console.log('Failed to get target position')
+            }
+          }).catch((error) => {
+            console.error('Error getting spawn data:', error)
+          })
         } else {
           console.log('GPU spawner not available')
         }

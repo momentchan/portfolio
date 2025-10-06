@@ -45,7 +45,6 @@ export interface VATMaterialControls {
   attenuationDistance: number
   attenuationColor: string
   bumpScale: number
-  hueShift: number
   noiseScale: number
   noiseStrength: number
   speed: number
@@ -123,7 +122,6 @@ export const DEFAULT_MATERIAL_CONTROLS: VATMaterialControls = {
   attenuationDistance: Infinity,
   attenuationColor: '#ffffff',
   bumpScale: 1.0,
-  hueShift: 0.45,
   noiseScale: 1,
   noiseStrength: 0.3,
   speed: 0.3,
