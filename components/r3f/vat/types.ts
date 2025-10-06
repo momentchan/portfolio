@@ -99,6 +99,8 @@ export interface SpawnedMeshData {
   id: number
   position: [number, number, number]
   scale: number
+  holdDuration: number
+  animDuration: number
 }
 
 // Default material controls

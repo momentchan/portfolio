@@ -2,6 +2,7 @@
 export { VATMesh } from './VATMesh'
 export { VATMeshLifecycle } from './VATMeshLifecycle'
 export { VATMeshSpawner } from './VATMeshSpawner'
+export { AutoSpawner } from './AutoSpawner'
 export { useVATPreloader } from './VATPreloader'
 
 // Type exports

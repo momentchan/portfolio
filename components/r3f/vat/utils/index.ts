@@ -62,11 +62,11 @@ export function calculateCameraFacingRotation(
 // Apply random rotation offsets
 export function applyRandomRotationOffsets(
   baseQuaternion: THREE.Quaternion,
-  maxXRotation: number = 45,
-  maxZRotation: number = 45
+  xRotationRange: [number, number] = [-45, 45],
+  zRotationRange: [number, number] = [-45, 45]
 ): THREE.Quaternion {
-  const randomX = Math.random() * maxXRotation * (Math.random() > 0.5 ? 1 : -1)
-  const randomZ = Math.random() * maxZRotation * (Math.random() > 0.5 ? 1 : -1)
+  const randomX = Math.random() * (xRotationRange[1] - xRotationRange[0]) + xRotationRange[0]
+  const randomZ = Math.random() * (zRotationRange[1] - zRotationRange[0]) + zRotationRange[0]
   
   const xRotationQuaternion = new THREE.Quaternion().setFromAxisAngle(
     new THREE.Vector3(1, 0, 0), 

@@ -4,6 +4,7 @@ import { VATMesh } from './VATMesh'
 import { useVATPreloader } from './VATPreloader'
 import { SpawnedMeshData } from './types'
 import { generateSpherePosition } from './utils'
+import { AutoSpawner } from './AutoSpawner'
 import { MathUtils } from 'three'
 import * as THREE from 'three'
 
@@ -70,18 +71,48 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
     const scale = MathUtils.randFloat(0.5, 1) * 5 // Random scale between 0.5 and 1.0
 
     const positionArray: [number, number, number] = [position.x, position.y, position.z]
-    setSpawnedMeshes(prev => [...prev, { id: newId, position: positionArray, scale }])
+    const holdDuration = MathUtils.randFloat(3, 7)
+    const animDuration = MathUtils.randFloat(2, 4)
+    setSpawnedMeshes(prev => [...prev, { id: newId, position: positionArray, scale, holdDuration, animDuration }])
     setMeshCounter(prev => prev + 1)
   }
 
+  // Check if position is too close to existing VAT meshes
+  const isPositionValid = (position: THREE.Vector3, minDistance: number = 0.1): boolean => {
+    return !spawnedMeshes.some(mesh => {
+      const meshPos = new THREE.Vector3(mesh.position[0], mesh.position[1], mesh.position[2])
+      const distance = position.distanceTo(meshPos)
+      return distance < minDistance
+    })
+  }
+
+  // Generate a valid position that doesn't collide with existing meshes
+  const generateValidPosition = (maxAttempts: number = 50): THREE.Vector3 | null => {
+    for (let i = 0; i < maxAttempts; i++) {
+      const position = generateSpherePosition(0.5) // Radius of 0.5
+      const vectorPosition = new THREE.Vector3(position[0], position[1], position[2])
+      
+      if (isPositionValid(vectorPosition)) {
+        return vectorPosition
+      }
+    }
+    return null // Couldn't find a valid position after max attempts
+  }
+
   const spawnVATMesh = () => {
-    const position = generateSpherePosition(0.5) // Radius of 0.5
-    spawnVATMeshAt(new THREE.Vector3(position[0], position[1], position[2]))
+    const validPosition = generateValidPosition()
+    if (validPosition) {
+      spawnVATMeshAt(validPosition)
+    } else {
+      console.warn('Could not find a valid spawn position - too many VAT meshes nearby')
+    }
   }
 
   const removeVATMesh = (id: number) => {
     setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
   }
+
+  // Auto-spawn state
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -95,19 +126,15 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isLoaded, meshCounter, spawnedMeshes.length])
 
-  // Auto-spawn test function - spawns VAT every 2 seconds
-  useEffect(() => {
-    if (!isLoaded) return
-
-    const interval = setInterval(() => {
-      spawnVATMesh()
-    }, 5000) // 2 seconds
-
-    return () => clearInterval(interval)
-  }, [isLoaded])
-
   return (
     <group>
+      {/* Auto-spawner component */}
+      <AutoSpawner
+        isActive={isLoaded}
+        onSpawn={spawnVATMesh}
+        minInterval={2000}
+        maxInterval={5000}
+      />
 
       {/* Pre-warm GPU with hidden VATMesh */}
       {isLoaded && preWarmed && (
@@ -138,15 +165,15 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
           // Lifecycle animation props
           maxScale={mesh.scale}
           // Frame timing
-          frameForwardDuration={3}  // 3 seconds to play forward
-          frameHoldDuration={5.0}   // 5 seconds to hold at frame 1
-          frameBackwardDuration={3} // 3 seconds to play backward
+          frameForwardDuration={mesh.animDuration}  // 3 seconds to play forward
+          frameHoldDuration={mesh.holdDuration}   // Random 3-7 seconds to hold at frame 1
+          frameBackwardDuration={mesh.animDuration} // 3 seconds to play backward
           // Scaling timing
-          scaleInDuration={1}       // 1 second to scale in (starts with frame start)
-          scaleOutDuration={1}      // 1 second to scale out (ends with frame complete)
+          scaleInDuration={mesh.animDuration * 0.33}       // 1 second to scale in (starts with frame start)
+          scaleOutDuration={mesh.animDuration * 0.33}      // 1 second to scale out (ends with frame complete)
           // Rotation timing
-          rotateInDuration={2}    // 2 seconds to rotate in (starts with frame start)
-          rotateOutDuration={2}   // 2 seconds to rotate out (ends with frame complete)
+          rotateInDuration={mesh.animDuration * 0.67}    // 2 seconds to rotate in (starts with frame start)
+          rotateOutDuration={mesh.animDuration * 0.67}   // 2 seconds to rotate out (ends with frame complete)
           onComplete={() => removeVATMesh(mesh.id)}
         />
       ))}
