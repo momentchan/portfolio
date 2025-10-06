@@ -96,7 +96,6 @@ export function InteractiveTrigger({
                 color={getVisualColor()}
                 wireframe={wireframe}
                 transparent
-                // opacity={ getVisualOpacity()}
                 opacity={0}
             />
         </mesh>

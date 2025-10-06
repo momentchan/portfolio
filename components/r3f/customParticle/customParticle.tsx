@@ -50,6 +50,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             glowIntensity: { value: 0.5 },
             hueShift: { value: 0.0 },
             uPointer: { value: new THREE.Vector2(-1000, -1000) },
+            uAspect: { value: 1 },
             uModelViewProjectionMatrix: { value: new THREE.Matrix4() },
             uAvoidanceRadius: { value: 0.0 },
             uSpeedMultiplier: { value: 0.0 },
@@ -60,23 +61,11 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             uniform float time;
             uniform float sizeMultiplier;
             uniform float minSize;
-            uniform float uAvoidanceRadius;
-            uniform float uSpeedMultiplier;
-            uniform vec2 uPointer;
-            uniform mat4 uModelViewProjectionMatrix;
-
-            vec2 worldToNDC(vec3 worldPos) {
-                vec4 clipPos = uModelViewProjectionMatrix * vec4(worldPos, 1.0);
-                vec3 ndc = clipPos.xyz / clipPos.w;
-                return ndc.xy;
-            }
-
             attribute float size;
             
             varying vec3 vColor;
             varying float vSize;
             varying vec4 vVel;
-            varying float vAvoidance;
             
             void main() {
                 vec4 pos = texture2D(positionTex, uv);
@@ -88,10 +77,6 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
                 float calculatedSize = size * sizeMultiplier * (300.0 / -mvPosition.z);
                 vSize = calculatedSize;
                 vVel = vel;
-
-                vec2 ndc = worldToNDC(pos.xyz);
-                float dist = distance(ndc, uPointer);
-                vAvoidance = smoothstep(uAvoidanceRadius, 0., dist) * uSpeedMultiplier;
                 
                 gl_PointSize = max(calculatedSize, minSize);
                 gl_Position = projectionMatrix * mvPosition;
@@ -107,8 +92,6 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             varying vec4 vVel;
             uniform vec3 glowColor;
             uniform float hueShift;
-            uniform vec2 uPointer;
-            varying float vAvoidance;
 
             void main() {
                 // Create circular particles with anti-flickering
@@ -129,7 +112,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
                 vec3 color = vColor * glowIntensity * glowColor * (1.0 + pow(speed, 2.0) * 100.0);
                 color = HSVShift(color, vec3(hueShift, 0.0, 0.0));
 
-                color *= (1.0 + vAvoidance * 10.0);
+                color *= (1.0 + vVel.w * 10.0);
 
                 gl_FragColor = vec4(color, opacity * fade);
             }
@@ -141,7 +124,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
 };
 
 export default function CustomParticle() {
-    const { camera, size } = useThree();
+    const { camera, viewport } = useThree();
     const controls = useControls('Particle', {
         glowColor: { value: '#ffd3d3' },
         glowIntensity: { value: 0.4, min: 0, max: 10, step: 0.01 },
@@ -178,7 +161,7 @@ export default function CustomParticle() {
         gsap.to(animate, {
             opacity: 1,
             duration: 3,
-            delay: 3,
+            delay: 5,
             ease: "power2.inOut",
             onUpdate: () => {
                 setAnimate({ ...animate });
@@ -226,16 +209,13 @@ export default function CustomParticle() {
             const modelViewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(projectionMatrix, new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix));
             const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
 
-            customMaterial.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
-            customMaterial.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
-            customMaterial.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
-            customMaterial.uniforms.uSpeedMultiplier.value = speedMultiplier;
-
             behaviorRef.current.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
-            behaviorRef.current.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength * speedMultiplier;
+            behaviorRef.current.uniforms.uSpeedMultiplier.value = speedMultiplier;
+            behaviorRef.current.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
             behaviorRef.current.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
             behaviorRef.current.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
             behaviorRef.current.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
+            behaviorRef.current.uniforms.uAspect.value = viewport.aspect;
         }
     }, 1);
 

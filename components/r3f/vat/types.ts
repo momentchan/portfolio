@@ -105,7 +105,7 @@ export interface SpawnedMeshData {
 
 // Default material controls
 export const DEFAULT_MATERIAL_CONTROLS: VATMaterialControls = {
-  roughness: 0.25,
+  roughness: 0.4,
   metalness: 0.6,
   transmission: 0,
   thickness: 0,

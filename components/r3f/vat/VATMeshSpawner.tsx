@@ -66,13 +66,12 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
       console.log('Loaded state:', { gltf: !!gltf, posTex: !!posTex, nrmTex: !!nrmTex, mapTex: !!mapTex, maskTex: !!maskTex, meta: !!meta })
       return
     }
-    console.log('Spawning VATMesh with ID:', meshCounter)
-    const newId = Date.now() + meshCounter // Use timestamp + counter for guaranteed uniqueness
+    const newId = Date.now() + meshCounter + Math.random() * 1000000 // Use timestamp + counter + random for guaranteed uniqueness
     const scale = MathUtils.randFloat(0.5, 1) * 5 // Random scale between 0.5 and 1.0
 
     const positionArray: [number, number, number] = [position.x, position.y, position.z]
     const holdDuration = MathUtils.randFloat(3, 7)
-    const animDuration = MathUtils.randFloat(2, 4)
+    const animDuration = MathUtils.randFloat(2.5, 4.5)
     setSpawnedMeshes(prev => [...prev, { id: newId, position: positionArray, scale, holdDuration, animDuration }])
     setMeshCounter(prev => prev + 1)
   }
@@ -134,6 +133,10 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         onSpawn={spawnVATMesh}
         minInterval={2000}
         maxInterval={5000}
+        burstEnabled={true}
+        burstInterval={[20000, 30000]} // 25-30 seconds between bursts
+        burstCount={[10, 15]} // 10-15 VATs per burst
+        burstDuration={3000} // 5 seconds to spawn all burst VATs
       />
 
       {/* Pre-warm GPU with hidden VATMesh */}

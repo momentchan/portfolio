@@ -23,8 +23,10 @@ uniform float uTimeScale;
 uniform float uNoiseStrength;
 uniform float uAttractStrength;
 uniform vec2 uPointer;
+uniform float uAspect;
 uniform float uAvoidanceStrength;
 uniform float uAvoidanceRadius;
+uniform float uSpeedMultiplier;
 
 uniform mat4 uModelViewProjectionMatrix;
 uniform mat4 uInverseModelViewProjectionMatrix;
@@ -45,7 +47,7 @@ vec3 safeNormalize(vec3 v) {
     return v / length;
 }
 // Custom force calculation
-vec3 calculateCustomForces(vec3 pos, vec3 vel, float time) {
+vec4 calculateCustomForces(vec3 pos, vec3 vel, float time) {
     float t = time * uTimeScale;
     vec3 curl = curlNoise(vec4(pos * uNoiseScale + vec3(0.35), t)) * uNoiseStrength;
     vec3 attract = -pos * uAttractStrength;
@@ -53,15 +55,15 @@ vec3 calculateCustomForces(vec3 pos, vec3 vel, float time) {
 
     // avoid
     vec2 ndc = worldToNDC(pos);
-    float dist = distance(ndc, uPointer);
+    float dist = length((ndc - uPointer) * vec2(uAspect, 1.0));
     vec2 ndcDir = normalize(ndc - uPointer);
     vec3 worldDir = ndcToWorld(ndcDir);
     float multiplier = smoothstep(uAvoidanceRadius, 0.0, dist);
-    vec3 avoidance = worldDir * multiplier * uAvoidanceStrength;
+    vec3 avoidance = worldDir * multiplier * uAvoidanceStrength * uSpeedMultiplier;
 
     vec3 velocity = safeNormalize(curl + attract);
     
-    return velocity * uSpeed + avoidance;
+    return vec4(velocity * uSpeed + avoidance, multiplier * uSpeedMultiplier);
 }
 
 void main() {
@@ -74,11 +76,14 @@ void main() {
     vec3 posXYZ = pos.xyz;
     vec3 velXYZ = vel.xyz;
     float aux1 = vel.w;
-    
+
     // Apply forces and integrate velocity
-    vec3 acc = calculateCustomForces(posXYZ, velXYZ, time);
+    vec4 acc = calculateCustomForces(posXYZ, velXYZ, time);
+
+    aux1 += (acc.w * 10. - 1.0) * delta;
+    aux1 = clamp(aux1, 0.0, 1.0);
     
-    velXYZ += acc * delta;
+    velXYZ += acc.xyz * delta;
     
     // Apply damping
     velXYZ *= (1.0 - uDamping * delta);
@@ -136,11 +141,11 @@ export default class CustomBehavior extends ParticleBehavior {
             uGravity: { value: new THREE.Vector3(0, -0.1, 0) },
             uDamping: { value: this.damping },
             uMaxSpeed: { value: 2.0 },
+            uSpeedMultiplier: { value: 1.0 },
             uPointer: { value: new THREE.Vector2(0, 0) },
+            uAspect: { value: 1 },
             uAvoidanceStrength: { value: this.avoidanceStrength },
             uAvoidanceRadius: { value: this.avoidanceRadius },
-            uViewMatrix: { value: new THREE.Matrix4() },
-            uProjectionMatrix: { value: new THREE.Matrix4() },
             uModelViewProjectionMatrix: { value: new THREE.Matrix4() },
             uInverseModelViewProjectionMatrix: { value: new THREE.Matrix4() }
         };

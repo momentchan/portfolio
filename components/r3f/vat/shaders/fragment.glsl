@@ -18,6 +18,7 @@ void main() {
 
   float shift = uHueShift + fract(uSeed) * 0.2;
   color.rgb = HSVShift(color.rgb, vec3(shift, 0.0, 0.0));
+  color.a = 0.1;
   
   csm_DiffuseColor = color;
 
@@ -29,5 +30,5 @@ void main() {
   float distance3 = abs(l - (animatedPos - 1.0));
   float distance = min(min(distance1, distance2), distance3);
   float gradient = smoothstep(0.2, 0.0, distance);
-  csm_Emissive = gradient * color.rgb * (0.5 + uTriggerRate * 0.5);
+  csm_Emissive = gradient * color.rgb * (0.3 + uTriggerRate * 0.5);
 }
