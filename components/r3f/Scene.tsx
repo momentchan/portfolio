@@ -13,6 +13,7 @@ import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import { TrailProvider } from './contexts/TrailContext';
+import CustomParticle from './contexts/customParticle/customParticle';
 
 export default function Scene() {
 
@@ -49,6 +50,7 @@ export default function Scene() {
             maskTexPath: "textures/blackanedwthioe.png",
             metaPath: "vat/Dahlia Clean_meta.json"
           }} />
+          <CustomParticle />
         </Canvas>
       </TrailProvider>
     </div >

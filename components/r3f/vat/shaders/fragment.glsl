@@ -17,7 +17,6 @@ void main() {
   }
 
   float shift = uHueShift + fract(uSeed) * 0.2;
-  shift += uTriggerRate;
   color.rgb = HSVShift(color.rgb, vec3(shift, 0.0, 0.0));
   
   csm_DiffuseColor = color;
