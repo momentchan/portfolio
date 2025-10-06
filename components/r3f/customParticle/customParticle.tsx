@@ -1,7 +1,7 @@
 import { ParticleSystem, ZeroVelocityConfig, SpherePositionConfig, UniformColorConfig, ParticlePositionConfig, RandomSizeConfig } from "@/lib/particle-system";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from 'three';
 import CustomBehavior from "./customBehavior";
 import gsap from "gsap";
@@ -37,39 +37,62 @@ class RandomSpherePositionConfig extends ParticlePositionConfig {
 }
 
 // Custom material with glow effect
-const createCustomMaterial = (positionTex: THREE.Texture | null) => {
+const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: THREE.Texture | null) => {
     return new THREE.ShaderMaterial({
         uniforms: {
             positionTex: { value: positionTex },
+            velocityTex: { value: velocityTex },
             time: { value: 0.0 },
             sizeMultiplier: { value: 1.0 },
             minSize: { value: 1.0 },
-            opacity: { value: 0.8 },
+            opacity: { value: 0 },
             glowColor: { value: new THREE.Color('#ffffff') },
             glowIntensity: { value: 0.5 },
             hueShift: { value: 0.0 },
+            uPointer: { value: new THREE.Vector2(-1000, -1000) },
+            uModelViewProjectionMatrix: { value: new THREE.Matrix4() },
+            uAvoidanceRadius: { value: 0.0 },
+            uSpeedMultiplier: { value: 0.0 },
         },
         vertexShader: /*glsl*/ `
             uniform sampler2D positionTex;
+            uniform sampler2D velocityTex;
             uniform float time;
             uniform float sizeMultiplier;
             uniform float minSize;
-            
+            uniform float uAvoidanceRadius;
+            uniform float uSpeedMultiplier;
+            uniform vec2 uPointer;
+            uniform mat4 uModelViewProjectionMatrix;
+
+            vec2 worldToNDC(vec3 worldPos) {
+                vec4 clipPos = uModelViewProjectionMatrix * vec4(worldPos, 1.0);
+                vec3 ndc = clipPos.xyz / clipPos.w;
+                return ndc.xy;
+            }
+
             attribute float size;
             
             varying vec3 vColor;
             varying float vSize;
+            varying vec4 vVel;
+            varying float vAvoidance;
             
             void main() {
                 vec4 pos = texture2D(positionTex, uv);
+                vec4 vel = texture2D(velocityTex, uv);
                 vColor = color;
                 
                 vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
                 
                 float calculatedSize = size * sizeMultiplier * (300.0 / -mvPosition.z);
                 vSize = calculatedSize;
+                vVel = vel;
+
+                vec2 ndc = worldToNDC(pos.xyz);
+                float dist = distance(ndc, uPointer);
+                vAvoidance = smoothstep(uAvoidanceRadius, 0., dist) * uSpeedMultiplier;
                 
-                // Ensure minimum point size to prevent flickering
                 gl_PointSize = max(calculatedSize, minSize);
                 gl_Position = projectionMatrix * mvPosition;
             }
@@ -81,8 +104,11 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
             uniform float glowIntensity;
             varying vec3 vColor;
             varying float vSize;
+            varying vec4 vVel;
             uniform vec3 glowColor;
             uniform float hueShift;
+            uniform vec2 uPointer;
+            varying float vAvoidance;
 
             void main() {
                 // Create circular particles with anti-flickering
@@ -96,11 +122,15 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
                 // Anti-flickering: fade out particles that are too small
                 float sizeFade = smoothstep(0.0, 1.0, vSize / 1.5);
                 sizeFade = pow(sizeFade, 0.8);
-                // fade *= sizeFade;
+                fade *= sizeFade;
                 
-                vec3 color = vColor * glowIntensity * glowColor;
+                float speed = smoothstep(0.0, 0.5, length(vVel.xyz));
+
+                vec3 color = vColor * glowIntensity * glowColor * (1.0 + pow(speed, 2.0) * 100.0);
                 color = HSVShift(color, vec3(hueShift, 0.0, 0.0));
-                
+
+                color *= (1.0 + vAvoidance * 10.0);
+
                 gl_FragColor = vec4(color, opacity * fade);
             }
         `,
@@ -111,14 +141,18 @@ const createCustomMaterial = (positionTex: THREE.Texture | null) => {
 };
 
 export default function CustomParticle() {
+    const { camera, size } = useThree();
     const controls = useControls('Particle', {
         glowColor: { value: '#ffd3d3' },
         glowIntensity: { value: 0.4, min: 0, max: 10, step: 0.01 },
         sizeMultiplier: { value: 0.4, min: 0, max: 2, step: 0.01 },
         minSize: { value: 2.0, min: 1.0, max: 5.0, step: 0.1 },
+        avoidanceStrength: { value: 3, min: 0, max: 10, step: 0.01 },
+        avoidanceRadius: { value: 0.2, min: 0, max: 0.5, step: 0.001 },
     });
 
     const particleSystemRef = useRef<any>(null);
+    const prevPointerRef = useRef({ x: 0, y: 0 });
 
     const config = useMemo(() => ({
         position: new RandomSpherePositionConfig(0.3, [0, 0, 0]),
@@ -129,11 +163,11 @@ export default function CustomParticle() {
 
     const hueCycle = 120;
 
-    const behavior = useMemo(() => new CustomBehavior(), []);
+    const behaviorRef = useRef<CustomBehavior>(new CustomBehavior(0.2, 1, 0.1, 2, 1.5, 0.98, 0.5, 100));
 
     // Create custom material
     const customMaterial = useMemo(() => {
-        return createCustomMaterial(null); // Will be updated when texture is available
+        return createCustomMaterial(null, null); // Will be updated when texture is available
     }, []);
 
     const [animate, setAnimate] = useState({
@@ -152,23 +186,31 @@ export default function CustomParticle() {
         });
     }, []);
 
-    useEffect(() => {
-        console.log(customMaterial);
-    }, [customMaterial]);
-
-    // Update material uniforms in real-time
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (particleSystemRef.current) {
             const time = state.clock.elapsedTime;
 
-            
+            // Calculate pointer movement speed
+            const currentPointer = { x: state.pointer.x, y: state.pointer.y };
+            const pointerDelta = {
+                x: currentPointer.x - prevPointerRef.current.x,
+                y: currentPointer.y - prevPointerRef.current.y
+            };
+            const pointerSpeed = Math.sqrt(pointerDelta.x * pointerDelta.x + pointerDelta.y * pointerDelta.y) / delta;
+            prevPointerRef.current = currentPointer;
+            const speedMultiplier = Math.max(0, Math.min(1, (pointerSpeed - 0) / (0.1 - 0)));
 
-            // Get the position texture and update custom material
+
             const positionTex = particleSystemRef.current.getParticleTexture?.();
+            const velocityTex = particleSystemRef.current.getVelocityTexture?.();
             if (positionTex && customMaterial.uniforms.positionTex.value !== positionTex) {
                 customMaterial.uniforms.positionTex.value = positionTex;
             }
 
+            if (velocityTex && customMaterial.uniforms.velocityTex.value !== velocityTex) {
+                customMaterial.uniforms.velocityTex.value = velocityTex;
+            }
+            
             customMaterial.uniforms.opacity.value = animate.opacity;
             customMaterial.uniforms.time.value = time;
             customMaterial.uniforms.glowIntensity.value = controls.glowIntensity;
@@ -176,15 +218,33 @@ export default function CustomParticle() {
             customMaterial.uniforms.minSize.value = controls.minSize;
             customMaterial.uniforms.glowColor.value = new THREE.Color(controls.glowColor);
             customMaterial.uniforms.hueShift.value = (performance.now() / 1000 / hueCycle) % 1;
+
+            const modelMatrix = particleSystemRef.current?.matrixWorld || new THREE.Matrix4();
+            const viewMatrix = camera.matrixWorldInverse;
+            const projectionMatrix = camera.projectionMatrix;
+
+            const modelViewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(projectionMatrix, new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix));
+            const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
+
+            customMaterial.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
+            customMaterial.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
+            customMaterial.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
+            customMaterial.uniforms.uSpeedMultiplier.value = speedMultiplier;
+
+            behaviorRef.current.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
+            behaviorRef.current.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength * speedMultiplier;
+            behaviorRef.current.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
+            behaviorRef.current.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
+            behaviorRef.current.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
         }
-    });
+    }, 1);
 
     return (
         <ParticleSystem
             ref={particleSystemRef}
             count={2048}
             config={config}
-            behavior={behavior}
+            behavior={behaviorRef.current}
             customMaterial={customMaterial}
         />
     )
