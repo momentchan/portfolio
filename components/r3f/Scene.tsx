@@ -13,7 +13,7 @@ import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import { TrailProvider } from './contexts/TrailContext';
-import CustomParticle from './contexts/customParticle/customParticle';
+import CustomParticle from './customParticle/customParticle';
 
 export default function Scene() {
 

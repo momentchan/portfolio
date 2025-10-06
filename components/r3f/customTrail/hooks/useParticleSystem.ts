@@ -25,7 +25,6 @@ export function useParticleSystem(trailsNum: number, rate: number) {
     noiseStrength: { value: 2, min: 0., max: 200.0, step: 0.1 },
     attractStrength: { value: 1, min: 0.0, max: 10.0, step: 0.01 },
     damping: { value: 0.98, min: 0.0, max: 1.0, step: 0.01 },
-    useGSAP: true // Toggle to use GSAP vs Leva controls
   }, { collapsed: true });
 
   // Generate initial particle positions
@@ -98,7 +97,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
   useEffect(() => {
     if (!particles.setUniform) return;
 
-    const params = particleUniforms.useGSAP ? animatedParams : particleUniforms;
+    const params = animatedParams;
 
     particles.setUniform('uSpeed', params.speed);
     particles.setUniform('uNoiseScale', params.noiseScale);

@@ -1,5 +1,5 @@
 import { ParticleBehavior, ShaderBuilder, ShaderTemplates } from "@/lib/particle-system";
-import noise4D from '../../../../lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
+import noise4D from '../../../lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
 import * as THREE from 'three';
 
 // Custom Velocity Shader for Particle System
@@ -10,7 +10,6 @@ precision highp float;
 
 uniform float time;
 uniform float delta;
-uniform float uParticleCount;
 
 // Default physics uniforms
 uniform vec3 uGravity;
@@ -68,7 +67,6 @@ precision highp float;
 
 uniform float time;
 uniform float delta;
-uniform float uParticleCount;
 
 void main() {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
