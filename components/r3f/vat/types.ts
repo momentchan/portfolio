@@ -72,6 +72,7 @@ export interface VATMeshProps {
   onTrigger?: (triggerType: 'click' | 'hover' | 'collision', data?: any) => void
   triggerSize?: number
   id?: string | number
+  globalRatio?: number
 }
 
 // VATMeshLifecycle props interface

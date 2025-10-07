@@ -26,11 +26,15 @@ export function VATMeshLifecycle({
 }: VATMeshLifecycleProps) {
   const { camera } = useThree()
   const groupRef = useRef<THREE.Group>(null!)
+  const frameRef = useRef({ value: 0 })
   const [currentFrame, setCurrentFrame] = useState(0)
+
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const scaleRef = useRef({ value: 0 })
-  const frameRef = useRef({ value: 0 })
   const rotationRef = useRef({ value: 0 })
+
+  const globalRatioRef = useRef({ value: 0 })
+  const [globalRatio, setGlobalRatio] = useState(0)
 
   // Calculate initial rotation so Y-axis faces camera when spawned
   useEffect(() => {
@@ -39,7 +43,7 @@ export function VATMeshLifecycle({
     const meshPosition = new THREE.Vector3(...vatMeshProps.position)
     const baseRotation = calculateCameraFacingRotation(meshPosition, camera.position)
     const finalRotation = applyRandomRotationOffsets(baseRotation, [-45, 45], [-45, 0])
-    
+
     groupRef.current.setRotationFromQuaternion(finalRotation)
   }, [camera, vatMeshProps.position])
 
@@ -130,6 +134,14 @@ export function VATMeshLifecycle({
         ease: "power2.in"
       }, rotateOutStartTime)
 
+    timeline
+      .to(globalRatioRef.current, {
+        value: 1,
+        duration: totalFrameDuration,
+        ease: "none",
+        onUpdate: () =>{setGlobalRatio(globalRatioRef.current.value)}
+      }, 0)
+
     timelineRef.current = timeline
 
     return () => {
@@ -154,6 +166,7 @@ export function VATMeshLifecycle({
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [])
 
+
   return (
     <group ref={groupRef} position={vatMeshProps.position}>
 
@@ -165,6 +178,7 @@ export function VATMeshLifecycle({
         scale={[scaleRef.current.value, scaleRef.current.value, scaleRef.current.value]}
         interactive={true}
         triggerSize={0.05}
+        globalRatio={globalRatio}
       />
 
       {/* Debug axes */}

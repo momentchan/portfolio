@@ -30,6 +30,7 @@ export class LifetimeBehavior extends ParticleBehavior {
             uBasePosTexture: { value: null },
             uStoreDelta: { value: 0 },
             uDamping: { value: 0.98 },
+            uAnimateRate: { value: 0.0 },
         };
     }
 
@@ -85,8 +86,7 @@ export class LifetimeBehavior extends ParticleBehavior {
         vec4 vel = texture2D(velocityTex, uv);
         
         // Get individual lifetime for this particle
-        vec4 lifetimeData = texture2D(uLifetimeTexture, uv);
-        float particleLifetime = lifetimeData.x;
+        float lifetime = texture2D(uLifetimeTexture, uv).x;
         
         vec3 currentPos = pos.xyz;
         float age = pos.w; // Age stored in position.w
@@ -95,7 +95,7 @@ export class LifetimeBehavior extends ParticleBehavior {
         age += delta;
         
         // Check if particle has exceeded its individual lifetime
-        if (age >= particleLifetime) {
+        if (age >= lifetime) {
             vec3 vatPos = VAT_pos(uv, uFrame);
             vec3 basePos = texture2D(uBasePosTexture, uv).xyz;
             vatPos = (uStoreDelta == 1) ? (basePos + vatPos) : vatPos;
@@ -125,6 +125,7 @@ export class LifetimeBehavior extends ParticleBehavior {
         uniform sampler2D uLifetimeTexture;
         uniform sampler2D uVatPosTex;
         uniform float uDamping;
+        uniform float uAnimateRate;
 
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -134,25 +135,28 @@ export class LifetimeBehavior extends ParticleBehavior {
             vec4 vel = texture2D(velocityTex, uv);
             
             // Get individual lifetime for this particle
-            vec4 lifetimeData = texture2D(uLifetimeTexture, uv);
-            float particleLifetime = lifetimeData.x;
+            float lifetime = texture2D(uLifetimeTexture, uv).x;
             
             vec3 currentPos = pos.xyz;
             float age = pos.w; // Age stored in position.w
             vec3 velocity = vel.xyz;
             
             // Check if particle has exceeded its individual lifetime
-            if (age >= particleLifetime) {
+            if (age >= lifetime) {
                 velocity = vec3(0.0, uUpwardSpeed, 0.0);
             } else {
 
                 vec3 acc = vec3(0.0, 0.0, 0.0);
+                float age_normalized = age / lifetime;
+
+                float boost = 1.0 + smoothstep(0.0, 0.4, uAnimateRate) * smoothstep(0.4, 0.2, age_normalized) * 2.0;
+
 
                 vec3 up = vec3(0.0, uUpwardSpeed, 0.0);
                 float t = time * uTimeScale;
                 vec3 noise = curlNoise(vec4(currentPos * uNoiseScale + vec3(0.35), t)) * uNoiseStrength;
 
-                acc = (up + noise);
+                acc = (up + noise) * boost;
                 // Add upward movement
                 velocity += acc * delta;
                 velocity *= (1.0 - uDamping * delta);

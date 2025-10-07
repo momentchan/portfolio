@@ -24,6 +24,10 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             glowColor: { value: new THREE.Color('#ffffff') },
             glowIntensity: { value: 0.5 },
             hueShift: { value: 0.0 },
+            uLifetimeTexture: { value: null },
+            uAnimateRate: { value: 0.0 },
+            uFrameNormalized: { value: 0.0 },
+            uGlobalRatio: { value: 0.0 },
         },
         vertexShader: /*glsl*/ `
             uniform sampler2D positionTex;
@@ -31,21 +35,29 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             uniform float time;
             uniform float sizeMultiplier;
             uniform float minSize;
+            uniform float uGlobalRatio;
+            uniform sampler2D uLifetimeTexture;
             attribute float size;
+            
             
             varying vec3 vColor;
             varying float vSize;
             varying float vAge;
-            
+
             void main() {
                 vec4 pos = texture2D(positionTex, uv);
                 vec4 vel = texture2D(velocityTex, uv);
                 vColor = color;
-                vAge = pos.w; // Age is stored in position.w
+
+                float lifetime = texture2D(uLifetimeTexture, uv).r;
+                float age = pos.w / lifetime;
                 
                 vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
-                
                 float calculatedSize = size * sizeMultiplier * (300.0 / -mvPosition.z);
+                calculatedSize *= smoothstep(0.0, 0.1, age) * smoothstep(1.0, 0.9, age);
+                calculatedSize *= smoothstep(0.0, 0.1, uGlobalRatio) * smoothstep(0.9, 0.85, uGlobalRatio);
+
+                vAge = age; 
                 vSize = calculatedSize;
                 
                 gl_PointSize = max(calculatedSize, minSize);
@@ -62,6 +74,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
             varying float vAge;
             uniform vec3 glowColor;
             uniform float hueShift;
+            uniform float uAnimateRate;
 
             void main() {
                 // Create circular particles with anti-flickering
@@ -78,11 +91,22 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
                 fade *= sizeFade;
                 
                 // Fade based on age (normalized or raw depending on implementation)
-                float ageFade = 1.0 - smoothstep(0.0, 1.0, vAge);
-                fade *= ageFade;
-
+                // fade *= ageFade;
+                
                 vec3 color = vColor * glowIntensity * glowColor;
+                // float speed = smoothstep(0.0, 0.5, length(vVel.xyz));
+                // vec3 color = vColor * glowIntensity * glowColor * (1.0 + pow(speed, 2.0) * 100.0);
+                
                 color = HSVShift(color, vec3(hueShift, 0.0, 0.0));
+                // color *= (1.0 + vVel.w * 10.0);
+                float distance1 = abs(vAge - uAnimateRate);
+                float distance2 = abs(vAge - (uAnimateRate + 1.0));
+                float distance3 = abs(vAge - (uAnimateRate - 1.0));
+                float distance = min(min(distance1, distance2), distance3);
+                float gradient = smoothstep(0.2, 0.0, distance);
+
+                color *= (1. + gradient * 3.);
+
 
                 gl_FragColor = vec4(color, opacity * fade);
             }
@@ -98,19 +122,20 @@ export default function LifetimeParticleSystem({
     posTex,
     meta,
     geometry,
-    storeDelta = 0
+    storeDelta = 0,
+    animateRate = 0,
+    globalRatio = 0
 }: {
     frame: number,
     posTex: THREE.Texture,
     meta: any,
     geometry?: THREE.BufferGeometry,
-    storeDelta?: number
+    storeDelta?: number,
+    animateRate?: number,
+    globalRatio?: number
 }) {
-
-
     const { gl } = useThree();
-
-    const particleCount = 8192 * 2 * 2;
+    const particleCount = 128;
 
     const controls = useControls('Lifetime Particles', {
         glowColor: { value: '#ffd3d3' },
@@ -118,9 +143,10 @@ export default function LifetimeParticleSystem({
         sizeMultiplier: { value: 0.4, min: 0, max: 2, step: 0.01 },
         minSize: { value: 2.0, min: 1.0, max: 5.0, step: 0.1 },
         minLifetime: { value: 2.0, min: 0.5, max: 8.0, step: 0.1 },
-        maxLifetime: { value: 8.0, min: 1.0, max: 12.0, step: 0.1 },
-        upwardSpeed: { value: 0.01, min: 0.0, max: 0.1, step: 0.001 },
+        maxLifetime: { value: 4.0, min: 1.0, max: 12.0, step: 0.1 },
+        upwardSpeed: { value: 0.005, min: 0.0, max: 0.01, step: 0.001 },
         noiseStrength: { value: 0.01, min: 0, max: 0.1, step: 0.001 },
+        noiseScale: { value: 100, min: 0, max: 100, step: 0.001 },
     });
 
     const particleSystemRef = useRef<any>(null);
@@ -129,7 +155,7 @@ export default function LifetimeParticleSystem({
         position: new RandomPositionConfig({ x: [-0, 0], y: [-0, 0], z: [0, 0] }),
         velocity: new ZeroVelocityConfig(),
         color: new UniformColorConfig([1, 1, 1]),
-        size: new RandomSizeConfig([0.03, 0.03])
+        size: new RandomSizeConfig([0.01, 0.02])
     }), []);
 
     const hueCycle = 120;
@@ -141,15 +167,29 @@ export default function LifetimeParticleSystem({
         controls.noiseStrength,
         1.0,
     ));
+
+    // Generate random vertex IDs (shared between base position and UV2 textures)
+    const randomVertexIds = useMemo(() => {
+        const size = Math.floor(Math.sqrt(particleCount));
+        const ids = new Uint32Array(size * size);
+        const maxVertexCount = meta?.vertexCount || (geometry?.getAttribute('position')?.count || 1);
+
+        for (let i = 0; i < size * size; i++) {
+            ids[i] = Math.floor(Math.random() * maxVertexCount);
+        }
+        return ids;
+    }, [meta, geometry]);
+
     // Generate base position texture from mesh geometry
-    const generateBasePosTexture = (count: number, geometry: THREE.BufferGeometry, gl: THREE.WebGLRenderer): THREE.DataTexture => {
+    const generateBasePosTexture = (count: number, geometry: THREE.BufferGeometry, gl: THREE.WebGLRenderer, randomIds: Uint32Array): THREE.DataTexture => {
         const size = Math.floor(Math.sqrt(count));
         const data = new Float32Array(size * size * 4);
 
         const positions = geometry.getAttribute('position');
 
         for (let i = 0; i < size * size; i++) {
-            const vatId = i % positions.count;
+            // Use shared random vertex ID
+            const vatId = randomIds[i];
             const x = positions.getX(vatId);
             const y = positions.getY(vatId);
             const z = positions.getZ(vatId);
@@ -173,13 +213,13 @@ export default function LifetimeParticleSystem({
     };
 
     // Generate UV2 texture for VAT mapping
-    const generateUV2Texture = (count: number, meta: any, gl: THREE.WebGLRenderer): THREE.DataTexture => {
+    const generateUV2Texture = (count: number, meta: any, gl: THREE.WebGLRenderer, randomIds: Uint32Array): THREE.DataTexture => {
         const size = Math.floor(Math.sqrt(count));
         const data = new Float32Array(size * size * 4);
 
         for (let i = 0; i < size * size; i++) {
-            // Map particle index to VAT vertex index (wraps if more particles than vertices)
-            const vatId = i % meta.vertexCount;
+            // Use shared random vertex ID
+            const vatId = randomIds[i];
 
             // Calculate UV2 coordinates based on VAT vertex ID
             const colIndex = Math.floor(vatId / meta.texHeight);
@@ -211,6 +251,7 @@ export default function LifetimeParticleSystem({
         return texture;
     };
 
+
     // Create custom material
     const customMaterial = useMemo(() => {
         return createCustomMaterial(null, null); // Will be updated when texture is available
@@ -227,20 +268,23 @@ export default function LifetimeParticleSystem({
     // Generate UV2 texture for VAT mapping
     const uv2Texture = useMemo(() => {
         if (meta) {
-            return generateUV2Texture(particleCount, meta, gl);
+            return generateUV2Texture(particleCount, meta, gl, randomVertexIds);
         }
         return null;
-    }, [meta, gl]);
+    }, [meta, gl, randomVertexIds]);
 
     // Generate base position texture if geometry is provided
     const basePosTexture = useMemo(() => {
         if (geometry) {
-            return generateBasePosTexture(particleCount, geometry, gl);
+            return generateBasePosTexture(particleCount, geometry, gl, randomVertexIds);
         }
         return null;
-    }, [geometry, gl]);
+    }, [geometry, gl, randomVertexIds]);
 
     useEffect(() => {
+        const meshRef = particleSystemRef.current.getMeshRef();
+        meshRef.userData = { isVAT: false }
+
         gsap.to(animate, {
             opacity: 1,
             duration: 3,
@@ -251,6 +295,7 @@ export default function LifetimeParticleSystem({
             }
         });
     }, []);
+
 
 
     useFrame((state, delta) => {
@@ -274,6 +319,10 @@ export default function LifetimeParticleSystem({
             customMaterial.uniforms.minSize.value = controls.minSize;
             customMaterial.uniforms.glowColor.value = new THREE.Color(controls.glowColor);
             customMaterial.uniforms.hueShift.value = (performance.now() / 1000 / hueCycle) % 1;
+            customMaterial.uniforms.uLifetimeTexture.value = lifetimeTexture;
+            customMaterial.uniforms.uAnimateRate.value = animateRate;
+            customMaterial.uniforms.uGlobalRatio.value = globalRatio;
+
 
             // Update behavior uniforms
             behaviorRef.current.uniforms.uVatPosTex.value = posTex;
@@ -292,7 +341,9 @@ export default function LifetimeParticleSystem({
             behaviorRef.current.uniforms.uTime.value = time;
             behaviorRef.current.uniforms.uLifetimeTexture.value = lifetimeTexture;
             behaviorRef.current.uniforms.uUpwardSpeed.value = controls.upwardSpeed;
+            behaviorRef.current.uniforms.uAnimateRate.value = animateRate;
             behaviorRef.current.uniforms.uNoiseStrength.value = controls.noiseStrength;
+            behaviorRef.current.uniforms.uNoiseScale.value = controls.noiseScale;
         }
     }, 1);
 
@@ -304,7 +355,6 @@ export default function LifetimeParticleSystem({
             config={config}
             behavior={behaviorRef.current}
             customMaterial={customMaterial}
-            userData={{ isVAT: false }}
         />
     );
 }

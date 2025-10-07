@@ -58,6 +58,7 @@ export function VATMesh({
   interactive = false,
   triggerSize = 1,
   id,
+  globalRatio,
   ...rest
 }: VATMeshProps) {
   const materialPropertiesControls = useMaterialPropertiesControls()
@@ -74,12 +75,12 @@ export function VATMesh({
   const startTimeRef = useRef<number>(0)
   const { scene } = useThree()
 
-  const seedRef = useRef(THREE.MathUtils.randFloat(0, 1000))
+  const [seed, setSeed] = useState(THREE.MathUtils.randFloat(0, 1000))
   const spawnTimeRef = useRef(performance.now() / 1000) // Global spawn time
   const hueCycle = 120
 
   const triggerRate = useRef({ value: 0 })
-  const timeRef = useRef({ value: 0 })
+  const [time, setTime] = useState(0)
   const [hovering, setHovering] = useState(false)
 
   // Custom trigger handler for VATMesh-specific behavior
@@ -187,15 +188,15 @@ export function VATMesh({
     triggerRate.current.value -= delta;
     triggerRate.current.value = Math.max(0, Math.min(triggerRate.current.value, 1))
 
-    timeRef.current.value += delta * materialControls.speed * (1 + triggerRate.current.value * 1)
+    setTime(time + delta * materialControls.speed * (1 + triggerRate.current.value * 1))
 
     // Update materials
     for (const material of materialsRef.current) {
       material.uniforms.uFrame.value = frame
-      material.uniforms.uTime.value = timeRef.current.value
+      material.uniforms.uTime.value = time
 
       // Update shader uniforms in real-time
-      material.uniforms.uSeed.value = seedRef.current
+      material.uniforms.uSeed.value = seed
       material.uniforms.uNoiseScale.value = shaderControls.noiseScale
       material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
       material.uniforms.uHueShift.value = (spawnTimeRef.current / hueCycle) % 1
@@ -225,6 +226,8 @@ export function VATMesh({
             meta={metaData}
             geometry={vatMesh.current.geometry}
             storeDelta={1}
+            animateRate={(time + seed) % 1}
+            globalRatio={globalRatio}
           />
         )}
       </group>
