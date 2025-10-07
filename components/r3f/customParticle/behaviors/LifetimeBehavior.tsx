@@ -31,6 +31,13 @@ export class LifetimeBehavior extends ParticleBehavior {
             uStoreDelta: { value: 0 },
             uDamping: { value: 0.98 },
             uAnimateRate: { value: 0.0 },
+            uAspect: { value: 0.0 },
+            uPointer: { value: new THREE.Vector2(0.0, 0.0) },
+            uModelViewProjectionMatrix: { value: new THREE.Matrix4() },
+            uInverseModelViewProjectionMatrix: { value: new THREE.Matrix4() },
+            uAvoidanceStrength: { value: 0.0 },
+            uAvoidanceRadius: { value: 0.0 },
+            modelMatrix: { value: new THREE.Matrix4() },
         };
     }
 
@@ -126,6 +133,23 @@ export class LifetimeBehavior extends ParticleBehavior {
         uniform sampler2D uVatPosTex;
         uniform float uDamping;
         uniform float uAnimateRate;
+        uniform float uAvoidanceStrength;
+        uniform mat4 uModelViewProjectionMatrix;
+        uniform mat4 uInverseModelViewProjectionMatrix;
+        uniform float uAvoidanceRadius;
+        uniform vec2 uPointer;
+        uniform float uAspect;
+
+        vec2 worldToNDC(vec3 worldPos) {
+            vec4 clipPos = uModelViewProjectionMatrix * vec4(worldPos, 1.0);
+            vec3 ndc = clipPos.xyz / clipPos.w;
+            return ndc.xy;
+        }
+
+        vec3 ndcToWorld(vec2 ndc) {
+            vec4 worldPos = uInverseModelViewProjectionMatrix * vec4(ndc, 0.0, 0.0);
+            return worldPos.xyz;
+        }
 
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -156,7 +180,15 @@ export class LifetimeBehavior extends ParticleBehavior {
                 float t = time * uTimeScale;
                 vec3 noise = curlNoise(vec4(currentPos * uNoiseScale + vec3(0.35), t)) * uNoiseStrength;
 
-                acc = (up + noise) * boost;
+                // Avoid pointer
+                vec2 ndc = worldToNDC(currentPos);
+                float dist = length((ndc - uPointer) * vec2(uAspect, 1.0));
+                vec2 ndcDir = normalize(ndc - uPointer);
+                vec3 worldDir = ndcToWorld(ndcDir);
+                float multiplier = smoothstep(uAvoidanceRadius, 0.0, dist);
+                vec3 avoidance = worldDir * multiplier * uAvoidanceStrength;
+
+                acc = (up + noise) * boost + avoidance;
                 // Add upward movement
                 velocity += acc * delta;
                 velocity *= (1.0 - uDamping * delta);

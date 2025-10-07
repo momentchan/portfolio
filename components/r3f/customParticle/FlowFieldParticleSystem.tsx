@@ -175,7 +175,7 @@ export default function FlowFieldParticleSystem() {
             customMaterial.uniforms.glowColor.value = new THREE.Color(controls.glowColor);
             customMaterial.uniforms.hueShift.value = (performance.now() / 1000 / hueCycle) % 1;
 
-            const modelMatrix = particleSystemRef.current?.matrixWorld || new THREE.Matrix4();
+            const modelMatrix = particleSystemRef.current.getMeshRef()?.matrixWorld || new THREE.Matrix4();
             const viewMatrix = camera.matrixWorldInverse;
             const projectionMatrix = camera.projectionMatrix;
 

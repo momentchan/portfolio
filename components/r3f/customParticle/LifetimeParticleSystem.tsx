@@ -105,7 +105,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
                 float distance = min(min(distance1, distance2), distance3);
                 float gradient = smoothstep(0.2, 0.0, distance);
 
-                color *= (1. + gradient * 3.);
+                color *= (1. + pow( gradient, 2.0) * 5.);
 
 
                 gl_FragColor = vec4(color, opacity * fade);
@@ -134,7 +134,7 @@ export default function LifetimeParticleSystem({
     animateRate?: number,
     globalRatio?: number
 }) {
-    const { gl } = useThree();
+    const { gl, camera, viewport } = useThree();
     const particleCount = 128;
 
     const controls = useControls('Lifetime Particles', {
@@ -147,6 +147,8 @@ export default function LifetimeParticleSystem({
         upwardSpeed: { value: 0.005, min: 0.0, max: 0.01, step: 0.001 },
         noiseStrength: { value: 0.01, min: 0, max: 0.1, step: 0.001 },
         noiseScale: { value: 100, min: 0, max: 100, step: 0.001 },
+        avoidanceStrength: { value: 1, min: 0, max: 10, step: 0.01 },
+        avoidanceRadius: { value: 0.1, min: 0, max: 0.5, step: 0.001 },
     });
 
     const particleSystemRef = useRef<any>(null);
@@ -311,6 +313,14 @@ export default function LifetimeParticleSystem({
             if (velocityTex && customMaterial.uniforms.velocityTex.value !== velocityTex) {
                 customMaterial.uniforms.velocityTex.value = velocityTex;
             }
+            const modelMatrix = particleSystemRef.current.getMeshRef()?.matrixWorld || new THREE.Matrix4();
+
+            const viewMatrix = camera.matrixWorldInverse;
+            const projectionMatrix = camera.projectionMatrix;
+
+            const modelViewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(projectionMatrix, new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix));
+            const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
+
 
             customMaterial.uniforms.opacity.value = 1;// animate.opacity;
             customMaterial.uniforms.time.value = time;
@@ -344,6 +354,15 @@ export default function LifetimeParticleSystem({
             behaviorRef.current.uniforms.uAnimateRate.value = animateRate;
             behaviorRef.current.uniforms.uNoiseStrength.value = controls.noiseStrength;
             behaviorRef.current.uniforms.uNoiseScale.value = controls.noiseScale;
+
+            behaviorRef.current.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
+            behaviorRef.current.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
+            behaviorRef.current.uniforms.uAspect.value = viewport.aspect;
+            behaviorRef.current.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
+
+            behaviorRef.current.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
+            behaviorRef.current.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
+
         }
     }, 1);
 
