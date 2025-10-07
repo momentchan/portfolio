@@ -60,7 +60,6 @@ export interface VATMeshProps {
   maskTex?: THREE.Texture | null
   metaData: VATMeta
   speed?: number
-  timeOffset?: number
   paused?: boolean
   useDepthMaterial?: boolean
   position?: [number, number, number]

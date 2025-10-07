@@ -8,6 +8,7 @@ import { createVATMaterial, createVATDepthMaterial, updatePhysicalProperties, up
 import { ensureUV2ForVAT } from './utils'
 import { InteractiveTrigger } from './InteractiveTrigger'
 import { gsap } from 'gsap'
+import LifetimeParticleSystem from '../customParticle/LifetimeParticleSystem'
 
 // Material properties controls (physical + advanced combined)
 function useMaterialPropertiesControls() {
@@ -51,7 +52,6 @@ export function VATMesh({
   maskTex = null,
   metaData,
   speed = 1,
-  timeOffset = 0,
   paused = false,
   useDepthMaterial = true,
   frame: externalFrame,
@@ -104,6 +104,8 @@ export function VATMesh({
     }
   }
 
+  const vatMesh = useRef<THREE.Mesh>(null!)
+
   // Create materials and clone scene for this instance
   useEffect(() => {
 
@@ -133,6 +135,7 @@ export function VATMesh({
         mesh.castShadow = true
         mesh.receiveShadow = true
         mesh.frustumCulled = false
+        vatMesh.current = mesh
       }
     })
 
@@ -161,16 +164,6 @@ export function VATMesh({
       updateAdvancedProperties(material, materialPropertiesControls)
     }
   }, [materialPropertiesControls])
-
-  // Update depth material properties (frame animation)
-  useEffect(() => {
-    for (const material of materialsRef.current) {
-      // Update frame uniform for all materials (both physical and depth)
-      if (material.uniforms?.uFrame) {
-        material.uniforms.uFrame.value = 0.0 // Reset to frame 0
-      }
-    }
-  }, [useDepthMaterial])
 
   // Animation frame update
   useFrame((state, delta) => {
@@ -208,7 +201,6 @@ export function VATMesh({
       material.uniforms.uHueShift.value = (spawnTimeRef.current / hueCycle) % 1
       material.uniforms.uTriggerRate.value = triggerRate.current.value
     }
-
   })
 
   return (
@@ -224,6 +216,15 @@ export function VATMesh({
             color="#ffffff"
             opacity={0.2}
             wireframe={true}
+          />
+        )}
+        {vatMesh.current && (
+          <LifetimeParticleSystem
+            frame={externalFrame || 0}
+            posTex={posTex}
+            meta={metaData}
+            geometry={vatMesh.current.geometry}
+            storeDelta={1}
           />
         )}
       </group>

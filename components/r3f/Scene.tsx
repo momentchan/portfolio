@@ -14,8 +14,11 @@ import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import { TrailProvider } from './contexts/TrailContext';
 import CustomParticle from './customParticle/customParticle';
+import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
+import LifetimeParticleSystem from './customParticle/LifetimeParticleSystem';
 
 export default function Scene() {
+  const vat = "Plumera"
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -36,21 +39,24 @@ export default function Scene() {
             fov={60}
           />
 
-          <CameraRotator />
+          {/* <CameraRotator /> */}
           <CameraControls />
           <EnvironmentSetup />
-          <CustomTrail />
+          {/* <CustomTrail /> */}
           <DirectionalLights />
           <Effects />
-          <VATMeshSpawner vatData={{
+          {/* <VATMeshSpawner vatData={{
             gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
             posTexPath: "vat/Dahlia Clean_pos.exr",
             nrmTexPath: "vat/Dahlia Clean_nrm.png",
             mapTexPath: "textures/tujlip.png",
             maskTexPath: "textures/blackanedwthioe.png",
             metaPath: "vat/Dahlia Clean_meta.json"
-          }} />
-          <CustomParticle />
+          }} /> */}
+          {/* <CustomParticle /> */}
+          {/* <FlowFieldParticleSystem /> */}
+          {/* <CustomParticle /> */}
+          <LifetimeParticleSystem />
         </Canvas>
       </TrailProvider>
     </div >
