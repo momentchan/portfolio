@@ -3,38 +3,11 @@ import { ParticleSystem, ZeroVelocityConfig, SpherePositionConfig, UniformColorC
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from 'three';
-import CustomBehavior from "./customBehavior";
+import { FlowFieldBehavior } from "./behaviors/FlowFieldBehavior";
+import { RandomSpherePositionConfig } from "./configs/PositionConfigs";
 import gsap from "gsap";
 import { useControls } from "leva";
 import photoshopMath from '@/lib/r3f-gist/shader/cginc/photoshopMath.glsl?raw'
-
-// Custom position config for random positions inside a sphere
-class RandomSpherePositionConfig extends ParticlePositionConfig {
-    constructor(
-        private radius: number = 1.0,
-        private center: [number, number, number] = [0, 0, 0]
-    ) {
-        super();
-    }
-
-    generatePosition(index: number, totalCount: number, size: number): [number, number, number, number] {
-        // Generate random point inside sphere using rejection sampling
-        let x, y, z, distance;
-        do {
-            x = (Math.random() - 0.5) * 2 * this.radius;
-            y = (Math.random() - 0.5) * 2 * this.radius;
-            z = (Math.random() - 0.5) * 2 * this.radius;
-            distance = Math.sqrt(x * x + y * y + z * z);
-        } while (distance > this.radius);
-
-        return [
-            this.center[0] + x,
-            this.center[1] + y,
-            this.center[2] + z,
-            0.0
-        ];
-    }
-}
 
 // Custom material with glow effect
 const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: THREE.Texture | null) => {
@@ -123,7 +96,7 @@ const createCustomMaterial = (positionTex: THREE.Texture | null, velocityTex: TH
     });
 };
 
-export default function CustomParticle() {
+export default function FlowFieldParticleSystem() {
     const { camera, viewport } = useThree();
     const controls = useControls('Particle', {
         glowColor: { value: '#ffd3d3' },
@@ -146,7 +119,7 @@ export default function CustomParticle() {
 
     const hueCycle = 120;
 
-    const behaviorRef = useRef<CustomBehavior>(new CustomBehavior(0.2, 1, 0.1, 2, 1.5, 0.98, 0.5, 100));
+    const behaviorRef = useRef<FlowFieldBehavior>(new FlowFieldBehavior(0.2, 1, 0.1, 2, 1.5, 0.98, 0.5, 100));
 
     // Create custom material
     const customMaterial = useMemo(() => {
