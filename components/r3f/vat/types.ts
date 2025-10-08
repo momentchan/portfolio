@@ -91,6 +91,7 @@ export interface LifecycleTimingProps {
 // VATMeshLifecycle props interface
 export interface VATMeshLifecycleProps extends CommonVATProps, LifecycleTimingProps {
   paused?: boolean
+  manual?: boolean
   onComplete?: () => void
 }
 
@@ -101,4 +102,5 @@ export interface SpawnedMeshData {
   scale: number
   holdDuration: number
   animDuration: number
+  manual: boolean
 }

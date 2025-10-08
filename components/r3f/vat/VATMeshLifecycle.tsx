@@ -25,6 +25,7 @@ export function VATMeshLifecycle({
   rotateInDuration = 1,
   rotateOutDuration = 1,
   paused = false,
+  manual = false,
   onComplete,
 }: VATMeshLifecycleProps) {
 
@@ -43,7 +44,7 @@ export function VATMeshLifecycle({
 
     const meshPosition = new THREE.Vector3(...position)
     const baseRotation = calculateCameraFacingRotation(meshPosition, camera.position)
-    const finalRotation = applyRandomRotationOffsets(baseRotation, [-45, 45], [-45, 0])
+    const finalRotation = applyRandomRotationOffsets(baseRotation, manual ? [0,0] : [-45, 45], manual ? [0, 0] : [-45, 0])
 
     groupRef.current.setRotationFromQuaternion(finalRotation)
   }, [camera, position])

@@ -138,3 +138,17 @@ export function createSpawnId(counter: number): number {
   return Date.now() + counter + Math.random() * 1000000
 }
 
+
+export function screenToWorldAtDepth(
+  pointer: { x: number; y: number },
+  camera: THREE.Camera,
+  depth: number = 5
+): THREE.Vector3 {
+  const vector = new THREE.Vector3(pointer.x, pointer.y, 0.5);
+  vector.unproject(camera);
+
+  const dir = vector.sub(camera.position).normalize();
+
+  return camera.position.clone().add(dir.multiplyScalar(depth));
+}
+

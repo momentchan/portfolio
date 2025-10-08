@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useThree } from '@react-three/fiber'
 import { VATMeshLifecycle } from './VATMeshLifecycle'
 import { VATMesh } from './VATMesh'
 import { useVATPreloader } from './VATPreloader'
@@ -6,6 +7,7 @@ import { SpawnedMeshData } from './types'
 import { AutoSpawner } from './AutoSpawner'
 import { MathUtils, Vector3 } from 'three'
 import { generateValidPosition, createSpawnId } from './utils'
+import { screenToWorldAtDepth } from './utils'
 
 export interface VATData {
   gltfPath: string
@@ -22,6 +24,7 @@ interface VATMeshSpawnerProps {
 
 // VATMesh spawner with lifecycle animation
 export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
+  const { camera } = useThree()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -70,11 +73,11 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
   }, [isLoaded, preWarmed])
 
 
-  const spawnVATMesh = () => {
+  const spawnVATMesh = (position?: Vector3) => {
     if (!isLoaded) return
 
-    const position = generateValidPosition(spawnedMeshes, 0.5, 0.1)
-    if (!position) return
+    const spawnPosition = position || generateValidPosition(spawnedMeshes, 0.5, 0.1)
+    if (!spawnPosition) return
 
     const newId = createSpawnId(meshCounter)
     const holdDuration = MathUtils.randFloat(3, 7)
@@ -83,10 +86,11 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
 
     setSpawnedMeshes(prev => [...prev, { 
       id: newId, 
-      position: [position.x, position.y, position.z], 
+      position: [spawnPosition.x, spawnPosition.y, spawnPosition.z], 
       scale, 
       holdDuration, 
-      animDuration 
+      animDuration,
+      manual: position ? true : false
     }])
     setMeshCounter(prev => prev + 1)
   }
@@ -107,9 +111,25 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
       }
     }
 
+    const handleClick = (event: MouseEvent) => {
+      if (!isLoaded) return
+
+      const pointer = {
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1
+      }
+
+      const worldPos = screenToWorldAtDepth(pointer, camera, 1)
+      spawnVATMesh(worldPos)
+    }
+
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isLoaded])
+    window.addEventListener('click', handleClick)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('click', handleClick)
+    }
+  }, [isLoaded, camera])
 
   return (
     <group>
@@ -141,6 +161,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
           position={mesh.position}
           id={mesh.id}
           maxScale={mesh.scale}
+          manual={mesh.manual}
           frameForwardDuration={mesh.animDuration}
           frameHoldDuration={mesh.holdDuration}
           frameBackwardDuration={mesh.animDuration}
