@@ -88,7 +88,7 @@ export default function FlowFieldParticleSystem() {
         behavior.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
         behavior.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
         behavior.uniforms.uAspect.value = viewport.aspect;
-    }, 1);
+    });
 
     return (
         <ParticleSystem

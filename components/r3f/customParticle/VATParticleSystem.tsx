@@ -133,7 +133,7 @@ export default function VATParticleSystem({
         behavior.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
         behavior.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
         behavior.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
-    }, 1);
+    });
 
     return (
         <ParticleSystem

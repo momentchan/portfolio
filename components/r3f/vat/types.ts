@@ -64,7 +64,7 @@ export interface CommonVATProps {
 
 // VATMesh props interface
 export interface VATMeshProps extends CommonVATProps {
-  speed?: number
+  vatSpeed?: number
   paused?: boolean
   useDepthMaterial?: boolean
   rotation?: [number, number, number]

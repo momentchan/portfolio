@@ -1,10 +1,8 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import { CameraControls, PerspectiveCamera } from '@react-three/drei';
-import { useRef, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { CameraControls, Loader, PerspectiveCamera, Preload } from '@react-three/drei';
 import * as THREE from 'three';
-import { useControls } from 'leva';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './Effects';
 import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
@@ -12,22 +10,29 @@ import { CustomTrail } from './customTrail/CustomTrail';
 import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
-import { TrailProvider } from './contexts/TrailContext';
-import CustomParticle from './customParticle/customParticle';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
-import LifetimeParticleSystem from './customParticle/LifetimeParticleSystem';
+import { Suspense, useEffect } from 'react';
+import GlobalState from './GlobalStates';
 
 export default function Scene() {
-  const vat = "Plumera"
+  const { setIsMobile } = GlobalState();
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const isMobileDevice =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      setIsMobile(isMobileDevice);
+    }, [])
+
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <LevaWraper initialHidden={true} />
-      <TrailProvider>
-        <Canvas
-          shadows
-          gl={{ shadowMapType: THREE.PCFSoftShadowMap }}
-        >
+      <Canvas
+        shadows
+        gl={{ shadowMapType: THREE.PCFSoftShadowMap }}
+      >
+        <Suspense fallback={null}>
           <color attach="background" args={['#000000']} />
 
           <PerspectiveCamera
@@ -39,26 +44,21 @@ export default function Scene() {
             fov={60}
           />
 
-          {/* <CameraRotator /> */}
-          <CameraControls />
+          <CameraRotator />
+          {/* <CameraControls /> */}
+
+          <CustomTrail />
+          <FlowFieldParticleSystem />
+          <VATMeshSpawner />
+
           <EnvironmentSetup />
-          {/* <CustomTrail /> */}
           <DirectionalLights />
           <Effects />
-          {/* <VATMeshSpawner vatData={{
-            gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
-            posTexPath: "vat/Dahlia Clean_pos.exr",
-            nrmTexPath: "vat/Dahlia Clean_nrm.png",
-            mapTexPath: "textures/tujlip.png",
-            maskTexPath: "textures/blackanedwthioe.png",
-            metaPath: "vat/Dahlia Clean_meta.json"
-          }} /> */}
-          {/* <CustomParticle /> */}
-          {/* <FlowFieldParticleSystem /> */}
-          {/* <CustomParticle /> */}
-          <LifetimeParticleSystem />
-        </Canvas>
-      </TrailProvider>
+
+          <Preload all />
+        </Suspense>
+      </Canvas>
+      <Loader />
     </div >
   );
 }

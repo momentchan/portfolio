@@ -2,14 +2,9 @@ import { Ribbon, ParticleDebugPoints } from '../../../lib/trail-gpu';
 import { useFrame } from '@react-three/fiber';
 import { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';
 import { useEffect, useState, useRef } from 'react';
-import { useControls } from 'leva';
 import { gsap } from 'gsap';
-import * as THREE from 'three';
-import { useTrailContext } from '../contexts/TrailContext';
 
 export function CustomTrail() {
-  const { setNodeTexture } = useTrailContext()
-  
   // Trail update state - controlled by mouse
   const [trailUpdateEnabled, setTrailUpdateEnabled] = useState(true);
   const [rate, setRate] = useState(0);
@@ -45,13 +40,6 @@ export function CustomTrail() {
     nodeTexture: trails.nodeTexture!,
     trailTexture: trails.trailTexture!,
   });
-
-  // Notify context when nodeTexture changes
-  useEffect(() => {
-    if (trails.nodeTexture) {
-      setNodeTexture(trails.nodeTexture);
-    }
-  }, [trails.nodeTexture, setNodeTexture]);
 
   // Keyboard event handlers for trail update control
   useEffect(() => {
