@@ -1,7 +1,11 @@
 import * as THREE from 'three'
-import { VATMeta } from '../types'
+import { VATMeta, SpawnedMeshData } from '../types'
 
-// Ensure UV2 attribute exists for VAT geometry
+// ========== VAT Geometry Utils ==========
+
+/**
+ * Ensure UV2 attribute exists for VAT geometry
+ */
 export function ensureUV2ForVAT(geometry: THREE.BufferGeometry, meta: VATMeta): void {
   if (geometry.getAttribute('uv2')) return
 
@@ -23,11 +27,15 @@ export function ensureUV2ForVAT(geometry: THREE.BufferGeometry, meta: VATMeta): 
   geometry.setAttribute('uv2', new THREE.BufferAttribute(uv2Array, 2))
 }
 
-// Generate random position inside sphere
+// ========== Position Utils ==========
+
+/**
+ * Generate random position inside sphere
+ */
 export function generateSpherePosition(radius: number = 0.5): [number, number, number] {
-  const theta = Math.random() * Math.PI * 2 // 0 to 2π
-  const phi = Math.acos(2 * Math.random() - 1) // 0 to π
-  const r = Math.cbrt(Math.random()) * radius // Cube root for uniform volume distribution
+  const theta = Math.random() * Math.PI * 2
+  const phi = Math.acos(2 * Math.random() - 1)
+  const r = Math.cbrt(Math.random()) * radius
   
   return [
     r * Math.sin(phi) * Math.cos(theta),
@@ -36,7 +44,45 @@ export function generateSpherePosition(radius: number = 0.5): [number, number, n
   ]
 }
 
-// Calculate camera-facing rotation
+/**
+ * Check if a position is valid (not too close to existing meshes)
+ */
+export function isPositionValid(
+  position: THREE.Vector3,
+  existingMeshes: SpawnedMeshData[],
+  minDistance: number = 0.1
+): boolean {
+  return !existingMeshes.some(mesh => {
+    const meshPos = new THREE.Vector3(mesh.position[0], mesh.position[1], mesh.position[2])
+    return position.distanceTo(meshPos) < minDistance
+  })
+}
+
+/**
+ * Generate a valid spawn position that doesn't collide with existing meshes
+ */
+export function generateValidPosition(
+  existingMeshes: SpawnedMeshData[],
+  radius: number = 0.5,
+  minDistance: number = 0.1,
+  maxAttempts: number = 50
+): THREE.Vector3 | null {
+  for (let i = 0; i < maxAttempts; i++) {
+    const position = generateSpherePosition(radius)
+    const vectorPosition = new THREE.Vector3(position[0], position[1], position[2])
+    
+    if (isPositionValid(vectorPosition, existingMeshes, minDistance)) {
+      return vectorPosition
+    }
+  }
+  return null
+}
+
+// ========== Rotation Utils ==========
+
+/**
+ * Calculate camera-facing rotation
+ */
 export function calculateCameraFacingRotation(
   meshPosition: THREE.Vector3,
   cameraPosition: THREE.Vector3,
@@ -44,22 +90,21 @@ export function calculateCameraFacingRotation(
 ): THREE.Quaternion {
   const direction = cameraPosition.clone().sub(meshPosition).normalize()
   
-  // Apply offset by rotating the direction vector
   if (offsetAngle !== 0) {
     const rotationMatrix = new THREE.Matrix4().makeRotationY(offsetAngle)
     direction.applyMatrix4(rotationMatrix)
   }
   
-  const up = new THREE.Vector3(0, 1, 0) // Y-axis
+  const up = new THREE.Vector3(0, 1, 0)
   const quaternion = new THREE.Quaternion()
-  
-  // Set quaternion to rotate from current up axis to camera direction
   quaternion.setFromUnitVectors(up, direction)
   
   return quaternion
 }
 
-// Apply random rotation offsets
+/**
+ * Apply random rotation offsets
+ */
 export function applyRandomRotationOffsets(
   baseQuaternion: THREE.Quaternion,
   xRotationRange: [number, number] = [-45, 45],
@@ -77,11 +122,19 @@ export function applyRandomRotationOffsets(
     THREE.MathUtils.degToRad(randomZ)
   )
   
-  // Combine rotations
   const result = baseQuaternion.clone()
   result.multiply(xRotationQuaternion)
   result.multiply(zRotationQuaternion)
   
   return result
+}
+
+// ========== Spawner Utils ==========
+
+/**
+ * Create unique ID for spawned mesh
+ */
+export function createSpawnId(counter: number): number {
+  return Date.now() + counter + Math.random() * 1000000
 }
 

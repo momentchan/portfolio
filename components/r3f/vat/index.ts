@@ -3,7 +3,18 @@ export { VATMesh } from './VATMesh'
 export { VATMeshLifecycle } from './VATMeshLifecycle'
 export { VATMeshSpawner } from './VATMeshSpawner'
 export { AutoSpawner } from './AutoSpawner'
+export { InteractiveTrigger } from './InteractiveTrigger'
+
+// Hooks
 export { useVATPreloader } from './VATPreloader'
+export { 
+  useVATAnimation,
+  useTriggerRate 
+} from './hooks/useVATAnimation'
+export {
+  useAnimatedValue,
+  useAnimatedValues
+} from './hooks/useAnimatedValue'
 
 // Type exports
 export type {
@@ -15,25 +26,37 @@ export type {
   SpawnedMeshData
 } from './types'
 
-export type { DebugAxesProps } from './components/DebugAxes'
-
 // Utility exports
 export {
   ensureUV2ForVAT,
   generateSpherePosition,
   calculateCameraFacingRotation,
-  applyRandomRotationOffsets
+  applyRandomRotationOffsets,
+  generateValidPosition,
+  isPositionValid,
+  createSpawnId
 } from './utils'
 
-// Component exports
-export { DebugAxes } from './components/DebugAxes'
+export {
+  setupVATMaterials,
+  cloneAndSetupVATScene,
+  calculateVATFrame
+} from './utils/materialSetup'
 
 // Material exports
 export {
   createVATMaterial,
   createVATDepthMaterial,
-  updateVATMaterial
+  updateVATMaterial,
+  updatePhysicalProperties,
+  updateAdvancedProperties
 } from './materials'
 
-// Constants
-export { DEFAULT_MATERIAL_CONTROLS } from './types'
+// Animation exports
+export { 
+  createVATLifecycleTimeline,
+} from './animations/gsapTimeline'
+export type {
+  TimelineAnimationConfig,
+  AnimationRefs
+} from './animations/gsapTimeline'

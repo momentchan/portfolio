@@ -1,5 +1,5 @@
 import { ParticleSystem, ZeroVelocityConfig, UniformColorConfig, RandomSizeConfig, RandomPositionConfig } from "@/lib/particle-system";
-import { useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from 'three';
 import { VATBehavior } from "./behaviors/VATBehavior";
@@ -9,7 +9,6 @@ import { VATParticleSystemProps } from "./types";
 import { createVATParticleMaterial, updateCommonMaterialUniforms } from "./materials/particleMaterial";
 import { generateRandomVertexIds, generateBasePosTexture, generateUV2Texture } from "./utils/textureUtils";
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
-import { useParticleAnimation } from "./hooks/useParticleAnimation";
 
 export default function VATParticleSystem({
     frame,
@@ -59,9 +58,6 @@ export default function VATParticleSystem({
     // Create custom material
     const customMaterial = useMemo(() => createVATParticleMaterial(), []);
 
-    // Use shared animation hook
-    const animate = useParticleAnimation({ duration: 3, delay: 1 });
-
     const lifetimeTexture = useMemo(() => {
         return generateLifetimeTexture(particleCount, controls.minLifetime, controls.maxLifetime, gl);
     }, [controls.minLifetime, controls.maxLifetime, gl, particleCount]);
@@ -82,12 +78,6 @@ export default function VATParticleSystem({
         return null;
     }, [geometry, randomVertexIds, particleCount]);
 
-    useEffect(() => {
-        if (particleSystemRef.current) {
-            const meshRef = particleSystemRef.current.getMeshRef();
-            meshRef.userData = { isVAT: false };
-        }
-    }, []);
 
     useFrame((state) => {
         if (!particleSystemRef.current) return;

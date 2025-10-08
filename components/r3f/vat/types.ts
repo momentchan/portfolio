@@ -50,47 +50,47 @@ export interface VATMaterialControls {
   speed: number
 }
 
-// VATMesh props interface
-export interface VATMeshProps {
-  // Preloaded resources
+// Common VAT props shared across components
+export interface CommonVATProps {
   gltf: THREE.Group
   posTex: THREE.Texture
   nrmTex?: THREE.Texture | null
   mapTex?: THREE.Texture | null
   maskTex?: THREE.Texture | null
   metaData: VATMeta
+  position?: [number, number, number]
+  id?: string | number
+}
+
+// VATMesh props interface
+export interface VATMeshProps extends CommonVATProps {
   speed?: number
   paused?: boolean
   useDepthMaterial?: boolean
-  position?: [number, number, number]
   rotation?: [number, number, number]
   scale?: number | [number, number, number]
-  // External frame control
-  frame?: number
-  // Interactive trigger props
+  frameRatio?: number
   interactive?: boolean
-  onTrigger?: (triggerType: 'click' | 'hover' | 'collision', data?: any) => void
   triggerSize?: number
-  id?: string | number
   globalRatio?: number
+  onTrigger?: (triggerType: 'click' | 'hover' | 'collision', data?: any) => void
 }
 
-// VATMeshLifecycle props interface
-export interface VATMeshLifecycleProps extends Omit<VATMeshProps, 'frame'> {
+// Lifecycle animation timing
+export interface LifecycleTimingProps {
   maxScale?: number
-  // Frame lifecycle timing
   frameForwardDuration?: number
   frameHoldDuration?: number
   frameBackwardDuration?: number
-  // Scaling timing (relative to frame timing)
   scaleInDuration?: number
   scaleOutDuration?: number
-  // Rotation timing (relative to frame timing)
   rotateInDuration?: number
   rotateOutDuration?: number
-  // Camera tracking
-  trackCamera?: boolean
-  angleOffset?: number
+}
+
+// VATMeshLifecycle props interface
+export interface VATMeshLifecycleProps extends CommonVATProps, LifecycleTimingProps {
+  paused?: boolean
   onComplete?: () => void
 }
 
@@ -101,30 +101,4 @@ export interface SpawnedMeshData {
   scale: number
   holdDuration: number
   animDuration: number
-}
-
-// Default material controls
-export const DEFAULT_MATERIAL_CONTROLS: VATMaterialControls = {
-  roughness: 0.4,
-  metalness: 0.6,
-  transmission: 0,
-  thickness: 0,
-  ior: 1.5,
-  clearcoat: 0.1,
-  clearcoatRoughness: 0.1,
-  reflectivity: 0.5,
-  envMapIntensity: 1,
-  sheen: 0,
-  sheenRoughness: 0.1,
-  sheenColor: '#3695ff',
-  iridescence: 0,
-  iridescenceIOR: 1.3,
-  iridescenceThicknessMin: 100,
-  iridescenceThicknessMax: 400,
-  attenuationDistance: Infinity,
-  attenuationColor: '#ffffff',
-  bumpScale: 1.0,
-  noiseScale: 1,
-  noiseStrength: 0.3,
-  speed: 0.3,
 }

@@ -30,14 +30,16 @@ export function InteractiveTrigger({
         triggerCooldown: 500 // 500ms cooldown between triggers
     })
 
-    // Handle trigger events with cooldown
+    // Handle trigger events with cooldown (only for clicks)
     const handleTrigger = (triggerType: 'click' | 'hover' | 'collision', data?: any) => {
-        const now = Date.now()
-        if (now - triggerDataRef.current.lastTriggerTime < triggerDataRef.current.triggerCooldown) {
-            return // Cooldown active
+        // Only apply cooldown to clicks
+        if (triggerType === 'click') {
+            const now = Date.now()
+            if (now - triggerDataRef.current.lastTriggerTime < triggerDataRef.current.triggerCooldown) {
+                return
+            }
+            triggerDataRef.current.lastTriggerTime = now
         }
-
-        triggerDataRef.current.lastTriggerTime = now
 
         if (onTrigger) {
             onTrigger(triggerType, {
@@ -82,15 +84,14 @@ export function InteractiveTrigger({
 
     if (!visible) return null
 
-  return (
-    <mesh
-      ref={triggerRef}
-      position={position}
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-      userData={{ isVAT: false }} // Mark as non-VAT to avoid clear()
-    >
+    return (
+        <mesh
+            ref={triggerRef}
+            position={position}
+            onClick={handleClick}
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}
+        >
             <boxGeometry args={[size, size, size]} />
             <meshBasicMaterial
                 color={getVisualColor()}
