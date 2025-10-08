@@ -137,6 +137,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         burstInterval={[20000, 30000]} // 25-30 seconds between bursts
         burstCount={[10, 15]} // 10-15 VATs per burst
         burstDuration={3000} // 5 seconds to spawn all burst VATs
+        // enabled={false}
       />
 
       {/* Pre-warm GPU with hidden VATMesh */}

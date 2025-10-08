@@ -8,7 +8,7 @@ import { createVATMaterial, createVATDepthMaterial, updatePhysicalProperties, up
 import { ensureUV2ForVAT } from './utils'
 import { InteractiveTrigger } from './InteractiveTrigger'
 import { gsap } from 'gsap'
-import LifetimeParticleSystem from '../customParticle/LifetimeParticleSystem'
+import VATParticleSystem from '../customParticle/VATParticleSystem'
 
 // Material properties controls (physical + advanced combined)
 function useMaterialPropertiesControls() {
@@ -220,7 +220,7 @@ export function VATMesh({
           />
         )}
         {vatMesh.current && (
-          <LifetimeParticleSystem
+          <VATParticleSystem
             frame={externalFrame || 0}
             posTex={posTex}
             meta={metaData}
