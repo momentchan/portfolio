@@ -14,7 +14,7 @@ export {
 export {
   useAnimatedValue,
   useAnimatedValues
-} from './hooks/useAnimatedValue'
+} from '../hooks/useAnimatedValue'
 
 // Type exports
 export type {

@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { VATMeshLifecycleProps } from './types'
 import { calculateCameraFacingRotation, applyRandomRotationOffsets } from './utils'
 import { createVATLifecycleTimeline } from './animations/gsapTimeline'
-import { useAnimatedValue } from './hooks/useAnimatedValue'
+import { useAnimatedValue } from '../hooks/useAnimatedValue'
 
 export function VATMeshLifecycle({
   gltf,

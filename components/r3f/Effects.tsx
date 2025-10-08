@@ -1,7 +1,8 @@
 'use client';
 
-import { EffectComposer, Bloom, DepthOfField, FXAA } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import { useControls } from 'leva';
+import CustomBlurEffect from './effects/CustomBlurEffect';
 
 export default function Effects() {
   const bloomParams = useControls('Effects.Bloom', {
@@ -21,19 +22,20 @@ export default function Effects() {
 
   return (
     <EffectComposer>
-      <Bloom 
+      <Bloom
         intensity={bloomParams.intensity}
         luminanceThreshold={bloomParams.luminanceThreshold}
         luminanceSmoothing={bloomParams.luminanceSmoothing}
         mipmapBlur={bloomParams.mipmapBlur}
       />
-      <DepthOfField 
+      <DepthOfField
         focusDistance={dofParams.focusDistance}
         focalLength={dofParams.focalLength}
         bokehScale={dofParams.bokehScale}
         focusRange={dofParams.focusRange}
         blur={dofParams.blur}
       />
+      <CustomBlurEffect />
     </EffectComposer>
   );
 }
