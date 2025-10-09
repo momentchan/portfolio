@@ -46,31 +46,28 @@ export default function Scene() {
         shadows
         gl={{ shadowMapType: THREE.PCFSoftShadowMap }}
       >
-        <Suspense fallback={null}>
-          <color attach="background" args={['#000000']} />
+        <color attach="background" args={['#000000']} />
 
-          <PerspectiveCamera
-            makeDefault
-            position={[0, 0, 0.75]}
-            zoom={1}
-            near={0.01}
-            far={5}
-            fov={60}
-          />
+        <PerspectiveCamera
+          makeDefault
+          position={[0, 0, 0.75]}
+          zoom={1}
+          near={0.01}
+          far={5}
+          fov={60}
+        />
 
-          <CameraRotator />
-          {/* <CameraControls /> */}
+        <CameraRotator />
+        {/* <CameraControls /> */}
 
-          <CustomTrail />
-          <FlowFieldParticleSystem />
-          <VATMeshSpawner />
-          <EnvironmentSetup />
-          <DirectionalLights />
-          <Effects />
-          <BGM />
-
-          <Preload all />
-        </Suspense>
+        <CustomTrail />
+        <FlowFieldParticleSystem />
+        <VATMeshSpawner />
+        <EnvironmentSetup />
+        <DirectionalLights />
+        <Effects />
+        <BGM />
+        <Preload all />
       </Canvas>
     </div >
   );

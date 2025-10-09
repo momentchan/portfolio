@@ -1,5 +1,6 @@
 import Scene from '@/components/r3f/Scene';
 import LoadingPage from '@/components/LoadingPage';
+import UICanvas from '@/components/ui/UICanvas';
 
 export default function HomePage() {
   return (
@@ -9,6 +10,7 @@ export default function HomePage() {
       {/* Fullscreen background - Canvas loads in background */}
       <div className="fixed inset-0 z-0">
         <Scene />
+        <UICanvas />
       </div>
 
       {/* Foreground content */}
