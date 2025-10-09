@@ -13,6 +13,7 @@ import DirectionalLights from './DirectionalLights';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
 import { Suspense, useEffect } from 'react';
 import GlobalState from './GlobalStates';
+import BGM from './Bgm';
 
 export default function Scene() {
   const { setIsMobile, setPaused } = GlobalState();
@@ -66,6 +67,7 @@ export default function Scene() {
           <EnvironmentSetup />
           <DirectionalLights />
           <Effects />
+          <BGM />
 
           <Preload all />
         </Suspense>

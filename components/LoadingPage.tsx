@@ -12,6 +12,14 @@ export default function LoadingPage() {
   const { progress, active } = useProgress();
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
+  // Check for dev mode via URL parameter (client-side only)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('dev') === 'true') {
+      setStarted(true); // Skip loading page in dev mode
+    }
+  }, [setStarted]);
+
   // Auto-start when loading complete and last word shown
   useEffect(() => {
     if (progress === 100 && !active && currentWordIndex >= WORDS.length - 1) {
@@ -26,6 +34,9 @@ export default function LoadingPage() {
       setCurrentWordIndex(prev => prev + 1);
     }
   }, [currentWordIndex]);
+
+  // Early return AFTER all hooks
+  if (started) return null;
 
   return (
     <div
