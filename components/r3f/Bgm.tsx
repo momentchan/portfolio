@@ -1,100 +1,90 @@
-import React, { useEffect, useRef } from 'react';
-import { Audio, AudioLoader } from 'three';
+import { useEffect, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import GlobalStates from './GlobalStates';
 
+interface SoundData {
+    file: string;
+    volume: number;
+    delay: number;
+}
+
 interface SoundRef {
     audio: THREE.Audio<GainNode>;
-    data: { file: string; volume: number; delay: number };
+    data: SoundData;
 }
+
+const SOUND_FILES: SoundData[] = [
+    { file: 'audio/fever-dreams-3am.mp3', volume: 0.3, delay: 0 },
+    { file: 'audio/noise.mp3', volume: 0.15, delay: 0 },
+];
 
 export default function BGM() {
     const { camera } = useThree();
+    const { started, soundOn } = GlobalStates();
+    const soundsRef = useRef<SoundRef[]>([]);
+    const listenerRef = useRef<THREE.AudioListener | null>(null);
+    const hasInitialized = useRef(false);
 
-    const bgmRefs = useRef<SoundRef[]>([]);
-    const { started } = GlobalStates();
-    const listener = useRef(new THREE.AudioListener()).current;
-    const hasStartedPlayback = useRef(false);
-
-    // Define sound files to play
-    const soundData = [
-        // { file: '/space.mp3', volume: 0.15, delay: 0, signal: false },
-        { file: 'audio/fever-dreams-3am.mp3', volume: 0.3, delay: 0 },
-        { file: 'audio/noise.mp3', volume: 0.15, delay: 0 },
-        // { file: '/narrative.mp3', volume: 0.02, delay: 3, signal: true }
-    ];
-
+    // Setup audio listener
     useEffect(() => {
-        camera.add(listener);
+        if (!listenerRef.current) {
+            listenerRef.current = new THREE.AudioListener();
+            camera.add(listenerRef.current);
+        }
         
         return () => {
-            camera.remove(listener);
+            if (listenerRef.current) {
+                camera.remove(listenerRef.current);
+            }
         };
-    }, [camera, listener])
+    }, [camera]);
 
+    // Load audio files when started
     useEffect(() => {
-        if (!started || hasStartedPlayback.current) return;
+        if (!started || hasInitialized.current || !listenerRef.current) return;
 
-        console.log('BGM: Attempting to start playback');
-        hasStartedPlayback.current = true;
+        hasInitialized.current = true;
+        const audioLoader = new THREE.AudioLoader();
 
-        soundData.forEach(data => {
-            const audio = new THREE.Audio(listener);
-            const audioLoader = new THREE.AudioLoader();
+        SOUND_FILES.forEach(data => {
+            const audio = new THREE.Audio(listenerRef.current!);
             
             audioLoader.load(
                 data.file,
                 (buffer) => {
-                    console.log(`BGM: Loaded ${data.file}`);
                     audio.setBuffer(buffer);
                     audio.setLoop(true);
                     audio.setVolume(data.volume);
-                    
-                    // Play with delay if specified
-                    const playAudio = () => {
-                        audio.play();
-                        console.log(`BGM: Playing ${data.file}`);
-                    };
-
-                    if (data.delay > 0) {
-                        setTimeout(playAudio, data.delay * 1000);
-                    } else {
-                        playAudio();
-                    }
                 },
-                undefined, // onProgress
-                (error) => {
-                    console.error(`BGM: Error loading ${data.file}:`, error);
-                }
+                undefined,
+                (error) => console.error(`Failed to load ${data.file}:`, error)
             );
 
-            bgmRefs.current.push({ audio: audio, data: data });
+            soundsRef.current.push({ audio, data });
         });
 
-        // Cleanup on unmount
         return () => {
-            bgmRefs.current.forEach((bgm) => {
-                if (bgm.audio.isPlaying) {
-                    bgm.audio.stop();
-                }
+            soundsRef.current.forEach(({ audio }) => {
+                if (audio.isPlaying) audio.stop();
+                audio.disconnect();
             });
-            bgmRefs.current = [];
+            soundsRef.current = [];
         };
-    }, [started, listener]);
+    }, [started]);
 
-    // useEffect(() => {
-    //     if (bgmRefs.current.length > 0) {
-    //         bgmRefs.current.forEach((bgm) => {
-    //             if (soundOn) {
-    //                 if (!bgm.data.signal || (bgm.data.signal && !noted))
-    //                     bgm.audio.play(bgm.data.delay);
-    //             } else {
-    //                 bgm.audio.stop();
-    //             }
-    //         });
-    //     }
-    // }, [soundOn]);
+    // Toggle audio playback based on soundOn state
+    useEffect(() => {
+        soundsRef.current.forEach(({ audio }) => {
+            if (!audio.buffer) return;
+            
+            if (soundOn && !audio.isPlaying) {
+                audio.play();
+            } else if (!soundOn && audio.isPlaying) {
+                audio.pause();
+            }
+        });
+    }, [soundOn]);
 
     return null;
 }

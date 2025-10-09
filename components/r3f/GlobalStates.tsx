@@ -7,6 +7,8 @@ interface GlobalState {
   setStarted: (value: boolean) => void;
   paused: boolean;
   setPaused: (value: boolean | ((prev: boolean) => boolean)) => void;
+  soundOn: boolean;
+  setSoundOn: (value: boolean) => void;
 }
 
 export default create<GlobalState>((set) => ({
@@ -18,4 +20,6 @@ export default create<GlobalState>((set) => ({
   setPaused: (value) => set((state) => ({ 
     paused: typeof value === 'function' ? value(state.paused) : value 
   })),
+  soundOn: false,
+  setSoundOn: (value) => set({ soundOn: value }),
 }))
