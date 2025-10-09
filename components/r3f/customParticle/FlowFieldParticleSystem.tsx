@@ -8,6 +8,7 @@ import { useControls } from "leva";
 import { createFlowFieldParticleMaterial, updateCommonMaterialUniforms } from "./materials/particleMaterial";
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { useParticleAnimation } from "./hooks/useParticleAnimation";
+import { usePointerTracking } from "./hooks/usePointerTracking";
 
 export default function FlowFieldParticleSystem() {
     const { camera, viewport } = useThree();
@@ -22,7 +23,7 @@ export default function FlowFieldParticleSystem() {
     }, { collapsed: true });
 
     const particleSystemRef = useRef<any>(null);
-    const prevPointerRef = useRef({ x: 0, y: 0 });
+    const { calculatePointerSpeed } = usePointerTracking();
 
     const config = useMemo(() => ({
         position: new RandomSpherePositionConfig(0.3, [0, 0, 0]),
@@ -47,16 +48,10 @@ export default function FlowFieldParticleSystem() {
         const time = state.clock.elapsedTime;
 
         // Calculate pointer movement speed
-        const currentPointer = { x: state.pointer.x, y: state.pointer.y };
-        const pointerDelta = {
-            x: currentPointer.x - prevPointerRef.current.x,
-            y: currentPointer.y - prevPointerRef.current.y
-        };
-        const pointerSpeed = Math.sqrt(
-            pointerDelta.x * pointerDelta.x + pointerDelta.y * pointerDelta.y
-        ) / delta;
-        prevPointerRef.current = currentPointer;
-        const speedMultiplier = Math.max(0, Math.min(1, (pointerSpeed - 0) / (0.1 - 0)));
+        const { pointerSpeedMultiplier } = calculatePointerSpeed(
+            { x: state.pointer.x, y: state.pointer.y },
+            delta
+        );
 
         const positionTex = particleSystemRef.current.getParticleTexture?.();
         const velocityTex = particleSystemRef.current.getVelocityTexture?.();
@@ -82,7 +77,7 @@ export default function FlowFieldParticleSystem() {
         // Update behavior uniforms
         const behavior = behaviorRef.current;
         behavior.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
-        behavior.uniforms.uSpeedMultiplier.value = speedMultiplier;
+        behavior.uniforms.uPointerSpeedMultiplier.value = pointerSpeedMultiplier;
         behavior.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
         behavior.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
         behavior.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);

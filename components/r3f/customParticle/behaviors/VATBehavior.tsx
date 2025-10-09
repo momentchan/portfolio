@@ -25,6 +25,7 @@ export class VATBehavior extends ParticleBehavior {
             uNoiseStrength: { value: this.noiseStrength },
             uTimeScale: { value: this.timeScale },
             uUpwardSpeed: { value: this.upwardSpeed },
+            uGlobalRatio: { value: 0.0 },
             uLifetimeTexture: { value: null },
             uVatPosTex: { value: null },
             uFrames: { value: 0 },
@@ -106,11 +107,13 @@ export class VATBehavior extends ParticleBehavior {
             uniform float uDamping;
             uniform float uAnimateRate;
             uniform float uAvoidanceStrength;
+            uniform float uPointerSpeedMultiplier;
             uniform mat4 uModelViewProjectionMatrix;
             uniform mat4 uInverseModelViewProjectionMatrix;
             uniform float uAvoidanceRadius;
             uniform vec2 uPointer;
             uniform float uAspect;
+            uniform float uGlobalRatio;
 
             void main() {
                 vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -131,6 +134,7 @@ export class VATBehavior extends ParticleBehavior {
                     float ageNormalized = age / lifetime;
                     float boost = 1.0 + smoothstep(0.0, 0.4, uAnimateRate) * 
                                        smoothstep(0.4, 0.2, ageNormalized) * 2.0;
+                    boost *= smoothstep(0.0, 0.1, uGlobalRatio);
 
                     // Upward movement
                     vec3 up = vec3(0.0, uUpwardSpeed, 0.0);
@@ -150,7 +154,7 @@ export class VATBehavior extends ParticleBehavior {
                         uInverseModelViewProjectionMatrix
                     );
 
-                    vec3 acc = (up + noise) * boost + avoidance;
+                    vec3 acc = (up + noise) * boost + avoidance * uPointerSpeedMultiplier;
                     velocity += acc * delta;
                     velocity *= (1.0 - uDamping * delta);
                 }

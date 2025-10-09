@@ -30,7 +30,6 @@ export class FlowFieldBehavior extends ParticleBehavior {
             uAttractStrength: { value: this.attractStrength },
             uGravity: { value: new THREE.Vector3(0, -0.1, 0) },
             uMaxSpeed: { value: 2.0 },
-            uSpeedMultiplier: { value: 1.0 },
         };
 
         // Override common uniforms with constructor values
@@ -86,7 +85,7 @@ export class FlowFieldBehavior extends ParticleBehavior {
             uniform float uAspect;
             uniform float uAvoidanceStrength;
             uniform float uAvoidanceRadius;
-            uniform float uSpeedMultiplier;
+            uniform float uPointerSpeedMultiplier;
             uniform mat4 uModelViewProjectionMatrix;
             uniform mat4 uInverseModelViewProjectionMatrix;
 
@@ -101,14 +100,14 @@ export class FlowFieldBehavior extends ParticleBehavior {
                     uPointer,
                     uAspect,
                     uAvoidanceRadius,
-                    uAvoidanceStrength * uSpeedMultiplier,
+                    uAvoidanceStrength * uPointerSpeedMultiplier,
                     uModelViewProjectionMatrix,
                     uInverseModelViewProjectionMatrix
                 );
                 
                 vec3 velocity = safeNormalize(curl + attract);
                 
-                return vec4(velocity * uSpeed + avoidance, length(avoidance) * uSpeedMultiplier);
+                return vec4(velocity * uSpeed + avoidance, length(avoidance) * uPointerSpeedMultiplier);
             }
 
             void main() {

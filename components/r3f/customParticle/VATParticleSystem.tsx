@@ -9,6 +9,7 @@ import { VATParticleSystemProps } from "./types";
 import { createVATParticleMaterial, updateCommonMaterialUniforms } from "./materials/particleMaterial";
 import { generateRandomVertexIds, generateBasePosTexture, generateUV2Texture } from "./utils/textureUtils";
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
+import { usePointerTracking } from "./hooks/usePointerTracking";
 
 export default function VATParticleSystem({
     frame,
@@ -37,6 +38,7 @@ export default function VATParticleSystem({
     }, { collapsed: true });
 
     const particleSystemRef = useRef<any>(null);
+    const { calculatePointerSpeed } = usePointerTracking();
 
     const config = useMemo(() => ({
         position: new RandomPositionConfig({ x: [-0, 0], y: [-0, 0], z: [0, 0] }),
@@ -79,10 +81,17 @@ export default function VATParticleSystem({
     }, [geometry, randomVertexIds, particleCount]);
 
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (!particleSystemRef.current) return;
 
         const time = state.clock.elapsedTime;
+
+        // Calculate pointer movement speed
+        const { pointerSpeedMultiplier } = calculatePointerSpeed(
+            { x: state.pointer.x, y: state.pointer.y },
+            delta
+        );
+
         const positionTex = particleSystemRef.current.getParticleTexture?.();
         const velocityTex = particleSystemRef.current.getVelocityTexture?.();
         const modelMatrix = getModelMatrix(particleSystemRef);
@@ -111,15 +120,15 @@ export default function VATParticleSystem({
 
         // Update behavior uniforms
         const behavior = behaviorRef.current;
+        if (uv2Texture) behavior.uniforms.uUV2Texture.value = uv2Texture;
+        if (basePosTexture) behavior.uniforms.uBasePosTexture.value = basePosTexture;
+
         behavior.uniforms.uVatPosTex.value = posTex;
         behavior.uniforms.uFrames.value = meta.frameCount;
         behavior.uniforms.uTexW.value = meta.texWidth;
         behavior.uniforms.uFrame.value = Math.min(frame * meta.frameCount, meta.frameCount - 5);
-
-        if (uv2Texture) behavior.uniforms.uUV2Texture.value = uv2Texture;
-        if (basePosTexture) behavior.uniforms.uBasePosTexture.value = basePosTexture;
-
         behavior.uniforms.uStoreDelta.value = storeDelta;
+        behavior.uniforms.uGlobalRatio.value = globalRatio;
         behavior.uniforms.uDamping.value = 0.98;
         behavior.uniforms.uTime.value = time;
         behavior.uniforms.uLifetimeTexture.value = lifetimeTexture;
@@ -131,6 +140,7 @@ export default function VATParticleSystem({
         behavior.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
         behavior.uniforms.uAspect.value = viewport.aspect;
         behavior.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
+        behavior.uniforms.uPointerSpeedMultiplier.value = pointerSpeedMultiplier;
         behavior.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
         behavior.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
     });

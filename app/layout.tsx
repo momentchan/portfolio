@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import AnimatedCursor from "@/components/AnimatedCursor";
 
 const pragmatica = localFont({
   src: [
@@ -20,7 +21,7 @@ const pragmatica = localFont({
 
 
 export const metadata: Metadata = {
-  title: "Ming Jyun Hung",
+  title: "Ming Jyun Hung | Creative Technologist",
   description: "Creative Technologist | Technical Artist",
 };
 

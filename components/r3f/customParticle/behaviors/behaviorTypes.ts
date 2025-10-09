@@ -7,6 +7,7 @@ export interface CommonBehaviorUniforms {
     uTime: { value: number };
     uDamping: { value: number };
     uPointer: { value: THREE.Vector2 };
+    uPointerSpeedMultiplier: { value: number };
     uAspect: { value: number };
     uAvoidanceStrength: { value: number };
     uAvoidanceRadius: { value: number };
@@ -43,6 +44,7 @@ export interface VATBehaviorUniforms extends
     CommonBehaviorUniforms, 
     NoiseBehaviorUniforms, 
     VATBaseUniforms {
+    uGlobalRatio: { value: number };
     uUpwardSpeed: { value: number };
     uLifetimeTexture: { value: THREE.Texture | null };
     uAnimateRate: { value: number };
@@ -59,7 +61,7 @@ export interface FlowFieldBehaviorUniforms extends
     uAttractStrength: { value: number };
     uGravity: { value: THREE.Vector3 };
     uMaxSpeed: { value: number };
-    uSpeedMultiplier: { value: number };
+    uPointerSpeedMultiplier: { value: number };
 }
 
 /**
@@ -70,6 +72,7 @@ export function createCommonUniforms(): CommonBehaviorUniforms {
         uTime: { value: 0.0 },
         uDamping: { value: 0.98 },
         uPointer: { value: new THREE.Vector2(0.0, 0.0) },
+        uPointerSpeedMultiplier: { value: 0.0 },
         uAspect: { value: 1.0 },
         uAvoidanceStrength: { value: 0.0 },
         uAvoidanceRadius: { value: 0.0 },

@@ -119,7 +119,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         y: -(event.clientY / window.innerHeight) * 2 + 1
       }
 
-      const worldPos = screenToWorldAtDepth(pointer, camera, 1)
+      const worldPos = screenToWorldAtDepth(pointer, camera, MathUtils.randFloat(1, 2))
       spawnVATMesh(worldPos)
     }
 

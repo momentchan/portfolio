@@ -30,7 +30,7 @@ export const createParticleVertexShader = (type: ParticleSystemType) => {
             vColor = color;
             vVel = vel;
             
-            ${isVAT ? `
+            ${isVAT ? /*glsl*/ `
                 float lifetime = texture2D(uLifetimeTexture, uv).r;
                 float age = pos.w / lifetime;
                 vAge = age;
@@ -39,11 +39,11 @@ export const createParticleVertexShader = (type: ParticleSystemType) => {
             vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
             float calculatedSize = size * sizeMultiplier * (300.0 / -mvPosition.z);
             
-            ${isVAT ? `
+            ${isVAT ? /*glsl*/ `
                 // Fade in/out based on age
                 calculatedSize *= smoothstep(0.0, 0.1, age) * smoothstep(1.0, 0.9, age);
                 // Fade in/out based on global animation ratio
-                calculatedSize *= smoothstep(0.0, 0.1, uGlobalRatio) * smoothstep(0.9, 0.85, uGlobalRatio);
+                calculatedSize *= smoothstep(0.9, 0.85, uGlobalRatio) * (1.0 + smoothstep(0.1, 0., uGlobalRatio) * 3.0);
             ` : ''}
             
             vSize = calculatedSize;
