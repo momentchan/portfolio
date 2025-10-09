@@ -148,6 +148,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         onSpawn={spawnVATMesh}
         minInterval={2000}
         maxInterval={5000}
+        initialDelay={5000}  // Wait 3 seconds before first spawn
         burstEnabled={true}
         burstInterval={[20000, 30000]}
         burstCount={[10, 15]}

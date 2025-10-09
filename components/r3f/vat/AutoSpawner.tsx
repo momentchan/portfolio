@@ -10,6 +10,7 @@ interface AutoSpawnerProps {
   burstInterval?: [number, number] // [min, max] seconds between bursts
   burstCount?: [number, number] // [min, max] number of VATs per burst
   burstDuration?: number // Duration in seconds to spawn all burst VATs
+  initialDelay?: number // Delay before first spawn in milliseconds
 }
 
 export const AutoSpawner: React.FC<AutoSpawnerProps> = ({
@@ -21,12 +22,14 @@ export const AutoSpawner: React.FC<AutoSpawnerProps> = ({
   burstEnabled = true,
   burstInterval = [25000, 30000], // 25-30 seconds
   burstCount = [10, 15], // 10-15 VATs
-  burstDuration = 5000 // 5 seconds
+  burstDuration = 5000, // 5 seconds
+  initialDelay = 0 // No delay by default
 }) => {
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
   const burstTimeoutIdRef = useRef<NodeJS.Timeout | null>(null)
   const burstSpawnTimeoutIdRef = useRef<NodeJS.Timeout | null>(null)
   const isVisibleRef = useRef(!document.hidden)
+  const hasStartedRef = useRef(false)
 
   const scheduleNextSpawn = () => {
     if (!enabled || !isVisibleRef.current) return
@@ -136,9 +139,20 @@ export const AutoSpawner: React.FC<AutoSpawnerProps> = ({
     // Listen for visibility changes
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
-    // Start the first spawn and burst
-    scheduleNextSpawn()
-    scheduleNextBurst()
+    // Start the first spawn and burst with initial delay
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true
+      
+      if (initialDelay > 0) {
+        setTimeout(() => {
+          scheduleNextSpawn()
+          scheduleNextBurst()
+        }, initialDelay)
+      } else {
+        scheduleNextSpawn()
+        scheduleNextBurst()
+      }
+    }
 
     return () => {
       if (timeoutIdRef.current) {

@@ -3,7 +3,7 @@ import { Effect } from 'postprocessing';
 import { Uniform } from 'three';
 import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
-import GlobalState from '../GlobalStates';
+import GlobalState from './GlobalStates';
 
 const fragmentShader = /* glsl */`
 uniform float uBlurAmount;
@@ -85,7 +85,7 @@ export default function CustomBlurEffect({ blurAmount = 1.0 }: CustomBlurEffectO
         const timeline = gsap.timeline();
         timeline.to(blurAmountRef.current, {
             value: 0,
-            duration: 8,
+            duration: 10,
             ease: "power2.inOut",
         });
     }, [started]);

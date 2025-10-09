@@ -2,7 +2,7 @@
 
 import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import { useControls } from 'leva';
-import CustomBlurEffect from './effects/CustomBlurEffect';
+import CustomBlurEffect from './CustomBlurEffect';
 
 export default function Effects() {
   const bloomParams = useControls('Effects.Bloom', {

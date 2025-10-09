@@ -27,22 +27,26 @@ export default function SplitText({
   onComplete 
 }: SplitTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || hasAnimated.current) return;
+    if (!containerRef.current) return;
 
     const chars = containerRef.current.querySelectorAll('.char');
+    if (chars.length === 0) return;
     
-    // Mark as animated before starting to prevent re-triggering
-    hasAnimated.current = true;
+    // Kill any existing animation
+    if (tweenRef.current) {
+      tweenRef.current.kill();
+    }
     
-    gsap.fromTo(
+    // Create new animation
+    tweenRef.current = gsap.fromTo(
       chars,
       {
         opacity: fade ? 0 : 1,
         y: move ? 20 : 0,
-        rotateX: spin ? -90 : 0,
+        rotateX: spin ? -45 : 0,
       },
       {
         opacity: 1,
@@ -55,7 +59,14 @@ export default function SplitText({
         onComplete,
       }
     );
-  }, [delay, duration, stagger, onComplete]);
+
+    // Cleanup on unmount or before next animation
+    return () => {
+      if (tweenRef.current) {
+        tweenRef.current.kill();
+      }
+    };
+  }, [text, delay, duration, stagger, fade, move, spin, onComplete]);
 
   const chars = text.split('').map((char, index) => (
     <span 
@@ -63,7 +74,8 @@ export default function SplitText({
       className="char inline-block"
       style={{ 
         transformStyle: 'preserve-3d',
-        transformOrigin: '0% 50%'
+        transformOrigin: '0% 50%',
+        opacity: 0  // Start invisible, GSAP will animate to 1
       }}
     >
       {char === ' ' ? '\u00A0' : char}
