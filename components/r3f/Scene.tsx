@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { CameraControls, Loader, PerspectiveCamera, Preload } from '@react-three/drei';
+import { CameraControls, PerspectiveCamera, Preload } from '@react-three/drei';
 import * as THREE from 'three';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './Effects';
@@ -15,15 +15,28 @@ import { Suspense, useEffect } from 'react';
 import GlobalState from './GlobalStates';
 
 export default function Scene() {
-  const { setIsMobile } = GlobalState();
+  const { setIsMobile, setPaused } = GlobalState();
 
   useEffect(() => {
     const userAgent = navigator.userAgent;
-    const isMobileDevice =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      setIsMobile(isMobileDevice);
-    }, [])
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    setIsMobile(isMobileDevice);
+  }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        setPaused((prev) => {
+          return !prev;
+        });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [setPaused]);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -50,7 +63,6 @@ export default function Scene() {
           <CustomTrail />
           <FlowFieldParticleSystem />
           <VATMeshSpawner />
-
           <EnvironmentSetup />
           <DirectionalLights />
           <Effects />
@@ -58,7 +70,6 @@ export default function Scene() {
           <Preload all />
         </Suspense>
       </Canvas>
-      <Loader />
     </div >
   );
 }

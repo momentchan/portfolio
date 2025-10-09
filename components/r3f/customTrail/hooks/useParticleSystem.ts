@@ -5,8 +5,11 @@ import { ParticleConfig, ParticleShaderConfig } from '../../../../lib/trail-gpu/
 import { customVelocityShader, customPositionShader } from '../particles';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
+import GlobalState from '../../GlobalStates';
 
-export function useParticleSystem(trailsNum: number, rate: number) {
+export function useParticleSystem(trailsNum: number) {
+  const { started } = GlobalState();
+
   // GSAP animated parameters - using state to trigger re-renders
   const [animatedParams, setAnimatedParams] = useState({
     speed: 0.6,
@@ -75,7 +78,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
 
   // GSAP animation setup for all parameters
   useEffect(() => {
-    if (!particles.setUniform) return;
+    if (!particles.setUniform || !started) return;
 
     const tl = gsap.timeline();
     // Animate multiple parameters in the same timeline step
@@ -91,7 +94,7 @@ export function useParticleSystem(trailsNum: number, rate: number) {
       onUpdate: () => setAnimatedParams({ ...animatedParams })
     })
 
-  }, [particles]);
+  }, [particles, started]);
 
   // Update uniforms when parameters change
   useEffect(() => {

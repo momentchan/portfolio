@@ -5,6 +5,8 @@ interface GlobalState {
   setIsMobile: (value: boolean) => void;
   started: boolean;
   setStarted: (value: boolean) => void;
+  paused: boolean;
+  setPaused: (value: boolean | ((prev: boolean) => boolean)) => void;
 }
 
 export default create<GlobalState>((set) => ({
@@ -12,4 +14,8 @@ export default create<GlobalState>((set) => ({
   setIsMobile: (value) => set({ isMobile: value }),
   started: false,
   setStarted: (value) => set({ started: value }),
+  paused: false,
+  setPaused: (value) => set((state) => ({ 
+    paused: typeof value === 'function' ? value(state.paused) : value 
+  })),
 }))

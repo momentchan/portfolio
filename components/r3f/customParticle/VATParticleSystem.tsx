@@ -10,6 +10,8 @@ import { createVATParticleMaterial, updateCommonMaterialUniforms } from "./mater
 import { generateRandomVertexIds, generateBasePosTexture, generateUV2Texture } from "./utils/textureUtils";
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { usePointerTracking } from "./hooks/usePointerTracking";
+import { useParticleAnimation } from "./hooks/useParticleAnimation";
+import GlobalState from "../GlobalStates";
 
 export default function VATParticleSystem({
     frame,
@@ -22,7 +24,8 @@ export default function VATParticleSystem({
 }: VATParticleSystemProps) {
     const { gl, camera, viewport } = useThree();
     const particleCount = 128;
-
+    const { started, paused } = GlobalState();  
+    
     const controls = useControls('Particles.VAT Particles', {
         glowColor: { value: '#ffd3d3' },
         glowIntensity: { value: 0.4, min: 0, max: 10, step: 0.01 },
@@ -82,7 +85,7 @@ export default function VATParticleSystem({
 
 
     useFrame((state, delta) => {
-        if (!particleSystemRef.current) return;
+        if (!particleSystemRef.current || !started || paused) return;
 
         const time = state.clock.elapsedTime;
 
@@ -152,6 +155,7 @@ export default function VATParticleSystem({
             config={config}
             behavior={behaviorRef.current}
             customMaterial={customMaterial}
+            update={started && !paused}
         />
     );
 }

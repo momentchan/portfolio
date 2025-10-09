@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { VATMeshLifecycle } from './VATMeshLifecycle'
 import { VATMesh } from './VATMesh'
@@ -8,6 +8,7 @@ import { AutoSpawner } from './AutoSpawner'
 import { MathUtils, Vector3 } from 'three'
 import { generateValidPosition, createSpawnId } from './utils'
 import { screenToWorldAtDepth } from './utils'
+import GlobalState from '../GlobalStates';
 
 export interface VATData {
   gltfPath: string
@@ -27,8 +28,17 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
   const { camera } = useThree()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
-  const [paused, setPaused] = useState(false)
-
+  const { started, paused } = GlobalState()
+  
+  // Use refs to always have latest values in callbacks
+  const startedRef = useRef(started)
+  const pausedRef = useRef(paused)
+  
+  useEffect(() => {
+    startedRef.current = started
+    pausedRef.current = paused
+  }, [started, paused])
+  
   // Default VAT data
   const defaultVATData: VATData = {
     gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
@@ -66,48 +76,47 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
   const [preWarmed, setPreWarmed] = useState(false)
 
   useEffect(() => {
-    if (isLoaded && !preWarmed) {
+    if (isLoaded && !preWarmed && started) {
       console.log('Pre-warming GPU with hidden VATMesh...')
       setPreWarmed(true)
     }
-  }, [isLoaded, preWarmed])
+  }, [isLoaded, preWarmed, started])
 
 
-  const spawnVATMesh = (position?: Vector3) => {
-    if (!isLoaded) return
+  const spawnVATMesh = useCallback((position?: Vector3) => {
+    if (!isLoaded || !startedRef.current || pausedRef.current) return
 
-    const spawnPosition = position || generateValidPosition(spawnedMeshes, 0.5, 0.1)
-    if (!spawnPosition) return
+    setSpawnedMeshes(prev => {
+      const spawnPosition = position || generateValidPosition(prev, 0.5, 0.1)
+      if (!spawnPosition) return prev
 
-    const newId = createSpawnId(meshCounter)
-    const holdDuration = MathUtils.randFloat(3, 7)
-    const animDuration = MathUtils.randFloat(2.5, 4.5)
-    const scale = MathUtils.randFloat(0.5, 1) * 5
+      setMeshCounter(counter => counter + 1)
+      
+      const newId = createSpawnId(prev.length)
+      const holdDuration = MathUtils.randFloat(3, 7)
+      const animDuration = MathUtils.randFloat(2.5, 4.5)
+      const scale = MathUtils.randFloat(0.5, 1) * 5
 
-    setSpawnedMeshes(prev => [...prev, { 
-      id: newId, 
-      position: [spawnPosition.x, spawnPosition.y, spawnPosition.z], 
-      scale, 
-      holdDuration, 
-      animDuration,
-      manual: position ? true : false
-    }])
-    setMeshCounter(prev => prev + 1)
-  }
+      return [...prev, { 
+        id: newId, 
+        position: [spawnPosition.x, spawnPosition.y, spawnPosition.z], 
+        scale, 
+        holdDuration, 
+        animDuration,
+        manual: position ? true : false
+      }]
+    })
+  }, [isLoaded])
 
-  const removeVATMesh = (id: number) => {
+  const removeVATMesh = useCallback((id: number) => {
     setSpawnedMeshes(prev => prev.filter(mesh => mesh.id !== id))
-  }
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'KeyF') {
         event.preventDefault()
         spawnVATMesh()
-      }
-      if (event.code === 'Space') {
-        event.preventDefault()
-        setPaused(prev => !prev)
       }
     }
 
@@ -143,10 +152,10 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         burstInterval={[20000, 30000]}
         burstCount={[10, 15]}
         burstDuration={3000}
-        enabled={true}
+        enabled={started && !paused}
       />
 
-      {isLoaded && preWarmed && (
+      {preWarmed && (
         <VATMesh
           {...VATProps}
           position={[-1000, -1000, -1000]}

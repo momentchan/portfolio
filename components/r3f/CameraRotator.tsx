@@ -4,9 +4,12 @@ import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
 import { gsap } from 'gsap';
+import GlobalState from './GlobalStates';
 
 export default function CameraRotator() {
   const { camera } = useThree();
+  const { started, paused } = GlobalState();
+
   const timeRef = useRef(0);
 
   const controls = useControls('Camera Rotator', {
@@ -19,19 +22,21 @@ export default function CameraRotator() {
   const rotateLerpRef = useRef({ value: 0 });
 
   useEffect(() => {
+    if (!started) return;
+
     const tl = gsap.timeline();
     tl.to(rotateLerpRef.current, {
       value: 1,
       duration: 5,
     });
-  }, []);
+  }, [started]);
 
   useFrame((state, delta) => {
     if (!controls.enabled) return;
 
     const speed = controls.speed * rotateLerpRef.current.value;
-    timeRef.current += delta * speed;
-    
+    timeRef.current += (started && !paused) ? delta * speed : 0;
+
     const x = controls.radius * Math.cos(timeRef.current);
     const y = controls.radius * Math.sin(timeRef.current * 0.5) + controls.height;
     const z = controls.radius * Math.sin(timeRef.current);

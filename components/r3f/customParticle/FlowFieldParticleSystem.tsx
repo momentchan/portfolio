@@ -9,9 +9,11 @@ import { createFlowFieldParticleMaterial, updateCommonMaterialUniforms } from ".
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { useParticleAnimation } from "./hooks/useParticleAnimation";
 import { usePointerTracking } from "./hooks/usePointerTracking";
+import GlobalState from "../GlobalStates";
 
 export default function FlowFieldParticleSystem() {
     const { camera, viewport } = useThree();
+    const { started, paused } = GlobalState();
 
     const controls = useControls('Particles.Flow Field Particles', {
         glowColor: { value: '#ffd3d3' },
@@ -39,11 +41,10 @@ export default function FlowFieldParticleSystem() {
     // Create custom material
     const customMaterial = useMemo(() => createFlowFieldParticleMaterial(), []);
 
-    // Use shared animation hook
-    const animate = useParticleAnimation({ duration: 3, delay: 5 });
+    const animate = useParticleAnimation({ duration: 5, delay: 3 });
 
     useFrame((state, delta) => {
-        if (!particleSystemRef.current) return;
+        if (!particleSystemRef.current || !started || paused) return;
 
         const time = state.clock.elapsedTime;
 
@@ -58,8 +59,7 @@ export default function FlowFieldParticleSystem() {
         const modelMatrix = getModelMatrix(particleSystemRef);
 
         // Calculate MVP matrices
-        const { modelViewProjectionMatrix, inverseModelViewProjectionMatrix } =
-            calculateMVPMatrices(modelMatrix, camera);
+        const { modelViewProjectionMatrix, inverseModelViewProjectionMatrix } = calculateMVPMatrices(modelMatrix, camera);
 
         // Update common material uniforms
         updateCommonMaterialUniforms(customMaterial, {
@@ -92,6 +92,7 @@ export default function FlowFieldParticleSystem() {
             config={config}
             behavior={behaviorRef.current}
             customMaterial={customMaterial}
-        />
+            update={started && !paused}
+        />  
     );
 }
