@@ -5,29 +5,26 @@ import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import GlobalState from '../common/GlobalStates';
 
-// Optimized separable Gaussian blur with linear sampling
 const fragmentShader = /* glsl */`
 uniform float uBlurAmount;
-uniform vec2 uTexelSize;
-uniform vec2 uDirection;
+uniform vec2 uResolution;
 
-vec4 blur5_linear(sampler2D img, vec2 uv, vec2 dir, float amount) {
-  if (amount <= 0.01) return texture2D(img, uv);
-
-  // Gaussian weights optimized for linear sampling
-  float w0 = 0.227027;
-  float w1 = 0.316216;
-  float w2 = 0.070270;
-
-  vec2 step = dir * uTexelSize * amount;
-
-  vec4 c = texture2D(inputBuffer, uv) * w0;
-  c += texture2D(inputBuffer, uv + step * 1.384615) * w1;
-  c += texture2D(inputBuffer, uv - step * 1.384615) * w1;
-  c += texture2D(inputBuffer, uv + step * 3.230769) * w2;
-  c += texture2D(inputBuffer, uv - step * 3.230769) * w2;
-
-  return c;
+vec4 blur(sampler2D image, vec2 uv, vec2 resolution, vec2 direction, float amount) {
+  vec4 color = vec4(0.0);
+  vec2 offset = direction / resolution * amount;
+  
+  // 9-tap Gaussian blur
+  color += texture2D(image, uv + offset * -4.0) * 0.051;
+  color += texture2D(image, uv + offset * -3.0) * 0.0918;
+  color += texture2D(image, uv + offset * -2.0) * 0.12245;
+  color += texture2D(image, uv + offset * -1.0) * 0.1531;
+  color += texture2D(image, uv + offset *  0.0) * 0.1633;
+  color += texture2D(image, uv + offset *  1.0) * 0.1531;
+  color += texture2D(image, uv + offset *  2.0) * 0.12245;
+  color += texture2D(image, uv + offset *  3.0) * 0.0918;
+  color += texture2D(image, uv + offset *  4.0) * 0.051;
+  
+  return color;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
@@ -35,122 +32,96 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     outputColor = inputColor;
     return;
   }
-
-  vec4 blurred = blur5_linear(inputBuffer, uv, uDirection, uBlurAmount);
+  
+  // Two-direction blur
+  vec4 blurH = blur(inputBuffer, uv, uResolution, vec2(1.0, 0.0), uBlurAmount);
+  vec4 blurV = blur(inputBuffer, uv, uResolution, vec2(0.0, 1.0), uBlurAmount);
+  vec4 blurred = (blurH + blurV) * 0.5;
   
   // Blend with original
-  float blendFactor = clamp(uBlurAmount / 15.0, 0.0, 1.0);
+  float blendFactor = clamp(uBlurAmount / 10.0, 0.0, 1.0);
   outputColor = mix(inputColor, blurred, blendFactor);
 }
 `;
 
+const BLUR_FADE_DURATION = 10; // seconds
+const BLUR_TOGGLE_DURATION = 0.5; // seconds
+
 export interface CustomEffectOptions {
     blurAmount?: number;
-    scale?: number;
 }
 
-/** Single-direction separable blur effect */
-class SeparableBlurEffect extends Effect {
-    private _scale: number;
-
-    constructor(direction: [number, number], scale = 0.5, initialAmount = 0) {
-        super('SeparableBlur', fragmentShader, {
+class CustomBlurEffectImpl extends Effect {
+    constructor({ blurAmount = 1.0 }: CustomEffectOptions = {}) {
+        super('CustomBlurEffect', fragmentShader, {
             uniforms: new Map<string, Uniform>([
-                ['uBlurAmount', new Uniform(initialAmount)],
-                ['uTexelSize', new Uniform([1, 1])],
-                ['uDirection', new Uniform(direction)],
+                ['uBlurAmount', new Uniform(blurAmount)],
+                ['uResolution', new Uniform([window.innerWidth, window.innerHeight])],
             ])
         });
-
-        this._scale = Math.max(0.25, Math.min(scale, 1.0));
     }
 
-    set amount(v: number) {
-        this.uniforms.get('uBlurAmount')!.value = v;
-    }
-
-    get amount() {
-        return this.uniforms.get('uBlurAmount')!.value;
-    }
-
-    setSize(w: number, h: number) {
-        const iw = Math.max(1, Math.floor(w * this._scale));
-        const ih = Math.max(1, Math.floor(h * this._scale));
-        this.uniforms.get('uTexelSize')!.value = [1 / iw, 1 / ih];
+    update(renderer: any, inputBuffer: any, deltaTime: number) {
+        this.uniforms.get('uResolution')!.value = [window.innerWidth, window.innerHeight];
     }
 }
 
-export default function CustomEffect({ 
-    blurAmount = 10, 
-    scale = 0.5 
-}: CustomEffectOptions = {}) {
+export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions = {}) {
     const { started } = GlobalState();
     const blurAmountRef = useRef({ value: blurAmount });
     const blurToggleRef = useRef(false);
-    const blurAnimationRef = useRef<gsap.core.Tween | null>(null);
+    const activeAnimationRef = useRef<gsap.core.Tween | null>(null);
 
-    // Create two passes: horizontal then vertical
-    const [blurX, blurY] = useMemo(() => {
-        const x = new SeparableBlurEffect([1, 0], scale, blurAmount);
-        const y = new SeparableBlurEffect([0, 1], scale, blurAmount);
-        return [x, y];
-    }, [scale]);
+    const effect = useMemo(() => new CustomBlurEffectImpl({ blurAmount }), []);
 
-    // Animate blur on start
+    const killActiveAnimation = () => {
+        if (activeAnimationRef.current) {
+            activeAnimationRef.current.kill();
+            activeAnimationRef.current = null;
+        }
+    };
+
+    const animateBlurAmount = (targetValue: number, duration: number) => {
+        killActiveAnimation();
+        activeAnimationRef.current = gsap.to(blurAmountRef.current, {
+            value: targetValue,
+            duration,
+            ease: "power2.inOut",
+        });
+    };
+
+    // Fade out blur when started
     useEffect(() => {
         if (!started) return;
 
-        const tween = gsap.timeline();
-        tween.to(blurAmountRef.current, {
-            value: 0,
-            duration: 10,
-            ease: "power2.inOut",
-        });
+        animateBlurAmount(0, BLUR_FADE_DURATION);
 
         return () => {
-            tween.kill();
+            killActiveAnimation();
             blurAmountRef.current.value = blurAmount;
         };
     }, [started, blurAmount]);
 
-    // Keyboard toggle for blur effect (T key)
+    // Toggle blur with 'T' key
     useEffect(() => {
         const handleKeyPress = (event: KeyboardEvent) => {
             if (event.key.toLowerCase() === 't') {
                 blurToggleRef.current = !blurToggleRef.current;
-
-                if (blurAnimationRef.current) {
-                    blurAnimationRef.current.kill();
-                }
-
-                blurAnimationRef.current = gsap.to(blurAmountRef.current, {
-                    value: blurToggleRef.current ? blurAmount : 0,
-                    duration: 0.5,
-                    ease: "power2.inOut",
-                });
+                const target = blurToggleRef.current ? blurAmount : 0;
+                animateBlurAmount(target, BLUR_TOGGLE_DURATION);
             }
         };
 
         window.addEventListener('keydown', handleKeyPress);
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
-            if (blurAnimationRef.current) {
-                blurAnimationRef.current.kill();
-            }
+            killActiveAnimation();
         };
     }, [blurAmount]);
 
-    // Update both passes each frame
     useFrame(() => {
-        const amt = blurAmountRef.current.value;
-        blurX.amount = amt;
-        blurY.amount = amt;
+        effect.uniforms.get('uBlurAmount')!.value = blurAmountRef.current.value;
     });
 
-    return (
-        <>
-            <primitive object={blurX} dispose={null} />
-            <primitive object={blurY} dispose={null} />
-        </>
-    );
+    return <primitive object={effect} dispose={null} />;
 }
