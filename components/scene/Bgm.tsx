@@ -130,6 +130,7 @@ export default function BGM() {
                 audio.disconnect();
             });
             soundsRef.current = [];
+            hasInitialized.current = false; // Reset for StrictMode
         };
     }, [started]);
 
@@ -148,6 +149,7 @@ export default function BGM() {
                 if (!audio.buffer) continue;
 
                 if (soundOn) {
+
                     if (!audio.isPlaying) {
                         audio.gain.gain.setValueAtTime(0, context.currentTime);
                         audio.play();
