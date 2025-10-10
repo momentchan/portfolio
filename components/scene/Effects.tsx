@@ -2,10 +2,9 @@
 
 import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import { useControls } from 'leva';
-import BlurEffect from './BlurEffect';
+import CustomEffect from './CustomEffect';
 
 export default function Effects() {
-
   const bloomParams = useControls('Effects.Bloom', {
     intensity: { value: 1, min: 0, max: 3, step: 0.01 },
     luminanceThreshold: { value: 0.5, min: 0, max: 1, step: 0.01 },
@@ -36,7 +35,7 @@ export default function Effects() {
         focusRange={dofParams.focusRange}
         blur={dofParams.blur}
       />
-      <BlurEffect />
+      <CustomEffect />
     </EffectComposer>
   );
 }
