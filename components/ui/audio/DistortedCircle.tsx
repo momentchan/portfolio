@@ -61,7 +61,8 @@ export default function DistortedCircle({
           
           // Use seed to offset noise sampling for different patterns
           float radialNoise = simplexNoise2d(vec2(noiseX + uTime * 0.5 + uSeed * 100.0, noiseY + uSeed * 50.0));
-          float newRadius = dist * (1.0 + radialNoise * 0.5 * uDistortionStrength);
+          float newRadius = dist * (1.0 + radialNoise * 0.5 * uDistortionStrength * 0.6);
+          newRadius *= mix(0.7, 1.0, smoothstep(0.0, 1.0, uDistortionStrength));
           
           gl_Position = projectionMatrix * modelViewMatrix * vec4(
             cos(angle) * newRadius,

@@ -119,7 +119,7 @@ export default function AudioUICanvas({
                         radius={radius}
                         segments={32}
                         color="#888888"
-                        distortionStrength={animatedStrength * 0.5}
+                        distortionStrength={animatedStrength}
                         distortionSpeed={1}
                         distortionFrequency={0.3}
                         seed={seed}

@@ -68,9 +68,9 @@ export default function LoadingPage() {
           <div className="overflow-hidden">
             <SplitText
               text={WORDS[currentWordIndex]}
-              delay={currentWordIndex === 0 ? 0.5 : 0}
+              delay={currentWordIndex === 0 ? 1.0 : 0}
               duration={1}
-              stagger={0.}
+              stagger={0.0}
               spin={false}
               move={false}
               onComplete={handleWordComplete}
