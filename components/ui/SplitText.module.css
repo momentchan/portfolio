@@ -1,0 +1,35 @@
+/* SplitText animation styles */
+
+@keyframes splitTextReveal {
+  from {
+    opacity: var(--start-opacity, 0);
+    transform: 
+      translateY(var(--start-y, 20px))
+      rotateX(var(--start-rotate, -45deg))
+      translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: 
+      translateY(0)
+      rotateX(0deg)
+      translateZ(0);
+  }
+}
+
+.container {
+  display: inline-block;
+  perspective: 1000px;
+}
+
+.char {
+  display: inline-block;
+  animation-name: splitTextReveal;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); /* power3.out */
+  transform-style: preserve-3d;
+  transform-origin: 0% 50%;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+

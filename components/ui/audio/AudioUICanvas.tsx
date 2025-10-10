@@ -5,7 +5,7 @@ import { OrthographicCamera } from '@react-three/drei';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import DistortedCircle from './DistortedCircle';
-import GlobalStates from '@/components/r3f/GlobalStates';
+import GlobalStates from '@/components/common/GlobalStates';
 import gsap from 'gsap';
 
 interface AudioUICanvasProps {

@@ -1,7 +1,7 @@
 'use client';
 
-import Scene from '@/components/r3f/Scene';
-import LoadingPage from '@/components/LoadingPage';
+import Scene from '@/components/scene/Scene';
+import LoadingPage from '@/components/ui/LoadingPage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 
 export default function HomePage() {
