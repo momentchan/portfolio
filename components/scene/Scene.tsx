@@ -11,18 +11,19 @@ import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
-import { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import GlobalState from '../common/GlobalStates';
 import BGM from './Bgm';
 
 export default function Scene() {
   const { setIsMobile, setPaused, paused } = GlobalState();
 
+  // Detect mobile device once on mount
   useEffect(() => {
     const userAgent = navigator.userAgent;
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
     setIsMobile(isMobileDevice);
-  }, [])
+  }, [setIsMobile])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

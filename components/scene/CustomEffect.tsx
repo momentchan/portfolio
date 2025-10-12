@@ -28,10 +28,6 @@ vec4 blur(sampler2D image, vec2 uv, vec2 resolution, vec2 direction, float amoun
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  if (uBlurAmount < 0.01) {
-    outputColor = inputColor;
-    return;
-  }
   
   // Two-direction blur
   vec4 blurH = blur(inputBuffer, uv, uResolution, vec2(1.0, 0.0), uBlurAmount);
@@ -40,7 +36,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   
   // Blend with original
   float blendFactor = clamp(uBlurAmount / 10.0, 0.0, 1.0);
-  outputColor = mix(inputColor, blurred, blendFactor);
+  outputColor = mix(inputColor, blurred, blendFactor) * mix(1.0, 1.0, blendFactor);
 }
 `;
 

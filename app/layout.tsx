@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Link from "next/link";
 import "./globals.css";
+import PersistentScene from "@/components/layout/PersistentScene";
 
 const pragmatica = localFont({
   src: [
@@ -32,17 +34,21 @@ export default function RootLayout({
   return (
     <html lang="en">
      <body className={`${pragmatica.variable} antialiased`}>
+        {/* Persistent background scene - runs across all routes */}
+        <PersistentScene />
+
         {/* Nav Bar */}
         <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center">
-          <a href="/" className="text-lg font-bold">Ming Jyun Hung</a>
+          <Link href="/" className="text-lg font-bold">Ming Jyun Hung</Link>
           <nav className="flex gap-6">
-            <a href="/projects" className="hover:underline">Projects</a>
-            <a href="/about" className="hover:underline">About</a>
-            <a href="/contact" className="hover:underline">Contact</a>
+            <Link href="/projects" className="hover:underline">Projects</Link>
+            <Link href="/about" className="hover:underline">About</Link>
+            <Link href="/contact" className="hover:underline">Contact</Link>
           </nav>
         </header>
 
-        <main className="relative z-10 min-h-screen px-6">{children}</main>
+        {/* Main content area - pointer-events-none allows scene interaction on empty pages */}
+        <main className="relative z-10 min-h-screen px-6 pointer-events-none">{children}</main>
 
         {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
