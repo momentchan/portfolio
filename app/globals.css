@@ -28,3 +28,8 @@ body {
   font-family: var(--font-pragmatica), system-ui, sans-serif;
   overflow: hidden; /* Disable page scroll */
 }
+
+/* Hide scrollbar while maintaining scroll functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

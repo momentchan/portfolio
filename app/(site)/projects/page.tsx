@@ -1,25 +1,16 @@
 import { getAllProjects } from "@/lib/mdx";
-import Link from "next/link";
 import ContentOverlay from '@/components/layout/ContentOverlay';
+import ProjectsFilter from '@/components/ui/ProjectsFilter';
 
 export const revalidate = 60;
 
 export default async function ProjectsPage() {
   const projects = await getAllProjects();
   return (
-    <div className="max-w-2xl mx-auto py-20">
-      <ContentOverlay>
+    <div className="max-w-4xl mx-auto py-10 h-screen overflow-hidden flex flex-col">
+      <ContentOverlay className="!overflow-hidden !max-h-none flex flex-col">
         <h1 className="text-2xl font-semibold mb-6">Projects</h1>
-        <ul className="space-y-4">
-          {projects.map(p => (
-            <li key={p.slug}>
-              <Link className="underline hover:no-underline" href={`/projects/${p.slug}`}>
-                {p.title}
-              </Link>
-              {p.summary && <div className="text-sm opacity-70">{p.summary}</div>}
-            </li>
-          ))}
-        </ul>
+        <ProjectsFilter projects={projects} />
       </ContentOverlay>
     </div>
   );

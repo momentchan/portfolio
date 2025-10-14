@@ -66,7 +66,7 @@ export default function Scene() {
           <VATMeshSpawner />
           <EnvironmentSetup />
           <DirectionalLights />
-          <Effects />
+          {/* <Effects /> */}
           <BGM />
         </Suspense>
         <Preload all />

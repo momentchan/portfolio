@@ -7,6 +7,9 @@ const ROOT = path.join(process.cwd(), "content");
 export type ProjectMeta = {
   title: string; slug: string; date: string;
   summary?: string; tags?: string[];
+  category?: 'web' | 'spatial';
+  images?: string[]; // Supports both local paths ("/images/...") and external URLs ("https://...")
+  videos?: string[]; // Supports both local paths ("/videos/...") and external URLs ("https://...")
   file: string;
 };
 

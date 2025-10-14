@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en">
      <body className={`${pragmatica.variable} antialiased`}>
         {/* Persistent background scene - runs across all routes */}
-        <PersistentScene />
+        {/* <PersistentScene /> */}
 
         {/* Nav Bar - preserves query parameters like ?dev=true */}
         <Navigation />
