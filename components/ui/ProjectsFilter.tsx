@@ -75,7 +75,7 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
             textColor = isHovered ? 'text-white underline' : 'text-white/10';
           } else if (activeProjectSlug) {
             // When not hovering but has active: active is white, others are dim
-            textColor = isActive ? 'text-white underline' : 'text-white/30';
+            textColor = isActive ? 'text-white underline' : 'text-white';
           }
           
           return (

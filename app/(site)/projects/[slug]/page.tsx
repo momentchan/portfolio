@@ -1,6 +1,3 @@
-import { MDXRemote } from "next-mdx-remote/rsc";
-import rehypeSlug from "rehype-slug";
-import remarkGfm from "remark-gfm";
 import { getAllProjects, getProjectBySlug } from "@/lib/mdx";
 import Link from 'next/link';
 
@@ -27,17 +24,13 @@ export default async function ProjectPage({ params }: { params: { slug: string }
         msOverflowStyle: 'none',
       }}>
         <article>
-          <h1 className="text-4xl font-bold text-white mb-4">{meta.title}</h1>
-          
+          <h1 className="text-4xl font-bold text-white mb-8">{meta.title}</h1>
+
           {/* Meta info */}
-          <div className="mb-6 space-y-3">
-            {meta.summary && (
-              <p className="text-white/70 text-lg">{meta.summary}</p>
-            )}
-            
+          <div className="mb-6 space-y-12">
             {/* Role */}
             {meta.role && meta.role.length > 0 && (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <div className="text-white/50 text-xs uppercase tracking-wider">Role</div>
                 <div className="text-white/80">
                   {meta.role.map((r, i) => (
@@ -50,10 +43,36 @@ export default async function ProjectPage({ params }: { params: { slug: string }
               </div>
             )}
 
+            {/* Summary */}
+            {meta.summary && (
+              <div className="space-y-1">
+                <div className="text-white/50 text-xs uppercase tracking-wider">Summary</div>
+                <p className="text-white/70 text-lg">{meta.summary}</p>
+              </div>
+            )}
+
+            {/* Description */}
+            {meta.description && (
+              <div className="space-y-1">
+                <div className="text-white/50 text-xs uppercase tracking-wider">Description</div>
+                <p className="text-white/70">{meta.description}</p>
+              </div>
+            )}
+
+            {meta.tags && meta.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {meta.tags.map(tag => (
+                  <span key={tag} className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-xs">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Visit Website Link */}
             {meta.link && (
               <div>
-                <a 
+                <a
                   href={meta.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -66,45 +85,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
                 </a>
               </div>
             )}
-            
-            {meta.date && (
-              <p className="text-white/50 text-sm">
-                {new Date(meta.date).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
-            )}
-            
-            {meta.category && (
-              <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-white/80 text-sm">
-                {meta.category}
-              </span>
-            )}
-            
-            {meta.tags && meta.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {meta.tags.map(tag => (
-                  <span key={tag} className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-xs">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* MDX Content */}
-          <div className="prose prose-lg dark:prose-invert max-w-none text-white/80">
-            <MDXRemote 
-              source={content} 
-              options={{ 
-                mdxOptions: { 
-                  remarkPlugins: [remarkGfm], 
-                  rehypePlugins: [rehypeSlug] 
-                } 
-              }} 
-            />
           </div>
         </article>
       </div>

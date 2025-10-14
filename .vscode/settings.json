@@ -1,0 +1,7 @@
+{
+    "editor.formatOnSave": true,
+    "[mdx]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "files.associations": { "*.mdx": "mdx" },
+    "prettier.printWidth": 100,
+    "prettier.proseWrap": "always"
+  }
