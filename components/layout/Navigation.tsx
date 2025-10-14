@@ -14,7 +14,6 @@ export default function Navigation() {
       <nav className="flex gap-6">
         <NavLink href="/projects" className="hover:underline">Projects</NavLink>
         <NavLink href="/about" className="hover:underline">About</NavLink>
-        <NavLink href="/contact" className="hover:underline">Contact</NavLink>
       </nav>
     </header>
   );

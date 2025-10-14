@@ -29,7 +29,7 @@ export function OverlayChrome() {
       ref={ref}
       className={`
         pointer-events-none
-        absolute inset-0 rounded-2xl
+        absolute inset-0 rounded-1xl
         ${styles.blurLayer}
         ${styles.contentFadeIn}
         opacity-0
