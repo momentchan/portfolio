@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import Link from "next/link";
 import "./globals.css";
 import PersistentScene from "@/components/layout/PersistentScene";
+import Navigation from "@/components/layout/Navigation";
 
 const pragmatica = localFont({
   src: [
@@ -37,15 +37,8 @@ export default function RootLayout({
         {/* Persistent background scene - runs across all routes */}
         <PersistentScene />
 
-        {/* Nav Bar */}
-        <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="text-lg font-bold">Ming Jyun Hung</Link>
-          <nav className="flex gap-6">
-            <Link href="/projects" className="hover:underline">Projects</Link>
-            <Link href="/about" className="hover:underline">About</Link>
-            <Link href="/contact" className="hover:underline">Contact</Link>
-          </nav>
-        </header>
+        {/* Nav Bar - preserves query parameters like ?dev=true */}
+        <Navigation />
 
         {/* Main content area - pointer-events-none allows scene interaction on empty pages */}
         <main className="relative z-10 min-h-screen px-6 pointer-events-none">{children}</main>

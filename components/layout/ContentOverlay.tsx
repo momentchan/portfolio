@@ -13,18 +13,21 @@ interface ContentOverlayProps {
  */
 export default function ContentOverlay({ children, className = '' }: ContentOverlayProps) {
   return (
-    <div className={`
-      relative
-      backdrop-blur-md
-      bg-white/80
-      dark:bg-black/80
-      rounded-2xl
-      shadow-2xl
-      border border-white/20
-      p-8
-      pointer-events-auto
-      ${className}
-    `}>
+    <div 
+      className={`
+        relative
+        backdrop-blur-md
+        bg-white/100
+        dark:bg-black/60
+        rounded-1xl
+        shadow-2xl
+        border border-gray-200
+        dark:border-gray-800
+        p-10
+        pointer-events-auto
+        ${className}
+      `}
+    >
       {children}
     </div>
   );
