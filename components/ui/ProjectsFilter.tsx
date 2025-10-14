@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProjectMeta } from '@/lib/mdx';
+import useGlobalState from '@/components/common/GlobalStates';
 
 type Category = 'all' | 'web' | 'spatial';
 
@@ -12,8 +13,10 @@ interface ProjectsFilterProps {
 
 export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
-  const [activeProject, setActiveProject] = useState<ProjectMeta | null>(null);
   const [hoveredProject, setHoveredProject] = useState<ProjectMeta | null>(null);
+  const [animationKey, setAnimationKey] = useState(0);
+  const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
+  const setActiveProjectSlug = useGlobalState((state) => state.setActiveProjectSlug);
 
   const filteredProjects = projects.filter(project => {
     if (selectedCategory === 'all') return true;
@@ -26,18 +29,31 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
     { value: 'spatial', label: 'Spatial' },
   ];
 
+  // Reset active project on mount (page change)
+  useEffect(() => {
+    setActiveProjectSlug(null);
+  }, [setActiveProjectSlug]);
+
+  // Trigger animation and reset active project when category changes
+  useEffect(() => {
+    setAnimationKey(prev => prev + 1);
+    setActiveProjectSlug(null);
+    setHoveredProject(null);
+  }, [selectedCategory, setActiveProjectSlug]);
+
+
   return (
     <div>
       {/* Category filter buttons */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex gap-8 mb-8">
         {categories.map(({ value, label }) => (
           <button
             key={value}
             onClick={() => setSelectedCategory(value)}
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`py-2 text-sm rounded-lg transition-colors cursor-pointer ${
               selectedCategory === value
-                ? 'bg-white/20 text-white'
-                : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
+                ? 'text-white'
+                : 'text-white/60 hover:text-white/80'
             }`}
           >
             {label}
@@ -45,94 +61,48 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
         ))}
       </div>
 
-      {/* Split screen layout */}
-      <div className="flex gap-8 h-[70vh]">
-        {/* Left half - Project list */}
-        <div className="w-1/2 border-r border-white/10 pr-8">
-          <ul className="space-y-6">
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map(p => {
-                const isActive = activeProject?.slug === p.slug;
-                const isHovered = hoveredProject?.slug === p.slug;
-                
-                // Determine text color based on hover and active states
-                let textColor = 'text-white/30'; // default
-                
-                if (hoveredProject) {
-                  // When hovering: active is white, others are very dark
-                  textColor = isHovered ? 'text-white underline' : 'text-white/10';
-                } else if (activeProject) {
-                  // When not hovering but has active: active is white, others are dim
-                  textColor = isActive ? 'text-white underline' : 'text-white/30';
-                }
-                
-                return (
-                  <li 
-                    key={p.slug}
-                    onMouseEnter={() => {
-                      setHoveredProject(p);
-                      setActiveProject(p);
-                    }}
-                    onMouseLeave={() => setHoveredProject(null)}
-                    className="transition-all duration-200"
-                  >
-                    <Link 
-                      href={`/projects/${p.slug}`}
-                      className={`block text-2xl font-medium transition-all duration-200 ${textColor}`}
-                    >
-                      {p.title}
-                    </Link>
-                  </li>
-                );
-              })
-            ) : (
-              <li className="text-white/50">No projects found in this category.</li>
-            )}
-          </ul>
-        </div>
-
-        {/* Right half - Media preview */}
-        <div className="w-1/2 flex items-center justify-center overflow-hidden">
-          {(() => {
-            const displayProject = hoveredProject || activeProject;
-            if (!displayProject) return null;
-            
-            return (
-              <div className="w-full h-full overflow-y-auto p-8 space-y-4 scrollbar-hide" style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}>
-                {/* Videos */}
-                {displayProject.videos && displayProject.videos.length > 0 && (
-                  displayProject.videos.map((video, index) => (
-                    <video
-                      key={`${displayProject.slug}-video-${index}`}
-                      src={video}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full rounded"
-                    />
-                  ))
-                )}
-                
-                {/* Images */}
-                {displayProject.images && displayProject.images.length > 0 && (
-                  displayProject.images.map((image, index) => (
-                    <img
-                      key={`${displayProject.slug}-image-${index}`}
-                      src={image}
-                      alt={`${displayProject.title} - ${index + 1}`}
-                      className="w-full rounded"
-                    />
-                  ))
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      </div>
+      {/* Project list */}
+      <ul className="space-y-4">
+        {filteredProjects.map((p, index) => {
+          const isActive = activeProjectSlug === p.slug;
+          const isHovered = hoveredProject?.slug === p.slug;
+          
+          // Determine text color based on hover and active states
+          let textColor = 'text-white/30'; // default
+          
+          if (hoveredProject) {
+            // When hovering: active is white, others are very dark
+            textColor = isHovered ? 'text-white underline' : 'text-white/10';
+          } else if (activeProjectSlug) {
+            // When not hovering but has active: active is white, others are dim
+            textColor = isActive ? 'text-white underline' : 'text-white/30';
+          }
+          
+          return (
+            <li 
+              key={`${animationKey}-${p.slug}`}
+              onMouseEnter={() => {
+                setHoveredProject(p);
+                setActiveProjectSlug(p.slug);
+              }}
+              onMouseLeave={() => setHoveredProject(null)}
+              className="transition-all duration-200 animate-crop-down"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                opacity: 0,
+                animationFillMode: 'forwards'
+              }}
+            >
+              <Link 
+                href={`/projects/${p.slug}`}
+                className={`block text-2xl font-medium transition-all duration-200 text-medium ${textColor}`}
+              >
+                {p.title}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

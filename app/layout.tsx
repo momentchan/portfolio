@@ -41,7 +41,7 @@ export default function RootLayout({
         <Navigation />
 
         {/* Main content area - pointer-events-none allows scene interaction on empty pages */}
-        <main className="relative z-10 min-h-screen px-6 pointer-events-none">{children}</main>
+        <main className="relative z-10 min-h-screen px-6">{children}</main>
 
         {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.

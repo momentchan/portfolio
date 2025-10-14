@@ -10,7 +10,10 @@ export type ProjectMeta = {
   category?: 'web' | 'spatial';
   images?: string[]; // Supports both local paths ("/images/...") and external URLs ("https://...")
   videos?: string[]; // Supports both local paths ("/videos/...") and external URLs ("https://...")
+  role?: string[]; // Roles like ["Fullstack Creative Development", "Motion"]
+  link?: string; // Website URL
   file: string;
+  _filename?: string; // Internal: used for filename-based sorting
 };
 
 export async function getAllProjects(): Promise<ProjectMeta[]> {
@@ -21,9 +24,17 @@ export async function getAllProjects(): Promise<ProjectMeta[]> {
     const full = path.join(dir, file);
     const src = await fs.readFile(full, "utf8");
     const { data } = matter(src);
-    metas.push({ ...(data as any), file: full });
+    metas.push({ ...(data as any), file: full, _filename: file });
   }
-  return metas.sort((a,b) => +new Date(b.date) - +new Date(a.date));
+  return metas.sort((a,b) => {
+    // Sort by filename (supports patterns like 01-project.mdx, 02-another.mdx)
+    // This allows easy reordering by renaming files
+    if (a._filename && b._filename) {
+      return a._filename.localeCompare(b._filename);
+    }
+    // Fallback to date sorting
+    return +new Date(b.date) - +new Date(a.date);
+  });
 }
 
 export async function getProjectBySlug(slug: string) {

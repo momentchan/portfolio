@@ -9,6 +9,8 @@ interface GlobalState {
   setPaused: (value: boolean | ((prev: boolean) => boolean)) => void;
   soundOn: boolean;
   setSoundOn: (value: boolean) => void;
+  activeProjectSlug: string | null;
+  setActiveProjectSlug: (slug: string | null) => void;
 }
 
 export default create<GlobalState>((set) => ({
@@ -22,4 +24,6 @@ export default create<GlobalState>((set) => ({
   })),
   soundOn: false,
   setSoundOn: (value) => set({ soundOn: value }),
+  activeProjectSlug: null,
+  setActiveProjectSlug: (slug) => set({ activeProjectSlug: slug }),
 }))
