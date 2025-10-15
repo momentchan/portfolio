@@ -72,10 +72,10 @@ export default function ContentOverlay({ children, className = '' }: ContentOver
   return (
     <div
       className={`
-        relative rounded-1xl shadow-2xl 
+        relative rounded-lg sm:rounded-xl lg:rounded-1xl shadow-lg sm:shadow-xl lg:shadow-2xl 
         border border-gray-200 dark:border-gray-800
-        p-10 pointer-events-auto 
-        overflow-y-auto max-h-[80vh]
+        p-6 sm:p-8 lg:p-10 pointer-events-auto 
+        overflow-y-auto max-h-[70vh] sm:max-h-[75vh] lg:max-h-[80vh]
         bg-white/100 dark:bg-black/50
         isolate will-change-transform
         ${className}

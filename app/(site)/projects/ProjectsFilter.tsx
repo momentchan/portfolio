@@ -56,12 +56,12 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   return (
     <div className="flex flex-col">
       {/* Category filter buttons */}
-      <div className="flex gap-8 mb-8 flex-shrink-0">
+      <div className="flex gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-8 flex-shrink-0 flex-wrap">
         {categories.map(({ value, label }) => (
           <button
             key={value}
             onClick={() => setSelectedCategory(value)}
-            className={`py-2 text-sm rounded-lg transition-colors cursor-pointer ${selectedCategory === value
+            className={`py-2 text-xs sm:text-sm cursor-pointer ${selectedCategory === value
               ? 'text-white'
               : 'text-white/50 hover:text-white/80'
               }`}
@@ -71,9 +71,9 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
         ))}
       </div>
 
-      {/* Project list - scrollable, auto two columns when >10 items */}
+      {/* Project list - scrollable, auto two columns when >10 items on desktop */}
       <ul
-        className={`overflow-y-auto scrollbar-hide flex-1 grid gap-y-3 w-fit ${useTwoColumns ? 'grid-cols-2 gap-x-10 auto-rows-min' : 'grid-cols-1'
+        className={`overflow-y-auto scrollbar-hide flex-1 grid gap-y-2 sm:gap-y-3 w-full lg:w-fit ${useTwoColumns ? 'lg:grid-cols-2 lg:gap-x-10 lg:auto-rows-min' : 'grid-cols-1'
           }`}
         style={{
           scrollbarWidth: 'none',
@@ -86,15 +86,15 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
           const isActive = activeProjectSlug === p.slug;
           const isHovered = hoveredProject?.slug === p.slug;
 
-          // Determine text color based on hover and active states
-          let textColor = 'text-white/30'; // default
+          // Determine text color based on hover and active states (desktop only)
+          let desktopColor = 'lg:text-white/30'; // default
 
           if (hoveredProject) {
             // When hovering: active is white, others are very dark
-            textColor = isHovered ? 'text-white underline' : 'text-white/50';
+            desktopColor = isHovered ? 'lg:text-white lg:underline' : 'lg:text-white/50';
           } else if (activeProjectSlug) {
             // When not hovering but has active: active is white, others are dim
-            textColor = isActive ? 'text-white underline' : 'text-white/50';
+            desktopColor = isActive ? 'lg:text-white lg:underline' : 'lg:text-white/50';
           }
 
           return (
@@ -114,7 +114,7 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
             >
               <Link
                 href={`/projects/${p.slug}`}
-                className={`block text-sm font-medium transition-all duration-200 text-medium ${textColor}`}
+                className={`block text-xs sm:text-sm whitespace-nowrap text-white ${desktopColor}`}
               >
                 {p.title}
               </Link>

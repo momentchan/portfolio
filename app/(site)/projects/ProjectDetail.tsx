@@ -14,8 +14,8 @@ interface Section {
 
 const InfoSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-2">
-    <div className="text-white/50 text-xs uppercase tracking-wider">{label}</div>
-    <div className="text-white/80">{children}</div>
+    <div className="text-white/50 text-[10px] sm:text-xs uppercase tracking-wider">{label}</div>
+    <div className="text-white/80 text-sm sm:text-base">{children}</div>
   </div>
 );
 
@@ -23,7 +23,7 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
   const sections: Section[] = [
     {
       id: 'title',
-      content: <h1 className="text-4xl font-bold text-white">{meta.title}</h1>
+      content: <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{meta.title}</h1>
     },
     meta.role && meta.role.length > 0 && {
       id: 'role',
@@ -55,9 +55,9 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
       id: 'tags',
       label: 'Tags',
       content: (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {meta.tags.map(tag => (
-            <span key={tag} className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-xs">
+            <span key={tag} className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-[10px] sm:text-xs">
               {tag}
             </span>
           ))}
@@ -71,10 +71,10 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
           href={meta.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors underline"
+          className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors underline text-sm sm:text-base"
         >
           Visit Website
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
         </a>
@@ -83,7 +83,7 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
   ].filter(Boolean) as Section[];
 
   return (
-    <div>
+    <div className="pb-8 sm:pb-0">
       {sections.map((section, index) => (
         <div
           key={section.id}
@@ -92,7 +92,7 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
             animationDelay: `${index * 50}ms`,
             opacity: 0,
             animationFillMode: 'forwards',
-            marginBottom: section.id === 'title' ? '2rem' : '3rem'
+            marginBottom: section.id === 'title' ? '1.5rem' : '2rem'
           }}
         >
           {section.id === 'title' || section.id === 'link' ? (

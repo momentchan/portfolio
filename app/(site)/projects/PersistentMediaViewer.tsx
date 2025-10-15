@@ -32,9 +32,9 @@ export default function PersistentMediaViewer({ projects }: PersistentMediaViewe
   if (!currentProject) return null;
 
   return (
-    <div className="w-full h-full pt-16 flex items-center justify-center overflow-hidden">
-      <div 
-        className="w-full h-full overflow-y-auto space-y-4 scrollbar-hide" 
+    <div className="w-full h-full pt-4 sm:pt-8 lg:pt-16 flex items-center justify-center overflow-hidden">
+      <div
+        className="w-full h-full overflow-y-auto space-y-3 sm:space-y-4 scrollbar-hide sm:px-0"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -54,7 +54,7 @@ export default function PersistentMediaViewer({ projects }: PersistentMediaViewe
             />
           ))
         )}
-        
+
         {/* Images */}
         {currentProject.images && currentProject.images.length > 0 && (
           currentProject.images.map((image, index) => (

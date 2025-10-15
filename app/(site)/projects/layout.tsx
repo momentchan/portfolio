@@ -1,5 +1,5 @@
 import { getAllProjects } from "@/lib/mdx";
-import PersistentMediaViewer from './PersistentMediaViewer';
+import ProjectsLayoutClient from "./ProjectsLayoutClient";
 
 export default async function ProjectsLayout({
   children,
@@ -7,19 +7,7 @@ export default async function ProjectsLayout({
   children: React.ReactNode;
 }) {
   const projects = await getAllProjects();
-  
-  return (
-    <div className="flex h-screen gap-30">
-      {/* Left half - Content (projects list or detail) */}
-      <div className="w-1/2 overflow-hidden">
-        {children}
-      </div>
-      
-      {/* Right half - Persistent Media Viewer */}
-      <div className="w-1/3 h-screen flex items-center justify-center">
-        <PersistentMediaViewer projects={projects} />
-      </div>
-    </div>
-  );
+
+  return <ProjectsLayoutClient projects={projects}>{children}</ProjectsLayoutClient>;
 }
 

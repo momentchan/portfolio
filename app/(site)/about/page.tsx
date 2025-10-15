@@ -2,10 +2,10 @@ import ContentOverlay from '@/app/(site)/about/ContentOverlay';
 
 export default function AboutPage() {
   return (
-    <div className="max-w-2xl mx-auto py-10">
+    <div className="max-w-2xl mx-auto py-4 sm:py-6 lg:py-10">
       <ContentOverlay>
-        <div className="space-y-6 text-gray-700 dark:text-gray-300 leading-relaxed select-none">
-          <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6 text-gray-700 dark:text-gray-300 leading-relaxed select-none text-sm sm:text-base">
+          <div className="space-y-3 sm:space-y-4">
             <p>
               I'm Ming Jyun Hung, a creative technologist and technical artist exploring how technology can move people — creating experiences that capture attention, evoke emotion, and stay in memory.
             </p>
@@ -20,7 +20,7 @@ export default function AboutPage() {
           </div>
 
           {/* Social Links */}
-          <div className="flex gap-6 pt-4 border-t border-gray-200 dark:border-gray-700 justify-center">
+          <div className="flex flex-wrap gap-4 sm:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700 justify-center text-xs sm:text-sm lg:text-base">
             <a
               href="https://instagram.com/mingjyunhung"
               target="_blank"
