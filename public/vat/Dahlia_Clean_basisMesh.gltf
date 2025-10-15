@@ -1,0 +1,46 @@
+{
+  "asset": { "version": "2.0", "generator": "Unity 2022.3.44f1 glTFast 6.14.0" },
+  "nodes": [{ "name": "Dahlia Clean_basisMesh", "mesh": 0 }],
+  "extensionsRequired": ["KHR_materials_unlit"],
+  "extensionsUsed": ["KHR_materials_unlit"],
+  "buffers": [{ "uri": "Dahlia_Clean_basisMesh.bin", "byteLength": 1232640 }],
+  "bufferViews": [
+    { "buffer": 0, "byteLength": 368640, "target": 34963 },
+    { "buffer": 0, "byteLength": 864000, "byteOffset": 368640, "byteStride": 40, "target": 34962 }
+  ],
+  "accessors": [
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 21600,
+      "type": "VEC3",
+      "max": [0.03581068, 0.00110070966, 0.0393491536],
+      "min": [-0.03858321, -0.0256208349, -0.0374032557]
+    },
+    { "bufferView": 1, "componentType": 5126, "count": 21600, "type": "VEC3", "byteOffset": 12 },
+    { "bufferView": 1, "componentType": 5126, "count": 21600, "type": "VEC2", "byteOffset": 24 },
+    { "bufferView": 1, "componentType": 5126, "count": 21600, "type": "VEC2", "byteOffset": 32 },
+    { "bufferView": 0, "componentType": 5125, "count": 92160, "type": "SCALAR" }
+  ],
+  "materials": [
+    {
+      "name": "Unlit_NewUnlitShader",
+      "pbrMetallicRoughness": { "metallicFactor": 0 },
+      "extensions": { "KHR_materials_unlit": {} }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Dahlia Clean_basisMesh",
+      "primitives": [
+        {
+          "attributes": { "POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2, "TEXCOORD_1": 3 },
+          "indices": 4,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "scene": 0,
+  "scenes": [{ "name": "Dahlia Clean_basisMesh", "nodes": [0] }]
+}

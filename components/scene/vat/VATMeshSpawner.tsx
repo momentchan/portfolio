@@ -39,12 +39,12 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
 
   // Default VAT data
   const defaultVATData: VATData = {
-    gltfPath: "vat/Dahlia Clean_basisMesh.gltf",
-    posTexPath: "vat/Dahlia Clean_pos.exr",
-    nrmTexPath: "vat/Dahlia Clean_nrm.png",
+    gltfPath: "vat/Dahlia_Clean_basisMesh.gltf",
+    posTexPath: "vat/Dahlia_Clean_pos.exr",
+    nrmTexPath: "vat/Dahlia_Clean_nrm.png",
     mapTexPath: "textures/tujlip.png",
     maskTexPath: "textures/blackanedwthioe.png",
-    metaPath: "vat/Dahlia Clean_meta.json"
+    metaPath: "vat/Dahlia_Clean_meta.json"
   }
 
   // Use provided VAT data or fall back to defaults
@@ -126,7 +126,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
       const canvasSize = 40; // radius * 4 (10 * 4)
       const bottomOffset = 5;
       const rightOffset = 5;
-      
+
       const isInAudioUI = (
         event.clientX >= window.innerWidth - canvasSize - rightOffset &&
         event.clientY >= window.innerHeight - canvasSize - bottomOffset
