@@ -30,21 +30,22 @@ export function useVATPreloader(glb: string, pos: string, nrm?: string | null, m
   // Use useGLTF instead of useLoader to leverage drei's caching
   const gltf = useGLTF(glb)
   const posTex = useLoader(getLoaderForExtension(pos), pos, configureEXRLoader)
-  const nrmTex = nrm ? useLoader(getLoaderForExtension(nrm), nrm, configureEXRLoader) : null
-  const mapTex = map ? useLoader(getLoaderForExtension(map), map, configureEXRLoader) : null
-  const maskTex = mask ? useLoader(getLoaderForExtension(mask), mask, configureEXRLoader) : null
-  
-  // Load meta data
-  const metaResponse = metaUrl ? useLoader(THREE.FileLoader, metaUrl) : null
+  // Always call hooks unconditionally - use fallback URL when optional textures are not provided
+  const nrmTex = useLoader(getLoaderForExtension(nrm || pos), nrm || pos, configureEXRLoader)
+  const mapTex = useLoader(getLoaderForExtension(map || pos), map || pos, configureEXRLoader)
+  const maskTex = useLoader(getLoaderForExtension(mask || pos), mask || pos, configureEXRLoader)
+
+  // Load meta data - use empty data URL as fallback
+  const metaResponse = useLoader(THREE.FileLoader, metaUrl || 'data:application/json,{}')
   const meta = metaResponse ? JSON.parse(metaResponse as string) : null
 
   return {
     gltf,
     posTex,
-    nrmTex,
-    mapTex,
-    maskTex,
-    meta,
+    nrmTex: nrm ? nrmTex : null,
+    mapTex: map ? mapTex : null,
+    maskTex: mask ? maskTex : null,
+    meta: metaUrl ? meta : null,
     isLoaded: !!(gltf && posTex && (!nrm || nrmTex) && (!map || mapTex) && (!mask || maskTex) && (!metaUrl || meta))
   }
 }

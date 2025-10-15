@@ -5,7 +5,7 @@
 export { customVelocityShader, customPositionShader } from './particles';
 
 // Ribbon shaders
-export { customRibbonQuadVertexShader, customRibbonQuadFragmentShader, customRibbonTubeVertexShader, customRibbonTubeFragmentShader } from './ribbon';
+export { customRibbonQuadVertexShader, customRibbonQuadFragmentShader } from './ribbon';
 
 // Hooks
 export { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';

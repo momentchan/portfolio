@@ -7,7 +7,7 @@ export default function AboutPage() {
         <div className="space-y-4 sm:space-y-6 text-gray-700 dark:text-gray-300 leading-relaxed select-none text-sm sm:text-base">
           <div className="space-y-3 sm:space-y-4">
             <p>
-              I'm Ming Jyun Hung, a creative technologist and technical artist exploring how technology can move people — creating experiences that capture attention, evoke emotion, and stay in memory.
+              I&apos;m Ming Jyun Hung, a creative technologist and technical artist exploring how technology can move people — creating experiences that capture attention, evoke emotion, and stay in memory.
             </p>
 
             <p>
