@@ -9,11 +9,12 @@ export type ProjectMeta = {
   summary?: string; 
   description?: string; // Detailed project description
   tags?: string[];
-  category?: 'web' | 'spatial';
+  category?: 'web' | 'experiential';
   images?: string[]; // Supports both local paths ("/images/...") and external URLs ("https://...")
   videos?: string[]; // Supports both local paths ("/videos/...") and external URLs ("https://...")
   role?: string[]; // Roles like ["Fullstack Creative Development", "Motion"]
   link?: string; // Website URL
+  enabled?: boolean; // Show/hide project (default: true)
   file: string;
   _filename?: string; // Internal: used for filename-based sorting
 };
@@ -65,17 +66,21 @@ export async function getAllProjects(): Promise<ProjectMeta[]> {
     const full = path.join(dir, file);
     const src = await fs.readFile(full, "utf8");
     const data = extractFrontmatter(src);
-    metas.push({ ...(data as any), file: full, _filename: file });
+    // Set enabled to true by default if not specified
+    const meta = { enabled: true, ...(data as any), file: full, _filename: file };
+    metas.push(meta);
   }
-  return metas.sort((a,b) => {
-    // Sort by filename (supports patterns like 01-project.mdx, 02-another.mdx)
-    // This allows easy reordering by renaming files
-    if (a._filename && b._filename) {
-      return a._filename.localeCompare(b._filename);
-    }
-    // Fallback to date sorting
-    return +new Date(b.date) - +new Date(a.date);
-  });
+  return metas
+    .filter(m => m.enabled !== false) // Only show enabled projects
+    .sort((a,b) => {
+      // Sort by filename (supports patterns like 01-project.mdx, 02-another.mdx)
+      // This allows easy reordering by renaming files
+      if (a._filename && b._filename) {
+        return a._filename.localeCompare(b._filename);
+      }
+      // Fallback to date sorting
+      return +new Date(b.date) - +new Date(a.date);
+    });
 }
 
 export async function getProjectBySlug(slug: string) {

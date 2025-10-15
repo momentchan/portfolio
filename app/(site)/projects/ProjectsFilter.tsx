@@ -6,7 +6,7 @@ import { ProjectMeta } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
 import { usePathname } from 'next/navigation';
 
-type Category = 'all' | 'web' | 'spatial';
+type Category = 'all' | 'web' | 'experiential';
 
 interface ProjectsFilterProps {
   projects: ProjectMeta[];
@@ -27,9 +27,9 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   });
 
   const categories: { value: Category; label: string }[] = [
-    { value: 'all', label: 'All' },
     { value: 'web', label: 'Web' },
-    { value: 'spatial', label: 'Spatial' },
+    { value: 'experiential', label: 'Experiential' },
+    { value: 'all', label: 'All' },
   ];
 
   // Track pathname changes
@@ -57,9 +57,9 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
 
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {/* Category filter buttons */}
-      <div className="flex gap-8 mb-8">
+      <div className="flex gap-8 mb-8 flex-shrink-0">
         {categories.map(({ value, label }) => (
           <button
             key={value}
@@ -67,7 +67,7 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
             className={`py-2 text-sm rounded-lg transition-colors cursor-pointer ${
               selectedCategory === value
                 ? 'text-white'
-                : 'text-white/60 hover:text-white/80'
+                : 'text-white/50 hover:text-white/80'
             }`}
           >
             {label}
@@ -75,8 +75,11 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
         ))}
       </div>
 
-      {/* Project list */}
-      <ul className="space-y-4">
+      {/* Project list - scrollable */}
+      <ul className="space-y-3 overflow-y-auto scrollbar-hide flex-1" style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
         {filteredProjects.map((p, index) => {
           const isActive = activeProjectSlug === p.slug;
           const isHovered = hoveredProject?.slug === p.slug;
@@ -86,10 +89,10 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
           
           if (hoveredProject) {
             // When hovering: active is white, others are very dark
-            textColor = isHovered ? 'text-white underline' : 'text-white/10';
+            textColor = isHovered ? 'text-white underline' : 'text-white/50';
           } else if (activeProjectSlug) {
             // When not hovering but has active: active is white, others are dim
-            textColor = isActive ? 'text-white underline' : 'text-white';
+            textColor = isActive ? 'text-white underline' : 'text-white/50';
           }
           
           return (
@@ -102,14 +105,14 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
               onMouseLeave={() => setHoveredProject(null)}
               className="transition-all duration-200 animate-crop-down"
               style={{
-                animationDelay: `${index * 100}ms`,
+                animationDelay: `${index * 50}ms`,
                 opacity: 0,
                 animationFillMode: 'forwards'
               }}
             >
               <Link 
                 href={`/projects/${p.slug}`}
-                className={`block text-2xl font-medium transition-all duration-200 text-medium ${textColor}`}
+                className={`block text-sm font-medium transition-all duration-200 text-medium ${textColor}`}
               >
                 {p.title}
               </Link>
