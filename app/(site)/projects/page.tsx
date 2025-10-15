@@ -1,13 +1,12 @@
 import { getAllProjects } from "@/lib/mdx";
-import ProjectsFilter from '@/components/ui/ProjectsFilter';
+import ProjectsFilter from './ProjectsFilter';
 
 export const revalidate = 60;
 
 export default async function ProjectsPage() {
   const projects = await getAllProjects();
   return (
-    <div className="px-10 py-10 h-full overflow-hidden flex flex-col">
-      <h1 className="text-2xl font-semibold mb-6 text-white">Projects</h1>
+    <div className="h-full overflow-hidden flex flex-col">
       <ProjectsFilter projects={projects} />
     </div>
   );

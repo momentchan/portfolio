@@ -1,4 +1,4 @@
-import ContentOverlay from '@/components/layout/ContentOverlay';
+import ContentOverlay from '@/app/(site)/about/ContentOverlay';
 
 export default function AboutPage() {
   return (

@@ -7,7 +7,7 @@ import NavLink from './NavLink';
  */
 export default function Navigation() {
   return (
-    <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center">
+    <header className="relative z-20 w-full px-20 py-20 flex justify-between items-center">
       <NavLink href="/" className="text-lg font-bold">
         Ming Jyun Hung
       </NavLink>

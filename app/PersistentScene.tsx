@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Scene from '@/components/scene/Scene';
-import LoadingPage from '../ui/LoadingPage';
-import AudioUICanvas from '../ui/audio/AudioUICanvas';
+import LoadingPage from '@/components/ui/LoadingPage';
+import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 
 /**
  * PersistentScene - Loads once and persists across all routes

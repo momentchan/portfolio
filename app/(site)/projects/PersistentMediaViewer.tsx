@@ -32,9 +32,9 @@ export default function PersistentMediaViewer({ projects }: PersistentMediaViewe
   if (!currentProject) return null;
 
   return (
-    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+    <div className="w-full h-full pt-16 flex items-center justify-center overflow-hidden">
       <div 
-        className="w-full h-full overflow-y-auto p-8 space-y-4 scrollbar-hide" 
+        className="w-full h-full overflow-y-auto space-y-4 scrollbar-hide" 
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',

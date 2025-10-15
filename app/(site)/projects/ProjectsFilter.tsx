@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ProjectMeta } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
+import { usePathname } from 'next/navigation';
 
 type Category = 'all' | 'web' | 'spatial';
 
@@ -17,6 +18,8 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   const [animationKey, setAnimationKey] = useState(0);
   const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
   const setActiveProjectSlug = useGlobalState((state) => state.setActiveProjectSlug);
+  const pathname = usePathname();
+  const previousPathname = useRef<string | null>(null);
 
   const filteredProjects = projects.filter(project => {
     if (selectedCategory === 'all') return true;
@@ -29,17 +32,28 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
     { value: 'spatial', label: 'Spatial' },
   ];
 
-  // Reset active project on mount (page change)
+  // Track pathname changes
   useEffect(() => {
-    setActiveProjectSlug(null);
-  }, [setActiveProjectSlug]);
+    previousPathname.current = pathname;
+  }, [pathname]);
+
+  // Reset active project only when NOT coming from a project detail page
+  // useEffect(() => {
+  //   const isComingFromProjectPage = previousPathname.current?.startsWith('/projects/');
+  //   const isOnProjectsListPage = pathname === '/projects';
+    
+  //   // Only reset if we're on projects list AND NOT coming from a project detail page
+  //   if (isOnProjectsListPage && !isComingFromProjectPage) {
+  //     setActiveProjectSlug(null);
+  //   }
+  // }, [pathname, setActiveProjectSlug]);
 
   // Trigger animation and reset active project when category changes
-  useEffect(() => {
-    setAnimationKey(prev => prev + 1);
-    setActiveProjectSlug(null);
-    setHoveredProject(null);
-  }, [selectedCategory, setActiveProjectSlug]);
+  // useEffect(() => {
+  //   setAnimationKey(prev => prev + 1);
+  //   setActiveProjectSlug(null);
+  //   setHoveredProject(null);
+  // }, [selectedCategory, setActiveProjectSlug]);
 
 
   return (

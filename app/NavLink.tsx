@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ReactNode } from 'react';
 
 interface NavLinkProps {
@@ -15,13 +15,20 @@ interface NavLinkProps {
  */
 export default function NavLink({ href, children, className }: NavLinkProps) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  
+  // Check if this link is active (exclude home page)
+  const isActive = href !== '/' && (pathname === href || pathname.startsWith(href + '/'));
   
   // Preserve existing query parameters
   const queryString = searchParams.toString();
   const fullHref = queryString ? `${href}?${queryString}` : href;
   
+  // Combine classes with underline for active state
+  const combinedClassName = `${className || ''} ${isActive ? 'underline' : ''}`.trim();
+  
   return (
-    <Link href={fullHref} className={className}>
+    <Link href={fullHref} className={combinedClassName}>
       {children}
     </Link>
   );
