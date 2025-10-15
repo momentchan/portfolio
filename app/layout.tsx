@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import PersistentScene from "./PersistentScene";
 import Navigation from "./Navigation";
+import PathTracker from "./PathTracker";
+import MainContent from "./MainContent";
 
 const pragmatica = localFont({
   src: [
@@ -34,14 +36,17 @@ export default function RootLayout({
   return (
     <html lang="en">
      <body className={`${pragmatica.variable} antialiased`}>
-        {/* Persistent background scene - runs across all routes */}
-        {/* <PersistentScene /> */}
+        {/* Track current and previous paths */}
+        <PathTracker />
+
+        {/* Persistent background scene - pauses on other pages */}
+        <PersistentScene />
 
         {/* Nav Bar - preserves query parameters like ?dev=true */}
         <Navigation />
 
-        {/* Main content area - pointer-events-none allows scene interaction on empty pages */}
-        <main className="relative z-10 min-h-screen px-20">{children}</main>
+        {/* Main content area - pointer-events-none on homepage allows scene interaction */}
+        <MainContent>{children}</MainContent>
 
         {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.

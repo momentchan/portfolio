@@ -35,7 +35,7 @@ export default function Effects() {
         focusRange={dofParams.focusRange}
         blur={dofParams.blur}
       />
-      {/* <CustomEffect /> */}
+      <CustomEffect />
     </EffectComposer>
   );
 }

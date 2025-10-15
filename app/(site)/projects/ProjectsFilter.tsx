@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProjectMeta } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
-import { usePathname } from 'next/navigation';
 
 type Category = 'all' | 'web' | 'experiential';
 
@@ -18,8 +17,8 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   const [animationKey, setAnimationKey] = useState(0);
   const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
   const setActiveProjectSlug = useGlobalState((state) => state.setActiveProjectSlug);
-  const pathname = usePathname();
-  const previousPathname = useRef<string | null>(null);
+  const currentPath = useGlobalState((state) => state.currentPath);
+  const previousPath = useGlobalState((state) => state.previousPath);
 
   const filteredProjects = projects.filter(project => {
     if (selectedCategory === 'all') return true;
@@ -27,33 +26,28 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   });
 
   const categories: { value: Category; label: string }[] = [
+    { value: 'all', label: 'All' },
     { value: 'web', label: 'Web' },
     { value: 'experiential', label: 'Experiential' },
-    { value: 'all', label: 'All' },
   ];
 
-  // Track pathname changes
-  useEffect(() => {
-    previousPathname.current = pathname;
-  }, [pathname]);
-
   // Reset active project only when NOT coming from a project detail page
-  // useEffect(() => {
-  //   const isComingFromProjectPage = previousPathname.current?.startsWith('/projects/');
-  //   const isOnProjectsListPage = pathname === '/projects';
+  useEffect(() => {
+    const isComingFromProjectPage = previousPath.startsWith('/projects/');
+    const isOnProjectsListPage = currentPath === '/projects';
     
-  //   // Only reset if we're on projects list AND NOT coming from a project detail page
-  //   if (isOnProjectsListPage && !isComingFromProjectPage) {
-  //     setActiveProjectSlug(null);
-  //   }
-  // }, [pathname, setActiveProjectSlug]);
+    // Only reset if we're on projects list AND NOT coming from a project detail page
+    if (isOnProjectsListPage && !isComingFromProjectPage) {
+      setActiveProjectSlug(null);
+    }
+  }, [currentPath, previousPath, setActiveProjectSlug]);
 
   // Trigger animation and reset active project when category changes
-  // useEffect(() => {
-  //   setAnimationKey(prev => prev + 1);
-  //   setActiveProjectSlug(null);
-  //   setHoveredProject(null);
-  // }, [selectedCategory, setActiveProjectSlug]);
+  useEffect(() => {
+    setAnimationKey(prev => prev + 1);
+    setActiveProjectSlug(null);
+    setHoveredProject(null);
+  }, [selectedCategory, setActiveProjectSlug]);
 
 
   return (

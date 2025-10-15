@@ -28,16 +28,14 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
   const { camera } = useThree()
   const [spawnedMeshes, setSpawnedMeshes] = useState<SpawnedMeshData[]>([])
   const [meshCounter, setMeshCounter] = useState(0)
-  const { started, paused } = GlobalState()
+  const { started } = GlobalState()
 
   // Use refs to always have latest values in callbacks
   const startedRef = useRef(started)
-  const pausedRef = useRef(paused)
 
   useEffect(() => {
     startedRef.current = started
-    pausedRef.current = paused
-  }, [started, paused])
+  }, [started])
 
   // Default VAT data
   const defaultVATData: VATData = {
@@ -84,7 +82,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
 
 
   const spawnVATMesh = useCallback((position?: Vector3) => {
-    if (!isLoaded || !startedRef.current || pausedRef.current) return
+    if (!isLoaded || !startedRef.current) return
 
     setSpawnedMeshes(prev => {
       const spawnPosition = position || generateValidPosition(prev, 0.5, 0.1)
@@ -166,7 +164,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
         burstInterval={[20000, 30000]}
         burstCount={[10, 15]}
         burstDuration={3000}
-        enabled={started && !paused}
+        enabled={started}
       />
 
       {preWarmed && (
@@ -192,7 +190,7 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
           scaleOutDuration={mesh.animDuration * 0.33}
           rotateInDuration={mesh.animDuration * 0.67}
           rotateOutDuration={mesh.animDuration * 0.67}
-          paused={paused}
+          paused={false}
           onComplete={() => removeVATMesh(mesh.id)}
         />
       ))}

@@ -8,7 +8,7 @@ import GlobalState from '../common/GlobalStates';
 
 export default function CameraRotator() {
   const { camera } = useThree();
-  const { started, paused } = GlobalState();
+  const { started } = GlobalState();
 
   const timeRef = useRef(0);
 
@@ -35,7 +35,7 @@ export default function CameraRotator() {
     if (!controls.enabled) return;
 
     const speed = controls.speed * rotateLerpRef.current.value;
-    timeRef.current += (started && !paused) ? delta * speed : 0;
+    timeRef.current += (started) ? delta * speed : 0;
 
     const x = controls.radius * Math.cos(timeRef.current);
     const y = controls.radius * Math.sin(timeRef.current * 0.5) + controls.height;

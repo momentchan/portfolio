@@ -5,7 +5,7 @@ import { gsap } from 'gsap';
 import GlobalState from '../../common/GlobalStates';
 
 export function CustomTrail() {
-  const { started, paused } = GlobalState();
+  const { started } = GlobalState();
 
   // Use organized hooks for each system
   const { trailControls, trails } = useTrailSystem();
@@ -19,7 +19,7 @@ export function CustomTrail() {
 
   // Update systems each frame
   useFrame((state, delta) => {
-    if (!trails || paused || !started) return;
+    if (!trails || !started) return;
 
     const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 1 / 30)

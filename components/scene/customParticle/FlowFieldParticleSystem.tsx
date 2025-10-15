@@ -13,7 +13,7 @@ import GlobalState from "../../common/GlobalStates";
 
 export default function FlowFieldParticleSystem() {
     const { camera, viewport } = useThree();
-    const { started, paused } = GlobalState();
+    const { started } = GlobalState();
 
     const controls = useControls('Particles.Flow Field Particles', {
         glowColor: { value: '#ffd3d3' },
@@ -44,7 +44,7 @@ export default function FlowFieldParticleSystem() {
     const animate = useParticleAnimation({ duration: 5, delay: 3 });
 
     useFrame((state, delta) => {
-        if (!particleSystemRef.current || !started || paused) return;
+        if (!particleSystemRef.current || !started) return;
 
         const time = state.clock.elapsedTime;
 
@@ -92,7 +92,7 @@ export default function FlowFieldParticleSystem() {
             config={config}
             behavior={behaviorRef.current}
             customMaterial={customMaterial}
-            update={started && !paused}
+            update={started}
         />  
     );
 }

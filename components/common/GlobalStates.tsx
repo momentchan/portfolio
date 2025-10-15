@@ -11,6 +11,9 @@ interface GlobalState {
   setSoundOn: (value: boolean) => void;
   activeProjectSlug: string | null;
   setActiveProjectSlug: (slug: string | null) => void;
+  currentPath: string;
+  previousPath: string;
+  setCurrentPath: (path: string) => void;
 }
 
 export default create<GlobalState>((set) => ({
@@ -26,4 +29,10 @@ export default create<GlobalState>((set) => ({
   setSoundOn: (value) => set({ soundOn: value }),
   activeProjectSlug: null,
   setActiveProjectSlug: (slug) => set({ activeProjectSlug: slug }),
+  currentPath: '/',
+  previousPath: '/',
+  setCurrentPath: (path) => set((state) => ({
+    previousPath: state.currentPath,
+    currentPath: path,
+  })),
 }))

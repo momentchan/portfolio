@@ -46,6 +46,7 @@ export default function Scene() {
       <Canvas
         shadows
         gl={{ shadowMapType: THREE.PCFSoftShadowMap }}
+        frameloop={paused ? 'never' : 'always'}
       >
         <Suspense fallback={null}>
           <color attach="background" args={['#000000']} />
@@ -59,14 +60,13 @@ export default function Scene() {
             fov={60}
           />
 
-          {paused ? <CameraControls /> : <CameraRotator />}
-
+          <CameraRotator />
           <CustomTrail />
           <FlowFieldParticleSystem />
           <VATMeshSpawner />
           <EnvironmentSetup />
           <DirectionalLights />
-          {/* <Effects /> */}
+          <Effects />
           <BGM />
         </Suspense>
         <Preload all />
