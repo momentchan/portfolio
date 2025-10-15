@@ -8,7 +8,7 @@ export default function MainContent({ children }: { children: React.ReactNode })
   
   return (
     <main 
-      className="relative z-10 min-h-screen px-20" 
+      className="relative z-10 min-h-screen px-10 mt-10" 
       style={{ pointerEvents: isHomepage ? 'none' : 'auto' }}
     >
       {children}

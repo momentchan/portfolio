@@ -11,7 +11,7 @@ export default async function ProjectsLayout({
   return (
     <div className="flex h-screen gap-30">
       {/* Left half - Content (projects list or detail) */}
-      <div className="w-1/3 overflow-hidden">
+      <div className="w-1/2 overflow-hidden">
         {children}
       </div>
       
