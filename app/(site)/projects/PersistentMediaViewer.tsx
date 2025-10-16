@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 import { ProjectMeta } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 interface PersistentMediaViewerProps {
   projects: ProjectMeta[];
@@ -58,10 +59,14 @@ export default function PersistentMediaViewer({ projects }: PersistentMediaViewe
         {/* Images */}
         {currentProject.images && currentProject.images.length > 0 && (
           currentProject.images.map((image, index) => (
-            <img
+            <OptimizedImage
               key={`${currentProject.slug}-image-${index}`}
-              src={image}
+              path={image}
               alt={`${currentProject.title} - ${index + 1}`}
+              width={1600}
+              height={900}
+              loading={index < 2 ? 'eager' : 'lazy'}
+              priority={index === 0}
               className="w-full rounded"
             />
           ))
