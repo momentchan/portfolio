@@ -1,6 +1,7 @@
 'use client';
 
 import { ProjectMeta } from '@/lib/mdx';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 interface ProjectDetailProps {
   meta: ProjectMeta;
@@ -83,25 +84,70 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
   ].filter(Boolean) as Section[];
 
   return (
-    <div className="pb-8 sm:pb-0">
-      {sections.map((section, index) => (
+    <div className="flex flex-col lg:flex-row lg:gap-20 h-screen">
+      {/* Left section - Project Details */}
+      <div className="pb-8 sm:pb-0 min-w-[450px] lg:w-1/3 lg:pr-8">
+        {sections.map((section, index) => (
+          <div
+            key={section.id}
+            className="animate-crop-down"
+            style={{
+              animationDelay: `${index * 50}ms`,
+              opacity: 0,
+              animationFillMode: 'forwards',
+              marginBottom: section.id === 'title' ? '1.5rem' : '2rem'
+            }}
+          >
+            {section.id === 'title' || section.id === 'link' ? (
+              section.content
+            ) : (
+              <InfoSection label={section.label!}>{section.content}</InfoSection>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Right section - Media Viewer */}
+      <div className="w-full lg:w-1/2 lg:h-[calc(100dvh-20rem)] lg:overflow-hidden">
         <div
-          key={section.id}
-          className="animate-crop-down"
+          className="w-full h-full space-y-3 sm:space-y-4 scrollbar-hide overflow-y-auto pb-50"
           style={{
-            animationDelay: `${index * 50}ms`,
-            opacity: 0,
-            animationFillMode: 'forwards',
-            marginBottom: section.id === 'title' ? '1.5rem' : '2rem'
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
           }}
         >
-          {section.id === 'title' || section.id === 'link' ? (
-            section.content
-          ) : (
-            <InfoSection label={section.label!}>{section.content}</InfoSection>
+          {/* Videos */}
+          {meta.videos && meta.videos.length > 0 && (
+            meta.videos.map((video, index) => (
+              <video
+                key={`${meta.slug}-video-${index}`}
+                src={video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full rounded"
+              />
+            ))
+          )}
+
+          {/* Images */}
+          {meta.images && meta.images.length > 0 && (
+            meta.images.map((image, index) => (
+              <OptimizedImage
+                key={`${meta.slug}-image-${index}`}
+                path={image}
+                alt={`${meta.title} - ${index + 1}`}
+                width={1600}
+                height={900}
+                loading={index < 2 ? 'eager' : 'lazy'}
+                priority={index === 0}
+                className="w-full rounded"
+              />
+            ))
           )}
         </div>
-      ))}
+      </div>
     </div>
   );
 }

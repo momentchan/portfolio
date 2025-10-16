@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProjectMeta } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 type Category = 'all' | 'web' | 'experiential';
 
@@ -11,116 +12,130 @@ interface ProjectsFilterProps {
   projects: ProjectMeta[];
 }
 
+const CATEGORIES: { value: Category; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'web', label: 'Web' },
+  { value: 'experiential', label: 'Experiential' },
+];
+
+const FADE_DELAY = 50;
+const FADE_DURATION = 500;
+
 export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
+  // State
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
+  const [displayCategory, setDisplayCategory] = useState<Category>('all');
   const [hoveredProject, setHoveredProject] = useState<ProjectMeta | null>(null);
-  const [animationKey, setAnimationKey] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Global state
   const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
   const setActiveProjectSlug = useGlobalState((state) => state.setActiveProjectSlug);
-  const currentPath = useGlobalState((state) => state.currentPath);
-  const previousPath = useGlobalState((state) => state.previousPath);
 
-  const filteredProjects = projects.filter(project => {
-    if (selectedCategory === 'all') return true;
-    return project.category === selectedCategory;
-  });
+  // Filter projects based on display category
+  const filteredProjects = projects.filter(project =>
+    displayCategory === 'all' || project.category === displayCategory
+  );
 
-  const categories: { value: Category; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'web', label: 'Web' },
-    { value: 'experiential', label: 'Experiential' },
-  ];
+  // Handle category change with fade animation
+  useEffect(() => {
+    if (selectedCategory === displayCategory) return;
 
-  // Use two columns when more than 10 projects
-  const useTwoColumns = filteredProjects.length > 10;
+    setIsVisible(false);
+    setActiveProjectSlug(null);
+    setHoveredProject(null);
 
-  // Reset active project only when NOT coming from a project detail page
-  // useEffect(() => {
-  //   const isComingFromProjectPage = previousPath.startsWith('/projects/');
-  //   const isOnProjectsListPage = currentPath === '/projects';
+    const timeout = setTimeout(() => {
+      setDisplayCategory(selectedCategory);
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    }, FADE_DELAY);
 
-  //   // Only reset if we're on projects list AND NOT coming from a project detail page
-  //   if (isOnProjectsListPage && !isComingFromProjectPage) {
-  //     setActiveProjectSlug(null);
-  //   }
-  // }, [currentPath, previousPath, setActiveProjectSlug]);
+    return () => clearTimeout(timeout);
+  }, [selectedCategory, displayCategory, setActiveProjectSlug]);
 
-  // // Trigger animation and reset active project when category changes
-  // useEffect(() => {
-  //   setAnimationKey(prev => prev + 1);
-  //   setActiveProjectSlug(null);
-  //   setHoveredProject(null);
-  // }, [selectedCategory, setActiveProjectSlug]);
 
+  // Handlers
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleProjectHover = (project: ProjectMeta | null) => {
+    setHoveredProject(project);
+    if (project) {
+      setActiveProjectSlug(project.slug);
+    }
+  };
+
+  // Helper to determine project text color on desktop
+  const getProjectTextColor = (projectSlug: string) => {
+    const isHovered = hoveredProject?.slug === projectSlug;
+    const isActive = activeProjectSlug === projectSlug;
+
+    if (hoveredProject) {
+      return isHovered ? 'lg:text-white lg:underline' : 'lg:text-white/50';
+    }
+    if (activeProjectSlug) {
+      return isActive ? 'lg:text-white lg:underline' : 'lg:text-white/50';
+    }
+    return 'lg:text-white/30';
+  };
 
   return (
-    <div className="flex flex-col">
-      {/* Category filter buttons */}
-      <div className="flex gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-8 flex-shrink-0 flex-wrap">
-        {categories.map(({ value, label }) => (
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-screen">
+      {/* Category Filter */}
+      <nav className="flex gap-4 sm:gap-6 lg:gap-8 flex-shrink-0 flex-wrap lg:flex-nowrap">
+        {CATEGORIES.map(({ value, label }) => (
           <button
             key={value}
-            onClick={() => setSelectedCategory(value)}
-            className={`py-2 text-xs sm:text-sm cursor-pointer ${selectedCategory === value
-              ? 'text-white'
-              : 'text-white/50 hover:text-white/80'
+            onClick={() => handleCategoryClick(value)}
+            className={`py-2 text-xs sm:text-sm cursor-pointer transition-colors ${selectedCategory === value
+                ? 'text-white'
+                : 'text-white/50 hover:text-white/80'
               }`}
           >
             {label}
           </button>
         ))}
-      </div>
+      </nav>
 
-      {/* Project list - scrollable, auto two columns when >10 items on desktop */}
+      {/* Project Grid */}
       <ul
-        className={`overflow-y-auto scrollbar-hide flex-1 grid gap-y-2 sm:gap-y-3 w-full lg:w-fit ${useTwoColumns ? 'lg:grid-cols-2 lg:gap-x-10 lg:auto-rows-min' : 'grid-cols-1'
-          }`}
+        className="overflow-y-auto scrollbar-hide flex-1 grid gap-y-6 gap-x-4 sm:gap-y-8 sm:gap-x-6 lg:gap-y-16 lg:gap-x-8 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-0 pb-32 transition-opacity"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          gridAutoFlow: useTwoColumns ? 'column' : 'row',
-          gridTemplateRows: useTwoColumns ? `repeat(${Math.ceil(filteredProjects.length / 2)}, auto)` : 'auto',
+          opacity: isVisible ? 1 : 0,
+          transitionDuration: `${FADE_DURATION}ms`,
         }}
       >
-        {filteredProjects.map((p, index) => {
-          const isActive = activeProjectSlug === p.slug;
-          const isHovered = hoveredProject?.slug === p.slug;
-
-          // Determine text color based on hover and active states (desktop only)
-          let desktopColor = 'lg:text-white/30'; // default
-
-          if (hoveredProject) {
-            // When hovering: active is white, others are very dark
-            desktopColor = isHovered ? 'lg:text-white lg:underline' : 'lg:text-white/50';
-          } else if (activeProjectSlug) {
-            // When not hovering but has active: active is white, others are dim
-            desktopColor = isActive ? 'lg:text-white lg:underline' : 'lg:text-white/50';
-          }
-
-          return (
-            <li
-              key={`${animationKey}-${p.slug}`}
-              onMouseEnter={() => {
-                setHoveredProject(p);
-                setActiveProjectSlug(p.slug);
-              }}
-              onMouseLeave={() => setHoveredProject(null)}
-              className="transition-all duration-200 animate-crop-down"
-              style={{
-                animationDelay: `${index * 50}ms`,
-                opacity: 0,
-                animationFillMode: 'forwards'
-              }}
+        {filteredProjects.map((project) => (
+          <li
+            key={project.slug}
+            onMouseEnter={() => handleProjectHover(project)}
+            onMouseLeave={() => handleProjectHover(null)}
+          >
+            <Link
+              href={`/projects/${project.slug}`}
+              className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors ${getProjectTextColor(project.slug)}`}
             >
-              <Link
-                href={`/projects/${p.slug}`}
-                className={`block text-xs sm:text-sm whitespace-nowrap text-white ${desktopColor}`}
-              >
-                {p.title}
-              </Link>
-            </li>
-          );
-        })}
+              {project.images?.[0] && (
+                <div className="relative w-full aspect-video lg:aspect-square overflow-hidden rounded">
+                  <OptimizedImage
+                    path={project.images[0]}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    preset="medium"
+                  />
+                </div>
+              )}
+              <span>{project.title}</span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );

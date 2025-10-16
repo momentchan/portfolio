@@ -40,12 +40,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-     <body className={`${pragmatica.variable} antialiased`}>
+      <body className={`${pragmatica.variable} antialiased`}>
         {/* Track current and previous paths */}
         <PathTracker />
 
         {/* Persistent background scene - pauses on other pages */}
-        <PersistentScene />
+        {/* <PersistentScene /> */}
 
         {/* Nav Bar - preserves query parameters like ?dev=true */}
         <Navigation />
