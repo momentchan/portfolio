@@ -14,7 +14,7 @@ import { isCloudflareImage } from '@/utils/cf';
 
 type Category = 'all' | 'web' | 'experiential';
 
-interface ProjectsFilterProps {
+interface ProjectListProps {
   projects: ProjectMeta[];
 }
 
@@ -31,22 +31,39 @@ const FADE_DURATION = 200;
 // HELPER FUNCTIONS
 // ============================================================================
 
-function getFullImageUrl(imagePath: string | undefined): string | null {
-  if (!imagePath) return null;
+function isVideoUrl(url: string): boolean {
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg'];
+  return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+}
 
-  // Cloudflare images - use as-is (already full URL)
-  if (isCloudflareImage(imagePath)) {
-    return imagePath;
+function getFullMediaUrl(mediaPath: string | undefined): string | null {
+  if (!mediaPath) return null;
+
+  // Cloudflare media - use as-is (already full URL)
+  if (isCloudflareImage(mediaPath)) {
+    return mediaPath;
   }
 
-  // Local images - prepend origin
-  if (imagePath.startsWith('/')) {
+  // Local media - prepend origin
+  if (mediaPath.startsWith('/')) {
     return typeof window !== 'undefined'
-      ? `${window.location.origin}${imagePath}`
-      : imagePath;
+      ? `${window.location.origin}${mediaPath}`
+      : mediaPath;
   }
 
-  return imagePath;
+  return mediaPath;
+}
+
+function getProjectMedia(project: ProjectMeta): { url: string | null; isVideo: boolean } {
+  // Prioritize videos if available
+  if (project.videos?.[0]) {
+    return { url: getFullMediaUrl(project.videos[0]), isVideo: true };
+  }
+  // Fall back to images
+  if (project.images?.[0]) {
+    return { url: getFullMediaUrl(project.images[0]), isVideo: false };
+  }
+  return { url: null, isVideo: false };
 }
 
 function getProjectTextColor(
@@ -70,7 +87,7 @@ function getProjectTextColor(
 // MAIN COMPONENT
 // ============================================================================
 
-export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
+export default function ProjectList({ projects }: ProjectListProps) {
   // Local State
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
   const [displayCategory, setDisplayCategory] = useState<Category>('all');
@@ -86,7 +103,7 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   const filteredProjects = projects.filter(
     (project) => displayCategory === 'all' || project.category === displayCategory
   );
-  const hoveredImageUrl = getFullImageUrl(hoveredProject?.images?.[0]);
+  const hoveredMedia = hoveredProject ? getProjectMedia(hoveredProject) : { url: null, isVideo: false };
 
   // Category change animation effect
   useEffect(() => {
@@ -120,7 +137,11 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
   return (
     <>
       {/* Three.js Hover Effect Canvas */}
-      <HoverCanvas hoveredElement={hoveredElement} imageUrl={hoveredImageUrl} />
+      {/* <HoverCanvas
+        hoveredElement={hoveredElement}
+        mediaUrl={hoveredMedia.url}
+        isVideo={hoveredMedia.isVideo}
+      /> */}
 
       <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-screen">
         {/* Category Filter */}
@@ -149,36 +170,60 @@ export default function ProjectsFilter({ projects }: ProjectsFilterProps) {
             transitionDuration: `${FADE_DURATION}ms`,
           }}
         >
-          {filteredProjects.map((project) => (
-            <li key={project.slug}>
-              <Link
-                href={`/projects/${project.slug}`}
-                className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors ${getProjectTextColor(
-                  project.slug,
-                  activeProjectSlug,
-                  hoveredProject?.slug || null
-                )}`}
-              >
-                {project.images?.[0] && (
-                  <div
-                    className="relative w-full aspect-video lg:aspect-square overflow-hidden rounded"
-                    onMouseEnter={(e) => handleProjectHover(project, e.currentTarget)}
-                    onMouseLeave={() => handleProjectHover(null, null)}
-                  >
-                    <OptimizedImage
-                      path={project.images[0]}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      preset="medium"
-                    />
-                  </div>
-                )}
-                <span>{project.title}</span>
-              </Link>
-            </li>
-          ))}
+          {filteredProjects.map((project) => {
+            const media = getProjectMedia(project);
+            const hasMedia = media.url !== null;
+
+            return (
+              <li key={project.slug}>
+                <Link
+                  href={`/projects/${project.slug}`}
+                  className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors ${getProjectTextColor(
+                    project.slug,
+                    activeProjectSlug,
+                    hoveredProject?.slug || null
+                  )}`}
+                >
+                  {hasMedia && (
+                    <div
+                      className="relative w-full aspect-video lg:aspect-square overflow-hidden rounded"
+                      onMouseEnter={(e) => handleProjectHover(project, e.currentTarget)}
+                      onMouseLeave={() => handleProjectHover(null, null)}
+                    >
+                      {media.isVideo ? (
+                        <video
+                          key={media.url}
+                          src={media.url!}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          onPause={(e) => {
+                            // Prevent pause, keep playing
+                            const video = e.currentTarget;
+                            if (video.paused) {
+                              video.play().catch(() => { });
+                            }
+                          }}
+                        />
+                      ) : (
+                        <OptimizedImage
+                          path={project.images![0]}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          preset="medium"
+                        />
+                      )}
+                    </div>
+                  )}
+                  <span>{project.title}</span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </>

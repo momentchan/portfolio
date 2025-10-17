@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useState, useCallback, Suspense, useRef, useMemo } from 'react';
 import { Canvas, useLoader, useFrame } from '@react-three/fiber';
-import { TextureLoader, ShaderMaterial } from 'three';
+import { TextureLoader, ShaderMaterial, VideoTexture } from 'three';
 import simplexNoise from '@/lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl?raw';
 
 // ============================================================================
@@ -11,7 +11,8 @@ import simplexNoise from '@/lib/r3f-gist/shader/cginc/noise/simplexNoise.glsl?ra
 
 interface HoverCanvasProps {
     hoveredElement: HTMLElement | null;
-    imageUrl?: string | null;
+    mediaUrl?: string | null;
+    isVideo?: boolean;
 }
 
 interface Position {
@@ -54,69 +55,33 @@ const fragmentShader = /* glsl */ `
     
     void main() {
         vec2 uv = (vUv - uUvOffset) / uUvScale * vec2(1.0, uAspect);
-        
         float dist = length(uv - uMouse);
         
-        // ========================================
-        // MOSAIC EFFECT (Adaptive grid based on brightness)
-        // ========================================
-        
-        // Sample original color at current position to get brightness
-        vec4 originalColor = texture2D(uTexture, vUv);
-        float brightness = dot(originalColor.rgb, vec3(0.299, 0.587, 0.114)); // Grayscale conversion
-        
-        // Quantize brightness into discrete levels
-        float brightnessLevels = 1.0; // Number of brightness steps
-        float quantizedBrightness = floor(brightness * brightnessLevels) / brightnessLevels;
-        
-        // Grid size varies with quantized brightness (brighter = larger blocks, darker = smaller blocks)
-        float minGridSize = 0.5;
-        float maxGridSize = 2.0;
-        float gridSize = mix(minGridSize, maxGridSize, brightness);
-        
-        // Create mosaic blocks
-        vec2 mosaicUv = floor(vUv * gridSize) / gridSize;
-        
-        // Sample from center of each block for solid color
-        vec2 blockCenter = (floor(vUv * gridSize) + 0.5) / gridSize;
-        vec4 mosaicColor = texture2D(uTexture, blockCenter);
-        
-        // ========================================
-        // GLITCH EFFECT (Horizontal displacement on blocks)
-        // ========================================
+        // Glitch bands
         float glitchBands = 100.0;
         float glitchSegments = 10.0;
-        
         float yBand = floor(vUv.y * glitchBands);
         float xSegment = floor(vUv.x * glitchSegments);
         
-        // Random selection for each cell
+        // Random cell selection
         float cellRandom = simplexNoise2d(vec2(yBand * 0.1, xSegment * 0.1));
-        
-        // Time-based glitch trigger
         float glitchNoise = simplexNoise2d(vec2(cellRandom, uTime * 1.0));
         float glitchTrigger = step(0.8, glitchNoise);
         
-        // Horizontal offset
+        // Horizontal glitch offset
         float xGlitch = glitchNoise * 0.05 * glitchTrigger;
-        
-        // Apply glitch to mosaic UV
-        vec2 glitchedUv = mosaicUv;
+        vec2 glitchedUv = vUv;
         glitchedUv.x += xGlitch;
         
-        // ========================================
-        // RGB SHIFT (Chromatic aberration)
-        // ========================================
+        // RGB shift
         float rgbShift = 0.01;
         vec2 direction = vec2(1.0, 0.0);
         
-        // Sample RGB channels with mosaic, glitch, and shift
         float r = texture2D(uTexture, glitchedUv + direction * rgbShift).r;
         float g = texture2D(uTexture, glitchedUv).g;
         float b = texture2D(uTexture, glitchedUv - direction * rgbShift).b;
         
-        // Use mosaic color
-        vec4 color = mosaicColor;
+        vec4 color = vec4(r, g, b, 1.0);
         
         gl_FragColor = color;
     }
@@ -128,7 +93,7 @@ const fragmentShader = /* glsl */ `
 
 function calculateUvTransform(
     containerAspect: number,
-    imageAspect: number,
+    mediaAspect: number,
     containerWidth: number,
     containerHeight: number
 ): { planeWidth: number; planeHeight: number; uvTransform: UvTransform } {
@@ -137,17 +102,17 @@ function calculateUvTransform(
     let uvScale = { x: 1, y: 1 };
     let uvOffset = { x: 0, y: 0 };
 
-    if (imageAspect > containerAspect) {
-        // Image is wider - fit to height, crop sides
-        planeWidth = containerHeight * imageAspect;
+    if (mediaAspect > containerAspect) {
+        // Media is wider - fit to height, crop sides
+        planeWidth = containerHeight * mediaAspect;
         planeHeight = containerHeight;
         const visibleRatio = containerWidth / planeWidth;
         uvScale = { x: visibleRatio, y: 1 };
         uvOffset = { x: (1 - visibleRatio) / 2, y: 0 };
     } else {
-        // Image is taller - fit to width, crop top/bottom
+        // Media is taller - fit to width, crop top/bottom
         planeWidth = containerWidth;
-        planeHeight = containerWidth / imageAspect;
+        planeHeight = containerWidth / mediaAspect;
         const visibleRatio = containerHeight / planeHeight;
         uvScale = { x: 1, y: visibleRatio };
         uvOffset = { x: 0, y: (1 - visibleRatio) / 2 };
@@ -181,6 +146,143 @@ function calculateClipPath(elementRect: DOMRect, parentRect: DOMRect): string {
 // COMPONENTS
 // ============================================================================
 
+// Video texture component
+function VideoPlane({
+    videoUrl,
+    width,
+    height,
+    mousePos
+}: {
+    videoUrl: string;
+    width: number;
+    height: number;
+    mousePos: { x: number; y: number };
+}) {
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const textureRef = useRef<VideoTexture | null>(null);
+    const [videoTexture, setVideoTexture] = useState<VideoTexture | null>(null);
+    const materialRef = useRef<ShaderMaterial>(null);
+
+    // Cleanup on component unmount
+    useLayoutEffect(() => {
+        return () => {
+            // Final cleanup when component is completely unmounted
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.src = '';
+                videoRef.current = null;
+            }
+            if (textureRef.current) {
+                textureRef.current.dispose();
+                textureRef.current = null;
+            }
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        // Reuse video element if exists, otherwise create new one
+        let video = videoRef.current;
+        if (!video) {
+            video = document.createElement('video');
+            video.crossOrigin = 'anonymous';
+            video.loop = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.preload = 'auto';
+            videoRef.current = video;
+        }
+
+        let playPromise: Promise<void> | undefined;
+        let mounted = true;
+
+        // Create or reuse texture
+        let texture = textureRef.current;
+        if (!texture) {
+            texture = new VideoTexture(video);
+            texture.generateMipmaps = false;
+            textureRef.current = texture;
+        }
+
+        // Update video source
+        if (video.src !== videoUrl) {
+            video.src = videoUrl;
+
+            const handleLoaded = () => {
+                if (mounted) {
+                    playPromise = video!.play().catch((err) => {
+                        console.warn('Video play failed:', err);
+                    });
+                    setVideoTexture(texture);
+                }
+            };
+
+            video.addEventListener('loadeddata', handleLoaded, { once: true });
+            video.load();
+        } else {
+            // Same video, just ensure it's playing
+            setVideoTexture(texture);
+            playPromise = video.play().catch(() => { });
+        }
+
+        return () => {
+            mounted = false;
+            // Pause but keep video element alive for reuse
+            if (video && playPromise) {
+                playPromise.then(() => {
+                    video.pause();
+                }).catch(() => {
+                    // Already paused or failed
+                });
+            }
+        };
+    }, [videoUrl, videoTexture]);
+
+    const containerAspect = width / height;
+    const videoAspect = videoTexture?.image ?
+        videoTexture.image.videoWidth / videoTexture.image.videoHeight : containerAspect;
+
+    const { planeWidth, planeHeight, uvTransform } = useMemo(
+        () => calculateUvTransform(containerAspect, videoAspect, width, height),
+        [containerAspect, videoAspect, width, height]
+    );
+
+    const uniforms = useMemo(() => ({
+        uTexture: { value: videoTexture },
+        uTime: { value: 0 },
+        uHover: { value: 1 },
+        uMouse: { value: [0.5, 0.5] },
+        uAspect: { value: containerAspect },
+        uUvScale: { value: [uvTransform.scale.x, uvTransform.scale.y] },
+        uUvOffset: { value: [uvTransform.offset.x, uvTransform.offset.y] },
+    }), [videoTexture, containerAspect, uvTransform]);
+
+    useFrame((state) => {
+        if (materialRef.current && videoTexture) {
+            materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+            materialRef.current.uniforms.uMouse.value = [mousePos.x, 1.0 - mousePos.y];
+            videoTexture.needsUpdate = true; // Update video frame every frame
+        }
+    });
+
+    if (!videoTexture || planeWidth <= 0 || planeHeight <= 0 || !isFinite(planeWidth) || !isFinite(planeHeight)) {
+        return null;
+    }
+
+    return (
+        <mesh position={[0, 0, 0]}>
+            <planeGeometry args={[planeWidth, planeHeight]} />
+            <shaderMaterial
+                ref={materialRef}
+                vertexShader={vertexShader}
+                fragmentShader={fragmentShader}
+                uniforms={uniforms}
+                toneMapped={false}
+            />
+        </mesh>
+    );
+}
+
+// Image texture component
 function ImagePlane({
     imageUrl,
     width,
@@ -192,12 +294,10 @@ function ImagePlane({
     height: number;
     mousePos: { x: number; y: number };
 }) {
-    // Load texture with error handling
     const texture = useLoader(TextureLoader, imageUrl, (loader) => {
         loader.crossOrigin = 'anonymous';
     });
 
-    // Force texture to use nearest filtering for sharper look
     texture.generateMipmaps = false;
 
     const materialRef = useRef<ShaderMaterial>(null);
@@ -227,6 +327,10 @@ function ImagePlane({
         }
     });
 
+    if (planeWidth <= 0 || planeHeight <= 0 || !isFinite(planeWidth) || !isFinite(planeHeight)) {
+        return null;
+    }
+
     return (
         <mesh position={[0, 0, 0]}>
             <planeGeometry args={[planeWidth, planeHeight]} />
@@ -241,12 +345,13 @@ function ImagePlane({
     );
 }
 
-export default function HoverCanvas({ hoveredElement, imageUrl }: HoverCanvasProps) {
+export default function HoverCanvas({ hoveredElement, mediaUrl, isVideo = false }: HoverCanvasProps) {
     const [position, setPosition] = useState<Position>({ top: 0, left: 0, width: 0, height: 0 });
     const [clipPath, setClipPath] = useState('none');
     const [isVisible, setIsVisible] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
-    const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+    const [currentMediaUrl, setCurrentMediaUrl] = useState<string | null>(null);
+    const [currentIsVideo, setCurrentIsVideo] = useState(false);
 
     // Update position and clipping
     const updatePosition = useCallback(() => {
@@ -278,25 +383,25 @@ export default function HoverCanvas({ hoveredElement, imageUrl }: HoverCanvasPro
         }
     }, [hoveredElement, updatePosition]);
 
-    // Handle image URL changes - update immediately but briefly hide to prevent stale image flicker
+    // Handle media URL changes
     useLayoutEffect(() => {
-        if (imageUrl !== currentImageUrl) {
-            if (!imageUrl) {
-                // No image - clear immediately
-                setCurrentImageUrl(null);
+        if (mediaUrl !== currentMediaUrl || isVideo !== currentIsVideo) {
+            if (!mediaUrl) {
+                setCurrentMediaUrl(null);
+                setCurrentIsVideo(false);
                 setIsVisible(false);
             } else {
-                // New image - hide briefly then show
                 setIsVisible(false);
                 requestAnimationFrame(() => {
-                    setCurrentImageUrl(imageUrl);
+                    setCurrentMediaUrl(mediaUrl);
+                    setCurrentIsVideo(isVideo);
                     requestAnimationFrame(() => {
                         setIsVisible(!!hoveredElement);
                     });
                 });
             }
         }
-    }, [imageUrl, currentImageUrl, hoveredElement]);
+    }, [mediaUrl, currentMediaUrl, isVideo, currentIsVideo, hoveredElement]);
 
     // Track mouse position
     useLayoutEffect(() => {
@@ -333,7 +438,7 @@ export default function HoverCanvas({ hoveredElement, imageUrl }: HoverCanvasPro
         };
     }, [hoveredElement, updatePosition]);
 
-    if (!isVisible) return null;
+    if (!isVisible || position.width <= 0 || position.height <= 0) return null;
 
     return (
         <div
@@ -360,23 +465,35 @@ export default function HoverCanvas({ hoveredElement, imageUrl }: HoverCanvasPro
                     near: 0.1,
                     far: 1000,
                 }}
+                onCreated={({ gl }) => {
+                    // Prevent default context loss behavior and handle gracefully
+                    gl.domElement.addEventListener('webglcontextlost', (e) => {
+                        e.preventDefault();
+                    });
+                    gl.domElement.addEventListener('webglcontextrestored', () => {
+                        // Context restored - Three.js will handle rebuilding
+                    });
+                }}
             >
-                <Suspense
-                    fallback={
-                        <mesh position={[0, 0, 0]}>
-                            <planeGeometry args={[position.width, position.height]} />
-                            <meshBasicMaterial color="#000000" transparent opacity={0} />
-                        </mesh>
-                    }
-                >
-                    {currentImageUrl && (
-                        <ImagePlane
-                            key={currentImageUrl}
-                            imageUrl={currentImageUrl}
-                            width={position.width}
-                            height={position.height}
-                            mousePos={mousePosition}
-                        />
+                <Suspense fallback={null}>
+                    {currentMediaUrl && (
+                        currentIsVideo ? (
+                            <VideoPlane
+                                key={currentMediaUrl}
+                                videoUrl={currentMediaUrl}
+                                width={position.width}
+                                height={position.height}
+                                mousePos={mousePosition}
+                            />
+                        ) : (
+                            <ImagePlane
+                                key={currentMediaUrl}
+                                imageUrl={currentMediaUrl}
+                                width={position.width}
+                                height={position.height}
+                                mousePos={mousePosition}
+                            />
+                        )
                     )}
                 </Suspense>
             </Canvas>
