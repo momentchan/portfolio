@@ -10,8 +10,8 @@ export type ProjectMeta = {
   description?: string; // Detailed project description
   tags?: string[];
   category?: 'web' | 'experiential';
-  images?: string[]; // Supports both local paths ("/images/...") and external URLs ("https://...")
-  videos?: string[]; // Supports both local paths ("/videos/...") and external URLs ("https://...")
+  cover: string; // Cover media for project list - can be image or video URL
+  media: string[]; // Combined media array (images and videos) - supports both local paths and URLs
   role?: string[]; // Roles like ["Fullstack Creative Development", "Motion"]
   link?: string; // Website URL
   enabled?: boolean; // Show/hide project (default: true)
@@ -19,13 +19,13 @@ export type ProjectMeta = {
   _filename?: string; // Internal: used for filename-based sorting
 };
 
-function extractFrontmatter(src: string): any {
-  // Check if file uses JavaScript export format
+function extractFrontmatter(src: string): { data: any; content: string; hasContent: boolean } {
+  // Check if file uses JavaScript export format (legacy)
   if (src.startsWith('export const frontmatter')) {
     try {
       // Find the opening brace
       const startIndex = src.indexOf('{');
-      if (startIndex === -1) return {};
+      if (startIndex === -1) return { data: {}, content: '', hasContent: false };
       
       // Find the matching closing brace
       let braceCount = 0;
@@ -45,17 +45,18 @@ function extractFrontmatter(src: string): any {
         const objStr = src.substring(startIndex, endIndex);
         // Use Function constructor to safely evaluate the object literal
         const frontmatter = new Function(`'use strict'; return (${objStr})`)();
-        return frontmatter;
+        return { data: frontmatter, content: '', hasContent: false };
       }
     } catch (e) {
       console.error('Failed to parse JavaScript frontmatter:', e);
-      return {};
+      return { data: {}, content: '', hasContent: false };
     }
   }
   
-  // Fall back to YAML frontmatter
-  const { data } = matter(src);
-  return data;
+  // Parse YAML frontmatter with gray-matter
+  const parsed = matter(src);
+  const hasContent = parsed.content.trim().length > 0;
+  return { data: parsed.data, content: parsed.content, hasContent };
 }
 
 export async function getAllProjects(): Promise<ProjectMeta[]> {
@@ -65,7 +66,7 @@ export async function getAllProjects(): Promise<ProjectMeta[]> {
   for (const file of files) {
     const full = path.join(dir, file);
     const src = await fs.readFile(full, "utf8");
-    const data = extractFrontmatter(src);
+    const { data } = extractFrontmatter(src);
     // Set enabled to true by default if not specified
     const meta = { enabled: true, ...(data as any), file: full, _filename: file };
     metas.push(meta);
@@ -89,16 +90,8 @@ export async function getProjectBySlug(slug: string) {
   if (!meta) return null;
   const src = await fs.readFile(meta.file, "utf8");
   
-  // Extract content (remove frontmatter export or YAML)
-  let content = src;
-  if (src.startsWith('export const frontmatter')) {
-    // Remove JavaScript export frontmatter
-    content = src.replace(/^export const frontmatter = {[\s\S]*?}\n+/m, '');
-  } else {
-    // Use gray-matter for YAML frontmatter
-    const parsed = matter(src);
-    content = parsed.content;
-  }
+  // Extract content and check if it exists
+  const { content, hasContent } = extractFrontmatter(src);
   
-  return { meta, content };
+  return { meta, content, hasContent };
 }

@@ -80,7 +80,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const [displayCategory, setDisplayCategory] = useState<Category>('all');
   const [hoveredProject, setHoveredProject] = useState<ProjectMeta | null>(null);
   const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Global State
   const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
@@ -91,6 +91,11 @@ export default function ProjectList({ projects }: ProjectListProps) {
     (project) => displayCategory === 'all' || project.category === displayCategory
   );
   const hoveredMedia = hoveredProject ? getCoverMedia(hoveredProject) : { url: null, isVideo: false };
+
+  // Initial mount animation
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
 
   // Category change animation effect
   useEffect(() => {
@@ -130,7 +135,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         isVideo={hoveredMedia.isVideo}
       /> */}
 
-      <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-screen">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-screen pb-20">
         {/* Category Filter */}
         <nav className="flex gap-4 sm:gap-6 lg:gap-8 flex-shrink-0 flex-wrap lg:flex-nowrap">
           {CATEGORIES.map(({ value, label }) => (
@@ -149,7 +154,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
         {/* Project Grid */}
         <ul
-          className="overflow-y-auto scrollbar-hide flex-1 grid gap-y-6 gap-x-4 sm:gap-y-8 sm:gap-x-6 lg:gap-y-16 lg:gap-x-8 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-0 pb-32 transition-opacity"
+          className="overflow-y-auto scrollbar-hide flex-1 grid gap-y-10 gap-x-4 sm:gap-y-20 sm:gap-x-6 lg:gap-y-50 lg:gap-x-8 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-0 pb-32 transition-opacity"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -206,7 +211,23 @@ export default function ProjectList({ projects }: ProjectListProps) {
                       )}
                     </div>
                   )}
-                  <span>{project.title}</span>
+
+                  <div className="flex flex-col gap-1.5">
+                    <span>{project.title}</span>
+
+                    {project.tags && project.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.tags.map(tag => (
+                          <span
+                            key={tag}
+                            className="inline-block px-1.5 py-0.5 rounded bg-white/5 text-white/50 text-[9px] sm:text-[10px]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </Link>
               </li>
             );

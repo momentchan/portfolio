@@ -5,6 +5,7 @@ import OptimizedImage from '@/components/ui/OptimizedImage';
 
 interface ProjectDetailProps {
   meta: ProjectMeta;
+  mdxContent?: React.ReactNode;
 }
 
 interface Section {
@@ -20,7 +21,8 @@ const InfoSection = ({ label, children }: { label: string; children: React.React
   </div>
 );
 
-export default function ProjectDetail({ meta }: ProjectDetailProps) {
+export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) {
+  // Build metadata sections
   const sections: Section[] = [
     {
       id: 'title',
@@ -41,7 +43,8 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
       label: 'Summary',
       content: <p>{meta.summary}</p>
     },
-    meta.description && {
+    // Only show description if there's no MDX content
+    !mdxContent && meta.description && {
       id: 'description',
       label: 'Description',
       content: (
@@ -86,7 +89,13 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
   return (
     <div className="flex flex-col lg:flex-row lg:gap-20 h-screen">
       {/* Left section - Project Details */}
-      <div className="pb-8 sm:pb-0 min-w-[450px] lg:w-1/3 lg:pr-8">
+      <div
+        className="pb-8 sm:pb-0 min-w-[450px] lg:w-1/3 lg:pr-8 lg:h-[calc(100dvh-20rem)] lg:overflow-auto scrollbar-hide"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
         {sections.map((section, index) => (
           <div
             key={section.id}
@@ -105,45 +114,61 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
             )}
           </div>
         ))}
+
+        {/* MDX Content - Rendered after metadata sections */}
+        {mdxContent && (
+          <div
+            className="animate-crop-down mt-8"
+            style={{
+              animationDelay: `${sections.length * 50}ms`,
+              opacity: 0,
+              animationFillMode: 'forwards',
+            }}
+          >
+            {mdxContent}
+          </div>
+        )}
       </div>
 
       {/* Right section - Media Viewer */}
-      <div className="w-full lg:w-1/2 lg:h-[calc(100dvh-20rem)] lg:overflow-hidden">
-        <div
-          className="w-full h-full space-y-3 sm:space-y-4 scrollbar-hide overflow-y-auto pb-16"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-        >
-          {/* Media Array (mixed images and videos) */}
-          {meta.media.map((mediaUrl, index) => {
-            const isVideo = mediaUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|ogg)$/);
+      <div
+        className="w-full lg:w-1/2 lg:h-[calc(100dvh-20rem)] lg:overflow-y-auto pb-30 sm:pb-40 lg:pb-16 space-y-3 sm:space-y-4 scrollbar-hide"
+        style={{
+          animation: 'fadeIn 0.8s ease-out',
+          animationDelay: '200ms',
+          opacity: 0,
+          animationFillMode: 'forwards',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {/* Media Array (mixed images and videos) */}
+        {meta.media.map((mediaUrl, index) => {
+          const isVideo = mediaUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|ogg)$/);
 
-            return isVideo ? (
-              <video
-                key={`${meta.slug}-media-${index}`}
-                src={mediaUrl}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full rounded"
-              />
-            ) : (
-              <OptimizedImage
-                key={`${meta.slug}-media-${index}`}
-                path={mediaUrl}
-                alt={`${meta.title} - ${index + 1}`}
-                width={1600}
-                height={900}
-                loading={index < 2 ? 'eager' : 'lazy'}
-                priority={index === 0}
-                className="w-full rounded"
-              />
-            );
-          })}
-        </div>
+          return isVideo ? (
+            <video
+              key={`${meta.slug}-media-${index}`}
+              src={mediaUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full rounded"
+            />
+          ) : (
+            <OptimizedImage
+              key={`${meta.slug}-media-${index}`}
+              path={mediaUrl}
+              alt={`${meta.title} - ${index + 1}`}
+              width={1600}
+              height={900}
+              loading={index < 2 ? 'eager' : 'lazy'}
+              priority={index === 0}
+              className="w-full rounded"
+            />
+          );
+        })}
       </div>
     </div>
   );

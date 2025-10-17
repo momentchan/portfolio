@@ -1,6 +1,8 @@
 import { getAllProjects, getProjectBySlug } from "@/lib/mdx";
 import Link from 'next/link';
 import ProjectDetail from '../ProjectDetail';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { mdxComponents } from '@/components/ui/MDXComponents';
 
 export async function generateStaticParams() {
   const projects = await getAllProjects();
@@ -11,7 +13,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const data = await getProjectBySlug(slug);
   if (!data) return null;
-  const { meta } = data;
+  const { meta, content, hasContent } = data;
+
+  // Render MDX content on the server
+  const mdxContent = hasContent && content ? (
+    <div className="prose prose-invert max-w-none">
+      <MDXRemote source={content} components={mdxComponents} />
+    </div>
+  ) : null;
 
   return (
     <div className="h-full overflow-hidden flex flex-col">
@@ -25,7 +34,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
       }}>
-        <ProjectDetail meta={meta} />
+        <ProjectDetail meta={meta} mdxContent={mdxContent} />
       </div>
     </div>
   );
