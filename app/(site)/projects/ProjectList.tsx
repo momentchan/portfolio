@@ -44,26 +44,13 @@ function getFullMediaUrl(mediaPath: string | undefined): string | null {
     return mediaPath;
   }
 
-  // Local media - prepend origin
-  if (mediaPath.startsWith('/')) {
-    return typeof window !== 'undefined'
-      ? `${window.location.origin}${mediaPath}`
-      : mediaPath;
-  }
-
+  // Local media - use relative path (Next.js handles it correctly)
   return mediaPath;
 }
 
-function getProjectMedia(project: ProjectMeta): { url: string | null; isVideo: boolean } {
-  // Prioritize videos if available
-  if (project.videos?.[0]) {
-    return { url: getFullMediaUrl(project.videos[0]), isVideo: true };
-  }
-  // Fall back to images
-  if (project.images?.[0]) {
-    return { url: getFullMediaUrl(project.images[0]), isVideo: false };
-  }
-  return { url: null, isVideo: false };
+function getCoverMedia(project: ProjectMeta): { url: string | null; isVideo: boolean } {
+  const url = getFullMediaUrl(project.cover);
+  return { url, isVideo: isVideoUrl(project.cover) };
 }
 
 function getProjectTextColor(
@@ -103,7 +90,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const filteredProjects = projects.filter(
     (project) => displayCategory === 'all' || project.category === displayCategory
   );
-  const hoveredMedia = hoveredProject ? getProjectMedia(hoveredProject) : { url: null, isVideo: false };
+  const hoveredMedia = hoveredProject ? getCoverMedia(hoveredProject) : { url: null, isVideo: false };
 
   // Category change animation effect
   useEffect(() => {
@@ -171,8 +158,8 @@ export default function ProjectList({ projects }: ProjectListProps) {
           }}
         >
           {filteredProjects.map((project) => {
-            const media = getProjectMedia(project);
-            const hasMedia = media.url !== null;
+            const cover = getCoverMedia(project);
+            const hasCover = cover.url !== null;
 
             return (
               <li key={project.slug}>
@@ -184,16 +171,16 @@ export default function ProjectList({ projects }: ProjectListProps) {
                     hoveredProject?.slug || null
                   )}`}
                 >
-                  {hasMedia && (
+                  {hasCover && (
                     <div
                       className="relative w-full aspect-video lg:aspect-square overflow-hidden rounded"
                       onMouseEnter={(e) => handleProjectHover(project, e.currentTarget)}
                       onMouseLeave={() => handleProjectHover(null, null)}
                     >
-                      {media.isVideo ? (
+                      {cover.isVideo ? (
                         <video
-                          key={media.url}
-                          src={media.url!}
+                          key={cover.url}
+                          src={cover.url!}
                           className="w-full h-full object-cover"
                           autoPlay
                           loop
@@ -209,7 +196,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
                         />
                       ) : (
                         <OptimizedImage
-                          path={project.images![0]}
+                          path={cover.url!}
                           alt={project.title}
                           fill
                           className="object-cover"

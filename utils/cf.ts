@@ -13,7 +13,16 @@ export const isCloudflareImage = (urlOrPath: string): boolean => {
  * @returns true if it's a local image
  */
 export const isLocalImage = (urlOrPath: string): boolean => {
-  return !isCloudflareImage(urlOrPath) && (urlOrPath.startsWith('/') || urlOrPath.startsWith('./'));
+  // Not a Cloudflare image
+  if (isCloudflareImage(urlOrPath)) return false;
+  
+  // Relative path
+  if (urlOrPath.startsWith('/') || urlOrPath.startsWith('./')) return true;
+  
+  // localhost URL (for dev environments)
+  if (urlOrPath.includes('localhost:') || urlOrPath.includes('127.0.0.1:')) return true;
+  
+  return false;
 };
 
 /**

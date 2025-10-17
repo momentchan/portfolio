@@ -110,33 +110,30 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
       {/* Right section - Media Viewer */}
       <div className="w-full lg:w-1/2 lg:h-[calc(100dvh-20rem)] lg:overflow-hidden">
         <div
-          className="w-full h-full space-y-3 sm:space-y-4 scrollbar-hide overflow-y-auto pb-50"
+          className="w-full h-full space-y-3 sm:space-y-4 scrollbar-hide overflow-y-auto pb-16"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
           }}
         >
-          {/* Videos */}
-          {meta.videos && meta.videos.length > 0 && (
-            meta.videos.map((video, index) => (
+          {/* Media Array (mixed images and videos) */}
+          {meta.media.map((mediaUrl, index) => {
+            const isVideo = mediaUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|ogg)$/);
+
+            return isVideo ? (
               <video
-                key={`${meta.slug}-video-${index}`}
-                src={video}
+                key={`${meta.slug}-media-${index}`}
+                src={mediaUrl}
                 autoPlay
                 loop
                 muted
                 playsInline
                 className="w-full rounded"
               />
-            ))
-          )}
-
-          {/* Images */}
-          {meta.images && meta.images.length > 0 && (
-            meta.images.map((image, index) => (
+            ) : (
               <OptimizedImage
-                key={`${meta.slug}-image-${index}`}
-                path={image}
+                key={`${meta.slug}-media-${index}`}
+                path={mediaUrl}
                 alt={`${meta.title} - ${index + 1}`}
                 width={1600}
                 height={900}
@@ -144,8 +141,8 @@ export default function ProjectDetail({ meta }: ProjectDetailProps) {
                 priority={index === 0}
                 className="w-full rounded"
               />
-            ))
-          )}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -53,3 +53,13 @@ body {
 .animate-crop-down {
   animation: crop-down 0.5s ease-out;
 }
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
