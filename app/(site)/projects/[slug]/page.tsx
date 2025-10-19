@@ -25,7 +25,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="h-full overflow-hidden flex flex-col">
       {/* Back button */}
-      <Link href="/projects" className="text-white/60 hover:text-white py-2 mb-6 inline-block text-sm">
+      <Link href="/projects" className="text-white/60 hover:text-white py-2 mb-6 inline-block w-fit text-sm">
         ← Back to Projects
       </Link>
 

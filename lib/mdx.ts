@@ -9,7 +9,8 @@ export type ProjectMeta = {
   summary?: string; 
   description?: string; // Detailed project description
   tags?: string[];
-  category?: 'web' | 'experiential';
+  category?: 'web' | 'experiential' | 'lab';
+  featured?: boolean; // Featured project flag (default: false)
   cover: string; // Cover media for project list - can be image or video URL
   media: string[]; // Combined media array (images and videos) - supports both local paths and URLs
   role?: string[]; // Roles like ["Fullstack Creative Development", "Motion"]
@@ -67,8 +68,8 @@ export async function getAllProjects(): Promise<ProjectMeta[]> {
     const full = path.join(dir, file);
     const src = await fs.readFile(full, "utf8");
     const { data } = extractFrontmatter(src);
-    // Set enabled to true by default if not specified
-    const meta = { enabled: true, ...(data as any), file: full, _filename: file };
+    // Set enabled to true and featured to false by default if not specified
+    const meta = { enabled: true, featured: false, ...(data as any), file: full, _filename: file };
     metas.push(meta);
   }
   return metas

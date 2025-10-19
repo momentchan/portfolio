@@ -12,7 +12,7 @@ import { isCloudflareImage } from '@/utils/cf';
 // TYPES & CONSTANTS
 // ============================================================================
 
-type Category = 'all' | 'web' | 'experiential';
+type Category = 'all' | 'featured' | 'web' | 'experiential' | 'lab';
 
 interface ProjectListProps {
   projects: ProjectMeta[];
@@ -20,8 +20,10 @@ interface ProjectListProps {
 
 const CATEGORIES: { value: Category; label: string }[] = [
   { value: 'all', label: 'All' },
+  { value: 'featured', label: 'Featured' },
   { value: 'web', label: 'Web' },
   { value: 'experiential', label: 'Experiential' },
+  { value: 'lab', label: 'Lab' },
 ];
 
 const FADE_DELAY = 200;
@@ -53,23 +55,6 @@ function getCoverMedia(project: ProjectMeta): { url: string | null; isVideo: boo
   return { url, isVideo: isVideoUrl(project.cover) };
 }
 
-function getProjectTextColor(
-  projectSlug: string,
-  activeSlug: string | null,
-  hoveredSlug: string | null
-): string {
-  const isHovered = hoveredSlug === projectSlug;
-  const isActive = activeSlug === projectSlug;
-
-  if (hoveredSlug) {
-    return isHovered ? 'lg:text-white' : 'lg:text-white/50';
-  }
-  if (activeSlug) {
-    return isActive ? 'lg:text-white' : 'lg:text-white/50';
-  }
-  return 'lg:text-white/30';
-}
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -83,13 +68,12 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   // Global State
-  const activeProjectSlug = useGlobalState((state) => state.activeProjectSlug);
-  const setActiveProjectSlug = useGlobalState((state) => state.setActiveProjectSlug);
-
   // Derived State
-  const filteredProjects = projects.filter(
-    (project) => displayCategory === 'all' || project.category === displayCategory
-  );
+  const filteredProjects = projects.filter((project) => {
+    if (displayCategory === 'all') return true;
+    if (displayCategory === 'featured') return project.featured === true;
+    return project.category === displayCategory;
+  });
   const hoveredMedia = hoveredProject ? getCoverMedia(hoveredProject) : { url: null, isVideo: false };
 
   // Initial mount animation
@@ -102,7 +86,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
     if (selectedCategory === displayCategory) return;
 
     setIsVisible(false);
-    setActiveProjectSlug(null);
     setHoveredProject(null);
 
     const timeout = setTimeout(() => {
@@ -111,7 +94,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
     }, FADE_DELAY);
 
     return () => clearTimeout(timeout);
-  }, [selectedCategory, displayCategory, setActiveProjectSlug]);
+  }, [selectedCategory, displayCategory]);
 
   // Handlers
   const handleCategoryClick = (category: Category) => {
@@ -121,9 +104,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const handleProjectHover = (project: ProjectMeta | null, element: HTMLElement | null) => {
     setHoveredProject(project);
     setHoveredElement(element);
-    if (project) {
-      setActiveProjectSlug(project.slug);
-    }
   };
 
   return (
@@ -170,11 +150,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
               <li key={project.slug}>
                 <Link
                   href={`/projects/${project.slug}`}
-                  className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors ${getProjectTextColor(
-                    project.slug,
-                    activeProjectSlug,
-                    hoveredProject?.slug || null
-                  )}`}
+                  className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors lg:text-white`}
                 >
                   {hasCover && (
                     <div
@@ -212,15 +188,15 @@ export default function ProjectList({ projects }: ProjectListProps) {
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2 pt-2 sm:pt-4 lg:pt-6">
                     <span>{project.title}</span>
 
                     {project.tags && project.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {project.tags.map(tag => (
                           <span
                             key={tag}
-                            className="inline-block px-1.5 py-0.5 rounded bg-white/5 text-white/50 text-[9px] sm:text-[10px]"
+                            className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-[10px] sm:text-xs"
                           >
                             {tag}
                           </span>
