@@ -1,6 +1,9 @@
 import { ProjectMeta, CategoryType } from '@/lib/mdx';
 import { isCloudflareImage } from '@/utils/cf';
 
+// Re-export ProjectMeta for use in other components
+export type { ProjectMeta, CategoryType };
+
 export function isVideoUrl(url: string): boolean {
   const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg'];
   return videoExtensions.some(ext => url.toLowerCase().includes(ext));
