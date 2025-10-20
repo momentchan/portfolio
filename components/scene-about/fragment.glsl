@@ -21,15 +21,13 @@ uniform float uPointerSpeed;
 uniform float uAspect;
 uniform float uOffset;
 uniform vec2 uResolution;
+uniform float uMouseOn;
 
 // Stripe effect parameters
 uniform vec2 uStripeFreqH;    // Horizontal stripe frequency
 uniform vec2 uStripeFreqV;    // Vertical stripe frequency
 uniform vec2 uStripeSpeed;    // Stripe animation speed
 uniform vec2 uStripeStrength; // Stripe intensity
-
-// Debug
-uniform float debug;
 
 // Varying
 varying vec2 vUv;
@@ -206,16 +204,7 @@ void main() {
   // stripeWithGrain += (traceTex.rrr) * 5.0 * stripeWithGrain;
 
     // Final color mixing
-  vec3 finalColor = mix(stripeWithGrain, baseColor, debug);
-
-    // Raymarching effect
-  vec2 worldUV = (distortedUV - 0.5) * 2.0;
-  vec3 ro = vec3(0.0, 0.0, -3.0);
-  vec3 rd = normalize(vec3(worldUV, 1.0));
-
-  finalColor += tex.rgb;
-
-  finalColor = (traceTex.rrr) * 5.0 * stripeWithGrain;
+  vec3 finalColor = mix(stripeWithGrain, (traceTex.rrr) * 2.0 * stripeWithGrain, uMouseOn);
 
     // Output
   gl_FragColor = vec4(finalColor, uOpacity);

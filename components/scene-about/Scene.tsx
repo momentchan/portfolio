@@ -10,6 +10,7 @@ import MouseTraceFBO from '../../lib/r3f-gist/utility/MouseTrace';
 import { FBOTextureManager } from '../../lib/hooks/useFBOTextureManager';
 import { useThree } from '@react-three/fiber';
 import RectangleSpawner from './RectangleSpawner';
+import GlobalState from '../common/GlobalStates';
 
 function DynamicCamera() {
   const { camera, size } = useThree();
@@ -32,13 +33,9 @@ function DynamicCamera() {
 
 
 export default function Scene() {
-  // Unified ref management with proper typing
-  const fboSceneRef = useRef<{ getFBOTexture: () => THREE.Texture | null } | null>(null);
-  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void } | null>(null);
-  const causticsRef = useRef<{ getMaterial: () => THREE.ShaderMaterial | null; getFBOTexture: () => THREE.Texture | null } | null>(null);
-  const scriptedTraceRef = useRef<{ getFBOTexture: () => THREE.Texture | null } | null>(null);
 
-  // Unified texture state management
+  const { isMobile } = GlobalState();
+  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void } | null>(null);
   const [textures, setTextures] = useState<{
     trace: THREE.Texture | null;
   }>({
@@ -80,12 +77,16 @@ export default function Scene() {
         />
         <Suspense fallback={null}>
           <DynamicCamera />
-          <MouseTraceFBO ref={traceRef} showDebug={false} downsample={8} />
-          <FBOTextureManager
-            refs={[traceRef]}
-            onTextureUpdate={handleTextureUpdate}
-          />
-          <RectangleSpawner />
+          {!isMobile && (
+            <>
+              <MouseTraceFBO ref={traceRef} showDebug={false} downsample={8} />
+              <FBOTextureManager
+                refs={[traceRef]}
+                onTextureUpdate={handleTextureUpdate}
+              />
+              <RectangleSpawner />
+            </>
+          )}
 
           <StripeEffect traceTexture={textures.trace} />
         </Suspense>
