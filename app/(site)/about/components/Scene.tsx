@@ -3,7 +3,7 @@
 import { OrthographicCamera, Preload } from '@react-three/drei';
 import React, { Suspense, useState } from 'react';
 import * as THREE from 'three';
-import WebGLCanvas from '../common/WebGLCanvas';
+import WebGLCanvas from '../../../../components/common/WebGLCanvas';
 import StripeEffect from './StripeEffect';
 import DynamicCamera from './DynamicCamera';
 import InteractiveEffects from './InteractiveEffects';

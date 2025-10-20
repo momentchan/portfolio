@@ -3,6 +3,7 @@
  * Separated for better organization and maintainability
  */
 
+
 interface ContentSectionProps {
     title: string;
     description: string;
@@ -11,8 +12,8 @@ interface ContentSectionProps {
 function ContentSection({ title, description }: ContentSectionProps) {
     return (
         <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-black dark:text-white">{title}</h3>
-            <p className="text-sm">{description}</p>
+            <h3 className="text-xl font-semibold text-white">{title}</h3>
+            <p className="text-sm text-white">{description}</p>
         </div>
     );
 }
@@ -31,7 +32,7 @@ function SocialLink({ href, children, isEmail = false }: SocialLinkProps) {
     return (
         <a
             {...linkProps}
-            className="hover:text-black dark:hover:text-white transition-colors"
+            className="text-white hover:text-white/70 transition-colors"
         >
             {children}
         </a>
@@ -70,7 +71,7 @@ export default function AboutContent() {
     ];
 
     return (
-        <div className="w-full lg:max-w-6xl lg:mx-auto text-gray-700 dark:text-gray-300 leading-relaxed select-none text-sm sm:text-base py-8" style={{ minHeight: 'calc(100vh + 200px)' }}>
+        <div className="relative w-full lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base pb-32 lg:pointer-events-none">
             {/* Main content layout - left: ARM, right: intro texts */}
             <div className="flex flex-col lg:flex-row lg:justify-center gap-8 lg:gap-12 items-start">
                 {/* Attention Resonance Memory - Left side */}
@@ -95,7 +96,7 @@ export default function AboutContent() {
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-wrap gap-4 sm:gap-6 py-4 my-8 border-t border-gray-200 dark:border-gray-700 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
+            <div className="flex flex-wrap gap-4 sm:gap-6 py-4 my-8 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
                 {socialLinks.map((link, index) => (
                     <SocialLink
                         key={index}

@@ -121,7 +121,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         isVideo={hoveredMedia.isVideo}
       /> */}
 
-      <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-screen pb-20">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 pb-20">
         {/* Category Filter */}
         <nav className="flex gap-4 sm:gap-6 lg:gap-8 flex-shrink-0 flex-wrap lg:flex-nowrap">
           {CATEGORIES.map(({ value, label }) => (
@@ -140,7 +140,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
         {/* Project Grid */}
         <ul
-          className="overflow-y-auto scrollbar-hide flex-1 grid gap-y-10 gap-x-4 sm:gap-y-20 sm:gap-x-6 lg:gap-y-50 lg:gap-x-8 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-0 pb-32 transition-opacity"
+          className="grid gap-y-10 gap-x-4 sm:gap-y-20 sm:gap-x-6 lg:gap-y-50 lg:gap-x-8 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 pb-32 transition-opacity"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',

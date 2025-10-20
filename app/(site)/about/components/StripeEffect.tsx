@@ -9,7 +9,7 @@ import gradientNoise from '@/lib/r3f-gist/shader/cginc/noise/gradientNoise.glsl'
 import fragment from './fragment.glsl';
 import utility from '@/lib/r3f-gist/shader/cginc/utility.glsl';
 import raymarching from '@/lib/r3f-gist/shader/cginc/raymarching.glsl';
-import GlobalState from '../common/GlobalStates';
+import GlobalState from '../../../../components/common/GlobalStates';
 
 interface StripeEffectProps {
   traceTexture?: THREE.Texture | null;
@@ -17,7 +17,6 @@ interface StripeEffectProps {
 
 export default function StripeEffect({ traceTexture }: StripeEffectProps) {
   const { camera, size } = useThree();
-  const { isMobile } = GlobalState();
   const meshRef = useRef<THREE.Mesh>(null);
 
   // State for animation
@@ -99,7 +98,7 @@ export default function StripeEffect({ traceTexture }: StripeEffectProps) {
         uPointerSpeed: { value: 0.0 },
         uAspect: { value: 1.0 },
         uOffset: { value: 0.0 },
-        uMouseOn: { value: isMobile ? 0.0 : 1.0 },
+        uMouseOn: { value: size.width <= 1024 ? 0.0 : 1.0 },
         uResolution: { value: new THREE.Vector2(size.width, size.height) },
       },
       toneMapped: false,
@@ -161,7 +160,7 @@ export default function StripeEffect({ traceTexture }: StripeEffectProps) {
     uniforms.uResolution.value = new THREE.Vector2(size.width, size.height);
     setOffset(prev => prev + delta * controls.offsetSpeed);
     uniforms.uOffset.value = offset;
-    uniforms.uMouseOn.value = isMobile ? 0.0 : 1.0;
+    uniforms.uMouseOn.value = size.width <= 1024 ? 0.0 : 1.0;
     material.needsUpdate = true;
   });
 
