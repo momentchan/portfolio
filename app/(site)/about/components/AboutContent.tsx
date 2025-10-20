@@ -71,7 +71,7 @@ export default function AboutContent() {
     ];
 
     return (
-        <div className="relative w-full lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base pb-32 lg:pointer-events-none">
+        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base pb-32 lg:pointer-events-none">
             {/* Main content layout - left: ARM, right: intro texts */}
             <div className="flex flex-col lg:flex-row lg:justify-center gap-8 lg:gap-12 items-start">
                 {/* Attention Resonance Memory - Left side */}

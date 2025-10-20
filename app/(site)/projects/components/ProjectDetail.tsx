@@ -87,10 +87,10 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
   ].filter(Boolean) as Section[];
 
   return (
-    <div className="flex flex-col lg:flex-row lg:gap-20 h-screen">
+    <div className="flex flex-col lg:flex-row lg:gap-20 w-full overflow-x-hidden">
       {/* Left section - Project Details */}
       <div
-        className="pb-8 sm:pb-0 min-w-[450px] lg:w-1/3 lg:pr-8 lg:h-[calc(100dvh-20rem)] lg:overflow-auto scrollbar-hide"
+        className="w-full lg:w-1/3 lg:min-w-[450px] lg:pr-8 lg:h-[calc(100dvh-20rem)] lg:overflow-auto scrollbar-hide overflow-x-hidden pb-8 lg:pb-0"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -132,7 +132,7 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
 
       {/* Right section - Media Viewer */}
       <div
-        className="w-full lg:w-1/2 lg:h-[calc(100dvh-20rem)] lg:overflow-y-auto pb-30 sm:pb-40 lg:pb-16 space-y-3 sm:space-y-4 scrollbar-hide"
+        className="w-full lg:w-2/3 lg:max-w-[1024px] lg:h-[calc(100dvh-20rem)] lg:overflow-y-auto overflow-x-hidden pb-8 sm:pb-12 lg:pb-16 space-y-3 sm:space-y-4 scrollbar-hide"
         style={{
           animation: 'fadeIn 0.8s ease-out',
           animationDelay: '200ms',
@@ -154,7 +154,7 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
               loop
               muted
               playsInline
-              className="w-full rounded"
+              className="w-full max-w-full rounded"
             />
           ) : (
             <OptimizedImage
@@ -165,7 +165,7 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
               height={900}
               loading={index < 2 ? 'eager' : 'lazy'}
               priority={index === 0}
-              className="w-full rounded"
+              className="w-full max-w-full rounded"
             />
           );
         })}

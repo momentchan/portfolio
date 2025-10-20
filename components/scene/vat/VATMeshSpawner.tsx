@@ -39,12 +39,12 @@ export function VATMeshSpawner({ vatData }: VATMeshSpawnerProps = {}) {
 
   // Default VAT data
   const defaultVATData: VATData = {
-    gltfPath: "vat/Dahlia_Clean_basisMesh.gltf",
-    posTexPath: "vat/Dahlia_Clean_pos.exr",
-    nrmTexPath: "vat/Dahlia_Clean_nrm.png",
-    mapTexPath: "textures/tujlip.png",
-    maskTexPath: "textures/blackanedwthioe.png",
-    metaPath: "vat/Dahlia_Clean_meta.json"
+    gltfPath: "/vat/Dahlia_Clean_basisMesh.gltf",
+    posTexPath: "/vat/Dahlia_Clean_pos.exr",
+    nrmTexPath: "/vat/Dahlia_Clean_nrm.png",
+    mapTexPath: "/textures/tujlip.png",
+    maskTexPath: "/textures/blackanedwthioe.png",
+    metaPath: "/vat/Dahlia_Clean_meta.json"
   }
 
   // Use provided VAT data or fall back to defaults

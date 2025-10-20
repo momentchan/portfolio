@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ProjectMeta } from '@/lib/mdx';
 import { useIntersectionObserver, useProjectLoading } from '@/lib/hooks';
-import { Category, filterProjectsByCategory, getCoverMedia } from './utils/projectHelpers';
-import { CategoryFilter, ProjectCard } from './components';
+import { Category, filterProjectsByCategory, getCoverMedia } from './projectHelpers';
+import { CategoryFilter, ProjectCard } from '.';
 import HoverCanvas from './HoverCanvas';
 
 // ============================================================================
