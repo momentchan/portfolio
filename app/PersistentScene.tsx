@@ -5,6 +5,7 @@ import Scene from '@/components/scene/Scene';
 import LoadingPage from '@/components/ui/LoadingPage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 import useGlobalState from '@/components/common/GlobalStates';
+import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';
 
 /**
  * PersistentScene - Loads once and persists across all routes
@@ -21,9 +22,10 @@ function PersistentSceneComponent() {
 
   return (
     <>
-      <div 
-        className="fixed inset-0 z-0 transition-opacity duration-2000" 
-        style={{ 
+      <LevaWraper initialHidden={true} />
+      <div
+        className="fixed inset-0 z-0 transition-opacity duration-2000"
+        style={{
           opacity: isHomepage ? 1 : 0,
           visibility: isHomepage ? 'visible' : 'hidden',
         }}

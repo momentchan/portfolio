@@ -7,16 +7,16 @@ import NavLink from './NavLink';
  */
 export default function Navigation() {
   return (
-    <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-10 flex justify-between items-center mix-blend-difference select-none">
+    <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-10 flex justify-between items-center mix-blend-difference select-none pointer-events-none">
 
       <NavLink
         href="/"
-        className="text-base sm:text-lg font-bold"
+        className="text-base sm:text-lg font-bold pointer-events-auto"
       >
         Ming Jyun Hung
       </NavLink>
 
-      <nav className="flex gap-4 sm:gap-6">
+      <nav className="flex gap-4 sm:gap-6 pointer-events-auto">
         <NavLink href="/projects" className="hover:underline text-sm sm:text-base">
           Projects
         </NavLink>

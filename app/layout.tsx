@@ -5,6 +5,7 @@ import PersistentScene from "./PersistentScene";
 import Navigation from "./Navigation";
 import PathTracker from "./PathTracker";
 import MainContent from "./MainContent";
+import LevaWraper from "@/lib/r3f-gist/utility/LevaWraper";
 
 const pragmatica = localFont({
   src: [
@@ -45,7 +46,7 @@ export default function RootLayout({
         <PathTracker />
 
         {/* Persistent background scene - pauses on other pages */}
-        {/* <PersistentScene /> */}
+        <PersistentScene />
 
         {/* Nav Bar - preserves query parameters like ?dev=true */}
         <Navigation />

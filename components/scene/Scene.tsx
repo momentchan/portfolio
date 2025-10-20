@@ -1,8 +1,8 @@
 'use client';
 
-import { Canvas } from '@react-three/fiber';
 import { CameraControls, PerspectiveCamera, Preload } from '@react-three/drei';
 import * as THREE from 'three';
+import WebGLCanvas from '../common/WebGLCanvas';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './Effects';
 import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
@@ -42,10 +42,8 @@ export default function Scene() {
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <LevaWraper initialHidden={true} />
-      <Canvas
+      <WebGLCanvas
         shadows
-        gl={{ shadowMapType: THREE.PCFSoftShadowMap }}
         frameloop={paused ? 'never' : 'always'}
       >
         <Suspense fallback={null}>
@@ -70,7 +68,7 @@ export default function Scene() {
           <BGM />
         </Suspense>
         <Preload all />
-      </Canvas>
+      </WebGLCanvas>
     </div >
   );
 }
