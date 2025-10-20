@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';
 import { gsap } from 'gsap';
 import GlobalState from '../../common/GlobalStates';
+import { useRef } from 'react';
 
 export function CustomTrail() {
   const { started } = GlobalState();
@@ -17,12 +18,16 @@ export function CustomTrail() {
     trailTexture: trails.trailTexture!,
   });
 
+  const timeRef = useRef(0);
+
   // Update systems each frame
   useFrame((state, delta) => {
     if (!trails || !started) return;
 
-    const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 1 / 30)
+
+    const t = timeRef.current;
+    timeRef.current += dt;
 
     // Always update particles
     particles.update(t, dt);

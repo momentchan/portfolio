@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 import GlobalState from '../../../common/GlobalStates';
 
 export function useParticleSystem(trailsNum: number) {
-  const { started } = GlobalState();
+  const { started, paused } = GlobalState();
 
   // GSAP animated parameters - using state to trigger re-renders
   const [animatedParams, setAnimatedParams] = useState({
@@ -78,7 +78,7 @@ export function useParticleSystem(trailsNum: number) {
 
   // GSAP animation setup for all parameters
   useEffect(() => {
-    if (!particles.setUniform || !started) return;
+    if (!particles.setUniform || !started || paused) return;
 
     const tl = gsap.timeline();
     // Animate multiple parameters in the same timeline step
@@ -94,7 +94,7 @@ export function useParticleSystem(trailsNum: number) {
       onUpdate: () => setAnimatedParams({ ...animatedParams })
     })
 
-  }, [particles, started]);
+  }, [particles, started, paused]);
 
   // Update uniforms when parameters change
   useEffect(() => {

@@ -63,7 +63,7 @@ class CustomBlurEffectImpl extends Effect {
 }
 
 export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions = {}) {
-    const { started } = GlobalState();
+    const { started, paused } = GlobalState();
     const blurAmountRef = useRef({ value: blurAmount });
     const blurToggleRef = useRef(false);
     const activeAnimationRef = useRef<gsap.core.Tween | null>(null);
@@ -86,9 +86,11 @@ export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions 
         });
     };
 
+    const animated = useRef(false)
+
     // Fade out blur when started
     useEffect(() => {
-        if (!started) return;
+        if (!started || paused) return;
 
         animateBlurAmount(0, BLUR_FADE_DURATION);
 
@@ -96,7 +98,7 @@ export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions 
             killActiveAnimation();
             blurAmountRef.current.value = blurAmount;
         };
-    }, [started, blurAmount]);
+    }, [started, paused, blurAmount]);
 
     // Toggle blur with 'T' key
     useEffect(() => {
