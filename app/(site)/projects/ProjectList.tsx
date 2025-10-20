@@ -1,59 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ProjectMeta, CategoryType } from '@/lib/mdx';
-import useGlobalState from '@/components/common/GlobalStates';
-import OptimizedImage from '@/components/ui/OptimizedImage';
+import { ProjectMeta } from '@/lib/mdx';
+import { useIntersectionObserver, useProjectLoading } from '@/lib/hooks';
+import { Category, filterProjectsByCategory, getCoverMedia } from './utils/projectHelpers';
+import { CategoryFilter, ProjectCard } from './components';
 import HoverCanvas from './HoverCanvas';
-import { isCloudflareImage } from '@/utils/cf';
 
 // ============================================================================
 // TYPES & CONSTANTS
 // ============================================================================
 
-type Category = 'all' | 'featured' | 'web' | 'experiential' | 'lab';
-
 interface ProjectListProps {
   projects: ProjectMeta[];
 }
 
-const CATEGORIES: { value: Category; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'featured', label: 'Featured' },
-  { value: 'web', label: 'Web' },
-  { value: 'experiential', label: 'Experiential' },
-  { value: 'lab', label: 'Lab' },
-];
-
 const FADE_DELAY = 200;
 const FADE_DURATION = 200;
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-function isVideoUrl(url: string): boolean {
-  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg'];
-  return videoExtensions.some(ext => url.toLowerCase().includes(ext));
-}
-
-function getFullMediaUrl(mediaPath: string | undefined): string | null {
-  if (!mediaPath) return null;
-
-  // Cloudflare media - use as-is (already full URL)
-  if (isCloudflareImage(mediaPath)) {
-    return mediaPath;
-  }
-
-  // Local media - use relative path (Next.js handles it correctly)
-  return mediaPath;
-}
-
-function getCoverMedia(project: ProjectMeta): { url: string | null; isVideo: boolean } {
-  const url = getFullMediaUrl(project.cover);
-  return { url, isVideo: isVideoUrl(project.cover) };
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -67,19 +30,23 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Global State
+  // Custom Hooks
+  const {
+    visibleItems,
+    setItemRef,
+    observeItems,
+    isItemVisible,
+  } = useIntersectionObserver();
+
+  const {
+    setLoadingState,
+    isProjectLoading,
+    shouldLoadProject,
+    initializeLoading,
+  } = useProjectLoading();
+
   // Derived State
-  const filteredProjects = projects.filter((project) => {
-    if (displayCategory === 'all') return true;
-    if (displayCategory === 'featured') return project.featured === true;
-
-    // Handle both single category strings and arrays of categories
-    const projectCategories = Array.isArray(project.category)
-      ? project.category
-      : project.category ? [project.category] : [];
-
-    return projectCategories.includes(displayCategory as CategoryType);
-  });
+  const filteredProjects = filterProjectsByCategory(projects, displayCategory);
   const hoveredMedia = hoveredProject ? getCoverMedia(hoveredProject) : { url: null, isVideo: false };
 
   // Initial mount animation
@@ -102,6 +69,22 @@ export default function ProjectList({ projects }: ProjectListProps) {
     return () => clearTimeout(timeout);
   }, [selectedCategory, displayCategory]);
 
+  // Setup intersection observer when projects change
+  useEffect(() => {
+    if (!isVisible || filteredProjects.length === 0) return;
+
+    const projectSlugs = filteredProjects.map(p => p.slug);
+    observeItems(projectSlugs);
+  }, [isVisible, filteredProjects, observeItems]);
+
+  // Initialize loading for visible and first few projects
+  useEffect(() => {
+    if (!isVisible || filteredProjects.length === 0) return;
+
+    const cleanup = initializeLoading(filteredProjects, visibleItems);
+    return cleanup;
+  }, [isVisible, filteredProjects, visibleItems, initializeLoading]);
+
   // Handlers
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
@@ -110,6 +93,18 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const handleProjectHover = (project: ProjectMeta | null, element: HTMLElement | null) => {
     setHoveredProject(project);
     setHoveredElement(element);
+  };
+
+  const handleMediaLoad = (projectSlug: string) => {
+    setLoadingState(projectSlug, false);
+  };
+
+  const handleMediaLoadStart = (projectSlug: string) => {
+    setLoadingState(projectSlug, true);
+  };
+
+  const handleMediaError = (projectSlug: string) => {
+    setLoadingState(projectSlug, false);
   };
 
   return (
@@ -123,20 +118,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
       <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 pb-20">
         {/* Category Filter */}
-        <nav className="flex gap-4 sm:gap-6 lg:gap-8 flex-shrink-0 flex-wrap lg:flex-nowrap">
-          {CATEGORIES.map(({ value, label }) => (
-            <button
-              key={value}
-              onClick={() => handleCategoryClick(value)}
-              className={`py-2 text-xs sm:text-sm cursor-pointer transition-colors ${selectedCategory === value
-                ? 'text-white'
-                : 'text-white/50 hover:text-white/80'
-                }`}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryClick}
+        />
 
         {/* Project Grid */}
         <ul
@@ -151,67 +136,24 @@ export default function ProjectList({ projects }: ProjectListProps) {
           {filteredProjects.map((project) => {
             const cover = getCoverMedia(project);
             const hasCover = cover.url !== null;
+            const isLoading = isProjectLoading(project.slug) && hasCover;
+            const shouldLoad = shouldLoadProject(project.slug);
+            const isVisible = isItemVisible(project.slug);
 
             return (
-              <li key={project.slug}>
-                <Link
-                  href={`/projects/${project.slug}`}
-                  className={`flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors lg:text-white`}
-                >
-                  {hasCover && (
-                    <div
-                      className="relative w-full aspect-video lg:aspect-square overflow-hidden rounded"
-                      onMouseEnter={(e) => handleProjectHover(project, e.currentTarget)}
-                      onMouseLeave={() => handleProjectHover(null, null)}
-                    >
-                      {cover.isVideo ? (
-                        <video
-                          key={cover.url}
-                          src={cover.url!}
-                          className="w-full h-full object-cover"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          onPause={(e) => {
-                            // Prevent pause, keep playing
-                            const video = e.currentTarget;
-                            if (video.paused) {
-                              video.play().catch(() => { });
-                            }
-                          }}
-                        />
-                      ) : (
-                        <OptimizedImage
-                          path={cover.url!}
-                          alt={project.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          preset="medium"
-                        />
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2 pt-2 sm:pt-4 lg:pt-6">
-                    <span>{project.title}</span>
-
-                    {project.tags && project.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {project.tags.map(tag => (
-                          <span
-                            key={tag}
-                            className="inline-block px-2 py-1 rounded bg-white/5 text-white/60 text-[10px] sm:text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </li>
+              <ProjectCard
+                key={project.slug}
+                project={project}
+                isLoading={isLoading}
+                shouldLoad={shouldLoad}
+                isVisible={isVisible}
+                setItemRef={setItemRef}
+                onLoadStart={handleMediaLoadStart}
+                onLoad={handleMediaLoad}
+                onError={handleMediaError}
+                onMouseEnter={handleProjectHover}
+                onMouseLeave={() => handleProjectHover(null, null)}
+              />
             );
           })}
         </ul>
