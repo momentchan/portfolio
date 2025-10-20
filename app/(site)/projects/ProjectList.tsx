@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ProjectMeta } from '@/lib/mdx';
+import { ProjectMeta, CategoryType } from '@/lib/mdx';
 import useGlobalState from '@/components/common/GlobalStates';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import HoverCanvas from './HoverCanvas';
@@ -72,7 +72,13 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const filteredProjects = projects.filter((project) => {
     if (displayCategory === 'all') return true;
     if (displayCategory === 'featured') return project.featured === true;
-    return project.category === displayCategory;
+
+    // Handle both single category strings and arrays of categories
+    const projectCategories = Array.isArray(project.category)
+      ? project.category
+      : project.category ? [project.category] : [];
+
+    return projectCategories.includes(displayCategory as CategoryType);
   });
   const hoveredMedia = hoveredProject ? getCoverMedia(hoveredProject) : { url: null, isVideo: false };
 

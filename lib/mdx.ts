@@ -4,12 +4,14 @@ import matter from "gray-matter";
 
 const ROOT = path.join(process.cwd(), "content");
 
+export type CategoryType = 'web' | 'experiential' | 'lab';
+
 export type ProjectMeta = {
   title: string; slug: string; date: string;
   summary?: string; 
   description?: string; // Detailed project description
   tags?: string[];
-  category?: 'web' | 'experiential' | 'lab';
+  category?: CategoryType | CategoryType[];
   featured?: boolean; // Featured project flag (default: false)
   cover: string; // Cover media for project list - can be image or video URL
   media: string[]; // Combined media array (images and videos) - supports both local paths and URLs
