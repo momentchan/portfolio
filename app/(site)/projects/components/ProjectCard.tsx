@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ProjectMeta, getCoverMedia } from '../utils/projectHelpers';
+import { ProjectMeta, getCoverMedia } from './projectHelpers';
 import ProjectMedia from './ProjectMedia';
 
 interface ProjectCardProps {

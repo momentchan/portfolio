@@ -1,6 +1,6 @@
 import { getAllProjects, getProjectBySlug } from "@/lib/mdx";
 import Link from 'next/link';
-import ProjectDetail from '../ProjectDetail';
+import ProjectDetail from '../components/ProjectDetail';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { mdxComponents } from '@/components/ui/MDXComponents';
 
@@ -23,14 +23,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   ) : null;
 
   return (
-    <div className="h-full overflow-hidden flex flex-col">
+    <div className="h-full overflow-hidden overflow-x-hidden flex flex-col">
       {/* Back button */}
-      <Link href="/projects" className="text-white/60 hover:text-white py-2 mb-6 inline-block w-fit text-sm">
+      <Link href="/projects" className="text-white/60 hover:text-white py-2 mb-6 inline-block w-fit text-sm flex-shrink-0">
         ← Back to Projects
       </Link>
 
       {/* Project info */}
-      <div className="overflow-y-auto scrollbar-hide" style={{
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide w-full" style={{
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
       }}>

@@ -1,5 +1,6 @@
 import OptimizedImage from '@/components/ui/OptimizedImage';
-import { ProjectMeta, getCoverMedia } from '../utils/projectHelpers';
+import { getCoverMedia } from './projectHelpers';
+import { ProjectMeta } from '@/lib/mdx';
 
 interface ProjectMediaProps {
     project: ProjectMeta;

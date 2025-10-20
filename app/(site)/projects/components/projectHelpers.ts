@@ -1,4 +1,4 @@
-import { ProjectMeta } from '@/lib/mdx';
+import { ProjectMeta, CategoryType } from '@/lib/mdx';
 import { isCloudflareImage } from '@/utils/cf';
 
 export function isVideoUrl(url: string): boolean {

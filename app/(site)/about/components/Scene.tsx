@@ -36,30 +36,22 @@ export default function Scene() {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <WebGLCanvas
-        shadows
         frameloop="always"
-        gl={{
-          alpha: true,
-        }}
-        onCreated={(state) => {
-          // Set transparent background
-          if (state.gl) {
-            state.gl.setClearColor('#000000', 0); // 0 alpha for transparent background
-          }
-        }}
       >
-        <OrthographicCamera
-          makeDefault
-          position={[0, 0, 10]}
-          zoom={50}
-          near={0.1}
-          far={1000}
-          left={-10}
-          right={10}
-          top={10}
-          bottom={-10}
-        />
         <Suspense fallback={null}>
+          <color attach="background" args={['#000000']} />
+
+          <OrthographicCamera
+            makeDefault
+            position={[0, 0, 10]}
+            zoom={50}
+            near={0.1}
+            far={1000}
+            left={-10}
+            right={10}
+            top={10}
+            bottom={-10}
+          />
           {/* Camera setup with dynamic aspect ratio adjustment */}
           <DynamicCamera />
 

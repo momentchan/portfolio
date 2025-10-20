@@ -1,4 +1,4 @@
-import { Category, CATEGORIES } from '../utils/projectHelpers';
+import { Category, CATEGORIES } from './projectHelpers';
 
 interface CategoryFilterProps {
     selectedCategory: Category;
@@ -13,8 +13,8 @@ export default function CategoryFilter({ selectedCategory, onCategoryChange }: C
                     key={value}
                     onClick={() => onCategoryChange(value)}
                     className={`py-2 text-xs sm:text-sm cursor-pointer transition-colors ${selectedCategory === value
-                            ? 'text-white'
-                            : 'text-white/50 hover:text-white/80'
+                        ? 'text-white'
+                        : 'text-white/50 hover:text-white/80'
                         }`}
                 >
                     {label}

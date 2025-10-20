@@ -9,11 +9,22 @@ export default function MainContent({ children }: { children: React.ReactNode })
   const isHomepage = currentPath === '/';
   const [isVisible, setIsVisible] = useState(true);
 
-  // Handle page transition fade effects
+  // Handle page transition fade effects and scroll reset
   useEffect(() => {
     if (currentPath !== previousPath) {
       setIsVisible(false);
+
+      // Reset scroll position when navigating to a new page
+      // This prevents scroll position from affecting navbar visibility
       const timer = setTimeout(() => {
+        // Reset scroll position more reliably
+        const mainElement = document.querySelector('main');
+        if (mainElement) {
+          mainElement.scrollTop = 0;
+        }
+        // Also reset window scroll if any
+        window.scrollTo(0, 0);
+
         setIsVisible(true);
       }, 150); // Half of transition duration for smoother effect
       return () => clearTimeout(timer);
