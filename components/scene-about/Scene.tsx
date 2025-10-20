@@ -1,48 +1,32 @@
 'use client';
 
-import { OrthographicCamera, PerspectiveCamera, Preload } from '@react-three/drei';
-import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { OrthographicCamera, Preload } from '@react-three/drei';
+import React, { Suspense, useState } from 'react';
+import * as THREE from 'three';
 import WebGLCanvas from '../common/WebGLCanvas';
 import StripeEffect from './StripeEffect';
-import * as THREE from 'three';
-import MouseTraceFBO from '../../lib/r3f-gist/utility/MouseTrace';
-import { FBOTextureManager } from '../../lib/hooks/useFBOTextureManager';
-import { useThree } from '@react-three/fiber';
-import RectangleSpawner from './RectangleSpawner';
-import GlobalState from '../common/GlobalStates';
+import DynamicCamera from './DynamicCamera';
+import InteractiveEffects from './InteractiveEffects';
 
-function DynamicCamera() {
-  const { camera, size } = useThree();
-
-  useEffect(() => {
-    if (camera instanceof THREE.OrthographicCamera) {
-      const aspect = size.width / size.height;
-      const frustumSize = 20; // Total height of the view
-
-      camera.left = -frustumSize * aspect / 2;
-      camera.right = frustumSize * aspect / 2;
-      camera.top = frustumSize / 2;
-      camera.bottom = -frustumSize / 2;
-      camera.updateProjectionMatrix();
-    }
-  }, [camera, size]);
-
-  return null;
-}
-
-
+/**
+ * About Scene - 3D interactive background for the about page
+ * Features:
+ * - Orthographic camera with dynamic aspect ratio adjustment
+ * - Stripe effect that works on all devices
+ * - Interactive mouse trace and rectangle spawning (desktop only)
+ * - Transparent background to overlay content
+ */
 export default function Scene() {
-
-  const { isMobile } = GlobalState();
-  const traceRef = useRef<{ getFBOTexture: () => THREE.Texture | null; clearTraces?: () => void } | null>(null);
   const [textures, setTextures] = useState<{
     trace: THREE.Texture | null;
   }>({
     trace: null,
   });
 
-  // Unified FBO texture manager
+  /**
+   * Handles texture updates from the FBO texture manager
+   * Updates the trace texture used by StripeEffect
+   */
   const handleTextureUpdate = (newTextures: Array<THREE.Texture | null>) => {
     setTextures({
       trace: newTextures[0] || null,
@@ -76,18 +60,13 @@ export default function Scene() {
           bottom={-10}
         />
         <Suspense fallback={null}>
+          {/* Camera setup with dynamic aspect ratio adjustment */}
           <DynamicCamera />
-          {!isMobile && (
-            <>
-              <MouseTraceFBO ref={traceRef} showDebug={false} downsample={8} />
-              <FBOTextureManager
-                refs={[traceRef]}
-                onTextureUpdate={handleTextureUpdate}
-              />
-              <RectangleSpawner />
-            </>
-          )}
 
+          {/* Interactive effects (desktop only) */}
+          <InteractiveEffects onTextureUpdate={handleTextureUpdate} />
+
+          {/* Main visual effect that works on all devices */}
           <StripeEffect traceTexture={textures.trace} />
         </Suspense>
         <Preload all />

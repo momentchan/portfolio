@@ -18,11 +18,23 @@ import BGM from './Bgm';
 export default function Scene() {
   const { setIsMobile, setPaused, paused } = GlobalState();
 
-  // Detect mobile device once on mount
+  // Detect mobile device based on screen size
   useEffect(() => {
-    const userAgent = navigator.userAgent;
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    setIsMobile(isMobileDevice);
+    const checkIsMobile = () => {
+      // Use viewport width instead of screen width for better accuracy
+      const isMobile = window.innerWidth <= 768; // Common mobile breakpoint
+      setIsMobile(isMobile);
+    };
+
+    // Check on mount
+    checkIsMobile();
+
+    // Listen for resize events to handle orientation changes and window resizing
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
   }, [setIsMobile])
 
   useEffect(() => {
