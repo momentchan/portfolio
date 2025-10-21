@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { Environment } from "../../utils/environment";
 
 interface GlobalState {
   isMobile: boolean;
@@ -9,14 +10,16 @@ interface GlobalState {
   setPaused: (value: boolean | ((prev: boolean) => boolean)) => void;
   soundOn: boolean;
   setSoundOn: (value: boolean) => void;
-  activeProjectSlug: string | null;
-  setActiveProjectSlug: (slug: string | null) => void;
   currentPath: string;
   previousPath: string;
   setCurrentPath: (path: string) => void;
+  environment: Environment;
+  setEnvironment: (env: Environment) => void;
+  isDev: boolean;
+  isProd: boolean;
 }
 
-export default create<GlobalState>((set) => ({
+export default create<GlobalState>((set, get) => ({
   isMobile: false,
   setIsMobile: (value) => set({ isMobile: value }),
   started: false,
@@ -27,12 +30,18 @@ export default create<GlobalState>((set) => ({
   })),
   soundOn: false,
   setSoundOn: (value) => set({ soundOn: value }),
-  activeProjectSlug: null,
-  setActiveProjectSlug: (slug) => set({ activeProjectSlug: slug }),
   currentPath: '/',
   previousPath: '/',
   setCurrentPath: (path) => set((state) => ({
     previousPath: state.currentPath,
     currentPath: path,
   })),
+  environment: 'development',
+  setEnvironment: (env) => set((state) => ({
+    environment: env,
+    isDev: env === 'development',
+    isProd: env === 'production',
+  })),
+  isDev: process.env.NODE_ENV === 'development',
+  isProd: process.env.NODE_ENV === 'production',
 }))

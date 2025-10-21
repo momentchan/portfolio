@@ -63,7 +63,7 @@ class CustomBlurEffectImpl extends Effect {
 }
 
 export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions = {}) {
-    const { started, paused } = GlobalState();
+    const { started, paused, isProd } = GlobalState();
     const blurAmountRef = useRef({ value: blurAmount });
     const blurToggleRef = useRef(false);
     const activeAnimationRef = useRef<gsap.core.Tween | null>(null);
@@ -102,6 +102,8 @@ export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions 
 
     // Toggle blur with 'T' key
     useEffect(() => {
+        if (isProd) return;
+
         const handleKeyPress = (event: KeyboardEvent) => {
             if (event.key.toLowerCase() === 't') {
                 blurToggleRef.current = !blurToggleRef.current;
@@ -115,7 +117,7 @@ export default function CustomEffect({ blurAmount = 10.0 }: CustomEffectOptions 
             window.removeEventListener('keydown', handleKeyPress);
             killActiveAnimation();
         };
-    }, [blurAmount]);
+    }, [blurAmount, isProd]);
 
     useFrame(() => {
         effect.uniforms.get('uBlurAmount')!.value = blurAmountRef.current.value;

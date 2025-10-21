@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -27,6 +27,10 @@ interface WebGLCanvasProps {
     onCreated?: (state: any) => void;
     onError?: (error: any) => void;
     fallback?: ReactNode;
+    loadingComponent?: ReactNode;
+    errorComponent?: ReactNode;
+    forceLoading?: boolean;
+    forceError?: boolean;
 }
 
 export default function WebGLCanvas({
@@ -39,6 +43,10 @@ export default function WebGLCanvas({
     onCreated,
     onError,
     fallback,
+    loadingComponent,
+    errorComponent,
+    forceLoading = false,
+    forceError = false,
     ...props
 }: WebGLCanvasProps) {
     const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
@@ -48,8 +56,12 @@ export default function WebGLCanvas({
         setWebglAvailable(isWebGLAvailable());
     }, []);
 
-    // Show loading state while checking WebGL availability
-    if (webglAvailable === null) {
+    // Show loading state while checking WebGL availability or when forced
+    if (webglAvailable === null || forceLoading) {
+        if (loadingComponent) {
+            return <>{loadingComponent}</>;
+        }
+
         return (
             <div
                 className={className}
@@ -67,10 +79,14 @@ export default function WebGLCanvas({
         );
     }
 
-    // Fallback UI when WebGL is not available or has errors
-    if (!webglAvailable || hasError) {
+    // Fallback UI when WebGL is not available or has errors or when forced
+    if (!webglAvailable || hasError || forceError) {
         if (fallback) {
             return <>{fallback}</>;
+        }
+
+        if (errorComponent) {
+            return <>{errorComponent}</>;
         }
 
         return (
@@ -112,6 +128,9 @@ export default function WebGLCanvas({
             style={style}
             onCreated={(state) => {
                 // Add error handling for WebGL context creation
+                if (state.gl) {
+                    state.gl.setClearColor('#000000');
+                }
 
                 // Suppress WebGL warnings in console
                 const originalError = console.error;

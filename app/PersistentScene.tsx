@@ -6,14 +6,15 @@ import LoadingPage from '@/components/ui/LoadingPage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 import useGlobalState from '@/components/common/GlobalStates';
 import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';
+import { Leva } from 'leva';
+import GlobalState from '@/components/common/GlobalStates';
 
 /**
  * PersistentScene - Loads once and persists across all routes
  * Hides and pauses when not on homepage to save performance
  */
 function PersistentSceneComponent() {
-  const currentPath = useGlobalState((state) => state.currentPath);
-  const setPaused = useGlobalState((state) => state.setPaused);
+  const { setPaused, isDev, currentPath } = GlobalState();
   const isHomepage = currentPath === '/';
 
   useEffect(() => {
@@ -22,7 +23,7 @@ function PersistentSceneComponent() {
 
   return (
     <>
-      <LevaWraper initialHidden={true} />
+      {isDev ? <LevaWraper initialHidden={true} /> : <Leva hidden={true} />}
       <div
         className="fixed inset-0 z-0 transition-opacity duration-2000"
         style={{

@@ -1,21 +1,32 @@
 'use client';
 
 import { CameraControls, PerspectiveCamera, Preload } from '@react-three/drei';
-import * as THREE from 'three';
 import WebGLCanvas from '../common/WebGLCanvas';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './Effects';
-import LevaWraper from '../../lib/r3f-gist/utility/LevaWraper';
 import { CustomTrail } from './customTrail/CustomTrail';
 import { VATMeshSpawner } from './vat/VATMeshSpawner';
 import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import GlobalState from '../common/GlobalStates';
+import WebGLLoadingComponent from '../common/WebGLLoadingComponent';
+import WebGLErrorComponent from '../common/WebGLErrorComponent';
+import { getEnvironment } from '../../utils/environment';
 
 export default function Scene() {
-  const { setIsMobile, setPaused, paused } = GlobalState();
+  const { setIsMobile, setPaused, paused, setEnvironment, isProd } = GlobalState();
+
+  // Testing states for WebGLCanvas loading and error layouts
+  const [forceLoading, setForceLoading] = useState(false);
+  const [forceError, setForceError] = useState(false);
+
+  // Initialize environment detection
+  useEffect(() => {
+    const env = getEnvironment();
+    setEnvironment(env);
+  }, [setEnvironment]);
 
   // Detect mobile device based on screen size
   useEffect(() => {
@@ -37,6 +48,9 @@ export default function Scene() {
   }, [setIsMobile])
 
   useEffect(() => {
+    if (isProd) {
+      return;
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Space') {
         event.preventDefault();
@@ -44,18 +58,39 @@ export default function Scene() {
           return !prev;
         });
       }
+
+      // Testing keys for WebGLCanvas layouts
+      if (event.key === 'l' || event.key === 'L') {
+        event.preventDefault();
+        setForceLoading(true);
+        setForceError(false);
+        // Auto reset after 3 seconds
+        setTimeout(() => setForceLoading(false), 3000);
+      }
+      if (event.key === 'e' || event.key === 'E') {
+        event.preventDefault();
+        setForceError(true);
+        setForceLoading(false);
+        // Auto reset after 3 seconds
+        setTimeout(() => setForceError(false), 3000);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setPaused]);
+  }, [setPaused, isProd]);
+
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <WebGLCanvas
         shadows
         frameloop={paused ? 'never' : 'always'}
+        loadingComponent={<WebGLLoadingComponent />}
+        errorComponent={<WebGLErrorComponent />}
+        forceLoading={forceLoading}
+        forceError={forceError}
       >
         <Suspense fallback={null}>
           <color attach="background" args={['#000000']} />
