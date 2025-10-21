@@ -6,7 +6,9 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import DistortedCircle from './DistortedCircle';
 import GlobalStates from '@/components/common/GlobalStates';
+import BGM from './Bgm';
 import gsap from 'gsap';
+
 
 interface AudioUICanvasProps {
     radius?: number;
@@ -81,6 +83,7 @@ export default function AudioUICanvas({
 
     const seeds = [12.35, 0.58, 3.67];
 
+
     useEffect(() => {
         gsap.to(strengthRef.current, {
             value: soundOn ? 1 : 0,
@@ -111,6 +114,9 @@ export default function AudioUICanvas({
             <Canvas gl={{ alpha: true, antialias: true }}>
                 <OrthographicCamera makeDefault position={[0, 0, 1]} zoom={1} near={0.1} far={100} />
                 <CameraSetup canvasSize={canvasSize} />
+
+                {/* BGM Component - handles all audio in the same canvas as the UI */}
+                <BGM />
 
                 {/* Multiple overlapping circles */}
                 {seeds.map((seed, i) => (
