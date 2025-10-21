@@ -74,7 +74,6 @@ export function useProjectVideoUrls(videoUrl: string) {
   }, [videoUrl, isVideo]);
 
   const currentUrl = useResponsiveVideo(videoUrls.url1080p, videoUrls.url720p);
-  console.log('currentUrl:', currentUrl);
   
   return {
     ...videoUrls,
