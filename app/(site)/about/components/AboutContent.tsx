@@ -4,16 +4,32 @@
  */
 
 
-interface ContentSectionProps {
+
+interface PairedContentProps {
     title: string;
     description: string;
+    content: string;
 }
 
-function ContentSection({ title, description }: ContentSectionProps) {
+function PairedContentSection({ title, description, content }: PairedContentProps) {
+    const paragraphs = content.split('\n\n').filter(p => p.trim());
+
     return (
-        <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-white">{title}</h3>
-            <p className="text-sm text-white">{description}</p>
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-16">
+            {/* Left side - Title and short description */}
+            <div className="lg:space-y-1 lg:w-96 lg:flex-shrink-0 lg:self-start">
+                <h3 className="text-xl lg:text-4xl font-semibold text-white">{title}</h3>
+                <p className="text-sm lg:text-base text-white/70 whitespace-nowrap">{description}</p>
+            </div>
+
+            {/* Right side - Detailed content */}
+            <div className="space-y-1 lg:flex-1 lg:self-start">
+                {paragraphs.map((paragraph, index) => (
+                    <p key={index} className="text-sm lg:text-base text-white leading-normal lg:leading-relaxed">
+                        {paragraph}
+                    </p>
+                ))}
+            </div>
         </div>
     );
 }
@@ -40,28 +56,24 @@ function SocialLink({ href, children, isEmail = false }: SocialLinkProps) {
 }
 
 export default function AboutContent() {
-    const contentSections = [
+    const pairedContent = [
         {
             title: 'Attention',
-            description: 'Capture the eye. Trigger curiosity.'
+            description: 'Capture the eye. Trigger curiosity.',
+            content: "I'm Ming Jyun Hung, a creative technologist and technical artist exploring how interactive technology can move people — creating experiences that demand attention, evoke emotion, and endure in memory.\n\nI design with vivid visual detail to capture the eye and spark curiosity."
         },
         {
             title: 'Resonance',
-            description: 'Respond and evolve with the audience.'
+            description: 'Respond and evolve with the audience.',
+            content: "My work doesn't stop at visuals — it responds, transforms, and connects.\n\nUsing real-time rendering, shader programming, and procedural systems, I craft experiences that follow a living rhythm: attention through detail, resonance through responsiveness.\n\nInteraction, to me, is a conversation between system and audience, not just input and output."
         },
         {
             title: 'Memory',
-            description: 'Transform into something personal and unforgettable.'
+            description: 'Transform into something personal and unforgettable.',
+            content: "I create large-scale interactive installations and web experiences for exhibitions, brands, and digital platforms across Japan and Taiwan — works that don’t just impress in the moment, but stay with people long after.\n\nEach project advances my pursuit of uniting art, technology, and emotion into seamless, living systems. I collaborate with teams who want to push interactive experiences further — through exhibitions, digital products, or experimental concepts that haven’t been done before."
         }
     ];
 
-    const introParagraphs = [
-        "I'm Ming Jyun Hung, a creative technologist and technical artist exploring how interactive technology can move people — creating experiences that demand attention, evoke emotion, and live on in memory.",
-        "My work doesn't stop at visuals. It responds, transforms, and connects. Through advanced visual computing and interactive design, I build experiences that follow a living rhythm: attention through vivid detail, resonance through responsiveness, and memory through transformation.",
-        "Using real-time rendering, shader programming, and procedural systems, I bring both digital and physical spaces to life — making technology feel not mechanical, but human and alive. I'm driven by the idea that interaction is not just input and output, but a conversation between system and audience.",
-        "I've created large-scale interactive installations and web experiences for exhibitions, brands, and digital platforms across Japan and Taiwan. Each project deepens my pursuit of uniting art, technology, and emotion into seamless, living systems — works that don't just impress in the moment, but stay with people long after.",
-        "I love collaborating with teams and creatives who want to push interactive experiences further — whether through exhibitions, digital products, or experimental concepts that haven't been done before."
-    ];
 
     const socialLinks = [
         { href: 'https://instagram.com/mingjyunhung', label: 'Instagram' },
@@ -72,31 +84,20 @@ export default function AboutContent() {
 
     return (
         <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base lg:pointer-events-none">
-            {/* Main content layout - left: ARM, right: intro texts */}
-            <div className="flex flex-col lg:flex-row lg:justify-center gap-8 lg:gap-12 items-start">
-                {/* Attention Resonance Memory - Left side */}
-                <div className="space-y-6 lg:w-auto lg:flex-shrink-0">
-                    <div className="space-y-4">
-                        {contentSections.map((section, index) => (
-                            <ContentSection
-                                key={index}
-                                title={section.title}
-                                description={section.description}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                {/* Intro texts - Right side */}
-                <div className="space-y-4 lg:flex-1">
-                    {introParagraphs.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                    ))}
-                </div>
+            {/* Main content layout - paired sections */}
+            <div className="space-y-8 lg:space-y-12">
+                {pairedContent.map((section, index) => (
+                    <PairedContentSection
+                        key={index}
+                        title={section.title}
+                        description={section.description}
+                        content={section.content}
+                    />
+                ))}
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-wrap gap-4 sm:gap-6 pt-2 my-6 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
+            <div className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
                 {socialLinks.map((link, index) => (
                     <SocialLink
                         key={index}
