@@ -22,8 +22,8 @@ export default create<GlobalState>((set) => ({
   started: false,
   setStarted: (value) => set({ started: value }),
   paused: false,
-  setPaused: (value) => set((state) => ({ 
-    paused: typeof value === 'function' ? value(state.paused) : value 
+  setPaused: (value) => set((state) => ({
+    paused: typeof value === 'function' ? value(state.paused) : value
   })),
   soundOn: false,
   setSoundOn: (value) => set({ soundOn: value }),

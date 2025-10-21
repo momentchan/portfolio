@@ -71,7 +71,7 @@ export default function AboutContent() {
     ];
 
     return (
-        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base pb-32 lg:pointer-events-none">
+        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base lg:pointer-events-none">
             {/* Main content layout - left: ARM, right: intro texts */}
             <div className="flex flex-col lg:flex-row lg:justify-center gap-8 lg:gap-12 items-start">
                 {/* Attention Resonance Memory - Left side */}
@@ -96,7 +96,7 @@ export default function AboutContent() {
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-wrap gap-4 sm:gap-6 py-4 my-8 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
+            <div className="flex flex-wrap gap-4 sm:gap-6 pt-2 my-6 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
                 {socialLinks.map((link, index) => (
                     <SocialLink
                         key={index}

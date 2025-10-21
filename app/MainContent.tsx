@@ -33,7 +33,7 @@ export default function MainContent({ children }: { children: React.ReactNode })
 
   return (
     <main
-      className="relative z-10 h-screen overflow-y-auto scrollbar-hide transition-opacity duration-300 ease-in-out"
+      className="relative z-10 h-screen-dynamic overflow-y-auto scrollbar-hide transition-opacity duration-300 ease-in-out"
       style={{
         pointerEvents: isHomepage ? 'none' : 'auto',
         opacity: isVisible ? 1 : 0

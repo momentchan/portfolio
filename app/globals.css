@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --vh: 1vh; /* Fallback for browsers that don't support custom properties */
 }
 
 @theme inline {
@@ -52,6 +53,39 @@ body {
 
 .animate-crop-down {
   animation: crop-down 0.5s ease-out;
+}
+
+/* Dynamic viewport height utility classes */
+.h-screen-dynamic {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+.min-h-screen-dynamic {
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Project detail specific height utilities */
+@media (min-width: 1024px) {
+  .lg-h-screen-dynamic-minus-nav {
+    height: calc(var(--vh, 1vh) * 100 - 20rem);
+  }
+}
+
+/* Fallback for browsers that don't support CSS custom properties */
+@supports not (--css: variables) {
+  .h-screen-dynamic {
+    height: 100vh;
+  }
+  
+  .min-h-screen-dynamic {
+    min-height: 100vh;
+  }
+  
+  @media (min-width: 1024px) {
+    .lg-h-screen-dynamic-minus-nav {
+      height: calc(100vh - 20rem);
+    }
+  }
 }
 
 /* Fade in animation */

@@ -5,6 +5,7 @@ import PersistentScene from "./PersistentScene";
 import Navigation from "./Navigation";
 import PathTracker from "./PathTracker";
 import MainContent from "./MainContent";
+import ViewportHeightProvider from "./ViewportHeightProvider";
 import LevaWraper from "@/lib/r3f-gist/utility/LevaWraper";
 
 const pragmatica = localFont({
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
+    viewportFit: "cover",
   },
 };
 
@@ -42,21 +44,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${pragmatica.variable} antialiased`}>
-        {/* Track current and previous paths */}
-        <PathTracker />
+        <ViewportHeightProvider>
+          {/* Track current and previous paths */}
+          <PathTracker />
 
-        {/* Persistent background scene - pauses on other pages */}
-        <PersistentScene />
+          {/* Persistent background scene - pauses on other pages */}
+          <PersistentScene />
 
-        {/* Nav Bar - preserves query parameters like ?dev=true */}
-        <Navigation />
+          {/* Nav Bar - preserves query parameters like ?dev=true */}
+          <Navigation />
 
-        {/* Main content area - pointer-events-none on homepage allows scene interaction */}
-        <MainContent>{children}</MainContent>
+          {/* Main content area - pointer-events-none on homepage allows scene interaction */}
+          <MainContent>{children}</MainContent>
 
-        {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
-        </footer> */}
+          {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
+          </footer> */}
+        </ViewportHeightProvider>
       </body>
     </html>
   );

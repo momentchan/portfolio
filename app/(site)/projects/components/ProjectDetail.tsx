@@ -87,10 +87,10 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
   ].filter(Boolean) as Section[];
 
   return (
-    <div className="flex flex-col lg:flex-row lg:gap-20 w-full overflow-x-hidden">
+    <div className="flex flex-col pb-8 lg:flex-row lg:gap-20 w-full overflow-x-hidden">
       {/* Left section - Project Details */}
       <div
-        className="w-full lg:w-1/3 lg:min-w-[450px] lg:pr-8 lg:h-[calc(100dvh-20rem)] lg:overflow-auto scrollbar-hide overflow-x-hidden pb-8 lg:pb-0"
+        className="w-full lg:w-1/3 lg:min-w-[450px] lg:pr-8 lg-h-screen-dynamic-minus-nav lg:overflow-auto scrollbar-hide overflow-x-hidden pb-8 lg:pb-0"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -132,7 +132,7 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
 
       {/* Right section - Media Viewer */}
       <div
-        className="w-full lg:w-2/3 lg:max-w-[1024px] lg:h-[calc(100dvh-20rem)] lg:overflow-y-auto overflow-x-hidden pb-8 sm:pb-12 lg:pb-16 space-y-3 sm:space-y-4 scrollbar-hide"
+        className="w-full lg:w-2/3 lg:max-w-[1024px] lg-h-screen-dynamic-minus-nav lg:overflow-y-auto overflow-x-hidden space-y-3 sm:space-y-4 scrollbar-hide"
         style={{
           animation: 'fadeIn 0.8s ease-out',
           animationDelay: '200ms',
