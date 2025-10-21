@@ -17,7 +17,7 @@ import { getEnvironment } from '../../utils/environment';
 import HintMessage from './HintMessage';
 
 export default function Scene() {
-  const { setIsMobile, setPaused, paused, setEnvironment, isProd } = GlobalState();
+  const { setPaused, paused, setEnvironment, isProd } = GlobalState();
 
   // Testing states for WebGLCanvas loading and error layouts
   const [forceLoading, setForceLoading] = useState(false);
@@ -29,24 +29,7 @@ export default function Scene() {
     setEnvironment(env);
   }, [setEnvironment]);
 
-  // Detect mobile device based on screen size
-  useEffect(() => {
-    const checkIsMobile = () => {
-      // Use viewport width instead of screen width for better accuracy
-      const isMobile = window.innerWidth <= 768; // Common mobile breakpoint
-      setIsMobile(isMobile);
-    };
-
-    // Check on mount
-    checkIsMobile();
-
-    // Listen for resize events to handle orientation changes and window resizing
-    window.addEventListener('resize', checkIsMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkIsMobile);
-    };
-  }, [setIsMobile])
+  // Mobile detection is now handled centrally in GlobalStates component
 
   useEffect(() => {
     if (isProd) {

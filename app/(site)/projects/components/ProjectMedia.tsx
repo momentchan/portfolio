@@ -1,4 +1,5 @@
 import OptimizedImage from '@/components/ui/OptimizedImage';
+import ResponsiveVideo from '@/components/ui/ResponsiveVideo';
 import { getCoverMedia } from './projectHelpers';
 import { ProjectMeta } from '@/lib/mdx';
 
@@ -49,8 +50,7 @@ export default function ProjectMedia({
             )}
 
             {shouldLoad && isVideo ? (
-                <video
-                    key={url}
+                <ResponsiveVideo
                     src={url}
                     className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'
                         }`}
@@ -62,7 +62,7 @@ export default function ProjectMedia({
                     onLoadedData={() => onLoad(project.slug)}
                     onCanPlay={() => onLoad(project.slug)}
                     onError={() => onError(project.slug)}
-                    onPause={(e) => {
+                    onPause={(e: React.SyntheticEvent<HTMLVideoElement>) => {
                         // Prevent pause, keep playing
                         const video = e.currentTarget;
                         if (video.paused) {

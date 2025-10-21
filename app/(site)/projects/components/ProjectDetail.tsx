@@ -2,6 +2,7 @@
 
 import { ProjectMeta } from '@/lib/mdx';
 import OptimizedImage from '@/components/ui/OptimizedImage';
+import ResponsiveVideo from '@/components/ui/ResponsiveVideo';
 
 interface ProjectDetailProps {
   meta: ProjectMeta;
@@ -147,13 +148,9 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
           const isVideo = mediaUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|ogg)$/);
 
           return isVideo ? (
-            <video
+            <ResponsiveVideo
               key={`${meta.slug}-media-${index}`}
               src={mediaUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
               className="w-full max-w-full rounded"
             />
           ) : (

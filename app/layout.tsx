@@ -6,7 +6,7 @@ import Navigation from "./Navigation";
 import PathTracker from "./PathTracker";
 import MainContent from "./MainContent";
 import ViewportHeightProvider from "./ViewportHeightProvider";
-import LevaWraper from "@/lib/r3f-gist/utility/LevaWraper";
+import MobileDetector from "@/components/common/MobileDetector";
 
 const pragmatica = localFont({
   src: [
@@ -45,6 +45,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${pragmatica.variable} antialiased`}>
         <ViewportHeightProvider>
+          {/* Initialize mobile detection */}
+          <MobileDetector />
+
           {/* Track current and previous paths */}
           <PathTracker />
 
