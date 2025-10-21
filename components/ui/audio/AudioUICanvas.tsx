@@ -63,8 +63,8 @@ function HoverPlane({
                 gl.domElement.style.cursor = 'auto';
             }}
         >
-            <circleGeometry args={[radius, 32]} />
-            <meshBasicMaterial transparent opacity={0} />
+            <circleGeometry args={[radius, 4]} />
+            <meshBasicMaterial />
         </mesh>
     );
 }
@@ -111,7 +111,13 @@ export default function AudioUICanvas({
                 zIndex: 20,
             }}
         >
-            <Canvas gl={{ alpha: true, antialias: true }}>
+            <Canvas
+                gl={{
+                    alpha: true,
+                    antialias: true,
+                }}
+                dpr={[2, 3]} // Use device pixel ratio, clamped between 1 and 2
+            >
                 <OrthographicCamera makeDefault position={[0, 0, 1]} zoom={1} near={0.1} far={100} />
                 <CameraSetup canvasSize={canvasSize} />
 
@@ -136,7 +142,7 @@ export default function AudioUICanvas({
 
                 {/* Single hover plane for all circles */}
                 <HoverPlane
-                    radius={radius}
+                    radius={radius * 5}
                     onClick={handleClick}
                     onHoverChange={setHovered}
                 />

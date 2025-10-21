@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { useProjectVideoUrls } from '@/lib/hooks/useResponsiveVideo';
 
 interface ResponsiveVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
@@ -25,9 +26,35 @@ export default function ResponsiveVideo({
     ...props
 }: ResponsiveVideoProps) {
     const { currentUrl } = useProjectVideoUrls(src);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // Ensure video plays when URL changes or component mounts
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !autoPlay) return;
+
+        // Small delay to ensure video is loaded
+        const playVideo = async () => {
+            try {
+                // Reset video to start
+                video.load();
+
+                // Try to play
+                await video.play();
+            } catch (error) {
+                // Autoplay failed - this is normal for some browsers
+                // The video will play on user interaction
+                console.log('Video autoplay prevented:', error);
+            }
+        };
+
+        playVideo();
+    }, [currentUrl, autoPlay]);
 
     return (
         <video
+            ref={videoRef}
+            key={currentUrl} // Force remount when URL changes
             src={currentUrl}
             autoPlay={autoPlay}
             loop={loop}

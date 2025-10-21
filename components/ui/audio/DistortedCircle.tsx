@@ -30,18 +30,33 @@ export default function DistortedCircle({
   isHovered = false,
 }: DistortedCircleProps) {
 
-  const lineRef = useRef<THREE.Line>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const { size } = useThree();
 
   const lineObject = useMemo(() => {
-    const vertices: number[] = [];
-    for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * Math.PI * 2;
-      vertices.push(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
-    }
+    // Create a tube geometry for thick lines
+    const curve = new THREE.EllipseCurve(
+      0, 0,            // center x, y
+      radius, radius,  // xRadius, yRadius
+      0, 2 * Math.PI,  // startAngle, endAngle
+      false,           // clockwise
+      0                // rotation
+    );
 
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    const points = curve.getPoints(segments);
+    const path = new THREE.CatmullRomCurve3(
+      points.map(p => new THREE.Vector3(p.x, p.y, 0))
+    );
+    path.closed = true;
+
+    // Use TubeGeometry for actual thickness
+    const geometry = new THREE.TubeGeometry(
+      path,
+      segments,
+      lineWidth * 0.1, // tube radius (adjust multiplier as needed)
+      8,                // radial segments
+      true              // closed
+    );
 
     const material = new THREE.ShaderMaterial({
       vertexShader: /* glsl */ `
@@ -52,8 +67,10 @@ export default function DistortedCircle({
         ${snoise}
         
         void main() {
-          float dist = length(position.xy);
-          float angle = atan(position.y, position.x);
+          // Get the center of the tube (original circle position)
+          vec3 center = normalize(position) * ${radius.toFixed(2)};
+          float dist = length(center.xy);
+          float angle = atan(center.y, center.x);
           
           float noiseRadius = 1.3 * uDistortionFrequency;
           float noiseX = cos(angle) * noiseRadius;
@@ -64,12 +81,19 @@ export default function DistortedCircle({
           float newRadius = dist * (1.0 + radialNoise * 0.5 * uDistortionStrength * 0.6);
           newRadius *= mix(0.7, 1.0, smoothstep(0.0, 1.0, uDistortionStrength));
           
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(
+          // Calculate offset from center to current position
+          vec3 offset = position - center;
+          
+          // Apply distortion to center, then add back the offset
+          vec3 newCenter = vec3(
             cos(angle) * newRadius,
             sin(angle) * newRadius,
-            0.0,
-            1.0
+            0.0
           );
+          
+          vec3 finalPosition = newCenter + offset;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
         }
       `,
       fragmentShader: /* glsl */ `
@@ -86,17 +110,16 @@ export default function DistortedCircle({
         uSeed: { value: 0 },
       },
       transparent: true,
-      linewidth: lineWidth,
       blending: THREE.AdditiveBlending,
     });
 
-    return new THREE.LineLoop(geo, material);
+    return new THREE.Mesh(geometry, material);
   }, [radius, segments, color, lineWidth]);
 
   useFrame((state) => {
-    if (!lineRef.current) return;
+    if (!meshRef.current) return;
 
-    const material = lineRef.current.material as THREE.ShaderMaterial;
+    const material = meshRef.current.material as THREE.ShaderMaterial;
     const { uniforms } = material;
 
     // Update uniforms
@@ -107,6 +130,6 @@ export default function DistortedCircle({
     uniforms.uColor.value.set(isHovered ? hoverColor : color);
   });
 
-  return <primitive ref={lineRef} object={lineObject} />;
+  return <primitive ref={meshRef} object={lineObject} position={[0, 0, seed % 1.0]} />;
 }
 
