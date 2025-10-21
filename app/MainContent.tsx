@@ -39,8 +39,13 @@ export default function MainContent({ children }: { children: React.ReactNode })
         opacity: isVisible ? 1 : 0
       }}
     >
-      <div className="px-4 sm:px-6 lg:px-10 mt-20 sm:mt-24 lg:mt-28">
-        {children}
+      <div className="px-4 sm:px-6 lg:px-10 mt-20 sm:mt-24 lg:mt-28 flex flex-col min-h-[calc(100vh-8rem)] sm:min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-7rem)]">
+        <div className="flex-1">
+          {children}
+        </div>
+        <div className="text-xs lg:text-sm text-white/60 pb-4 z-30">
+          © 2025
+        </div>
       </div>
     </main>
   );

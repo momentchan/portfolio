@@ -107,7 +107,7 @@ export default function AboutContent() {
 
             {/* Social Links */}
             <div
-                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
+                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 lg:justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
                 style={{
                     animationDelay: `${pairedContent.length * 150}ms`,
                     opacity: 0,
