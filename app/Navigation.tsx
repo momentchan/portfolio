@@ -12,15 +12,16 @@ export default function Navigation() {
       <NavLink
         href="/"
         className="text-base sm:text-lg font-bold pointer-events-auto"
+        showUnderline={false}
       >
         Ming Jyun Hung
       </NavLink>
 
       <nav className="flex gap-4 sm:gap-6 pointer-events-auto">
-        <NavLink href="/projects" className="hover:underline text-sm sm:text-base">
+        <NavLink href="/projects" className="text-sm sm:text-base">
           Projects
         </NavLink>
-        <NavLink href="/about" className="hover:underline text-sm sm:text-base">
+        <NavLink href="/about" className="text-sm sm:text-base">
           About
         </NavLink>
       </nav>

@@ -87,17 +87,33 @@ export default function AboutContent() {
             {/* Main content layout - paired sections */}
             <div className="space-y-8 lg:space-y-12">
                 {pairedContent.map((section, index) => (
-                    <PairedContentSection
+                    <div
                         key={index}
-                        title={section.title}
-                        description={section.description}
-                        content={section.content}
-                    />
+                        className="animate-crop-down"
+                        style={{
+                            animationDelay: `${index * 150}ms`,
+                            opacity: 0,
+                            animationFillMode: 'forwards',
+                        }}
+                    >
+                        <PairedContentSection
+                            title={section.title}
+                            description={section.description}
+                            content={section.content}
+                        />
+                    </div>
                 ))}
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto">
+            <div
+                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
+                style={{
+                    animationDelay: `${pairedContent.length * 150}ms`,
+                    opacity: 0,
+                    animationFillMode: 'forwards',
+                }}
+            >
                 {socialLinks.map((link, index) => (
                     <SocialLink
                         key={index}
