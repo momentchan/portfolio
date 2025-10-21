@@ -3,8 +3,8 @@
 import React, { useEffect } from 'react';
 import Scene from '@/components/scene/Scene';
 import LoadingPage from '@/components/ui/LoadingPage';
+import HintMessage from '@/components/ui/HintMessage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
-import useGlobalState from '@/components/common/GlobalStates';
 import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';
 import { Leva } from 'leva';
 import GlobalState from '@/components/common/GlobalStates';
@@ -34,6 +34,7 @@ function PersistentSceneComponent() {
         <Scene />
       </div>
       <LoadingPage />
+      <HintMessage />
       <AudioUICanvas radius={10} bottomOffset={5} rightOffset={5} />
     </>
   );

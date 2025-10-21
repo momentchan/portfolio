@@ -69,7 +69,7 @@ export default function LoadingPage() {
             <SplitText
               text={WORDS[currentWordIndex]}
               delay={currentWordIndex === 0 ? 1.0 : 0}
-              duration={1}
+              duration={0.75}
               stagger={0.0}
               spin={false}
               move={false}
