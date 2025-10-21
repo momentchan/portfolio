@@ -17,7 +17,7 @@ function PairedContentSection({ title, description, content }: PairedContentProp
     return (
         <div className="flex flex-col lg:flex-row gap-2 lg:gap-16">
             {/* Left side - Title and short description */}
-            <div className="lg:space-y-1 lg:w-96 lg:flex-shrink-0 lg:self-start">
+            <div className="lg:space-y-2 lg:w-96 lg:flex-shrink-0 lg:self-start">
                 <h3 className="text-xl lg:text-4xl font-semibold text-white">{title}</h3>
                 <p className="text-sm lg:text-base text-white/70 whitespace-nowrap">{description}</p>
             </div>
@@ -59,18 +59,18 @@ export default function AboutContent() {
     const pairedContent = [
         {
             title: 'Attention',
-            description: 'Capture the eye. Trigger curiosity.',
-            content: "I'm Ming Jyun Hung, a creative technologist and technical artist exploring how interactive technology can move people — creating experiences that demand attention, evoke emotion, and endure in memory.\n\nI design with vivid visual detail to capture the eye and spark curiosity."
+            description: 'Capture and Invite',
+            content: "I'm Ming Jyun Hung, a creative technologist and technical artist.\n\nI create digital experiences that connect technology, design, and emotion — capturing attention as the first step toward interaction and memory.\n\nMy work explores how movement, form, and interaction draw people in, turning awareness into curiosity."
         },
         {
             title: 'Resonance',
-            description: 'Respond and evolve with the audience.',
-            content: "My work doesn't stop at visuals — it responds, transforms, and connects.\n\nUsing real-time rendering, shader programming, and procedural systems, I craft experiences that follow a living rhythm: attention through detail, resonance through responsiveness.\n\nInteraction, to me, is a conversation between system and audience, not just input and output."
+            description: 'Engage and Connect',
+            content: "When attention becomes engagement, it creates resonance — interaction that flows both ways.\n\nI design systems that respond to people in real time, using rendering, shaders, and procedural design to build environments that feel alive and human.\n\nEach project becomes a dialogue between creative intent and audience response, developed with designers, engineers, and artists through close collaboration."
         },
         {
             title: 'Memory',
-            description: 'Transform into something personal and unforgettable.',
-            content: "I create large-scale interactive installations and web experiences for exhibitions, brands, and digital platforms across Japan and Taiwan — works that don’t just impress in the moment, but stay with people long after.\n\nEach project advances my pursuit of uniting art, technology, and emotion into seamless, living systems. I collaborate with teams who want to push interactive experiences further — through exhibitions, digital products, or experimental concepts that haven’t been done before."
+            description: 'Sustain and Remember',
+            content: "When resonance endures, it forms memory — the emotional echo of an experience. I've created large-scale installations and interactive web works for exhibitions, brands, and platforms across Japan and Taiwan, exploring how digital interaction can leave a lasting impression.\n\nI'm always open to collaborating with teams who share a passion for creating meaningful interactive work — bringing new ideas to life together."
         }
     ];
 
