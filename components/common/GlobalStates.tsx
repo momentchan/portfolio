@@ -13,6 +13,8 @@ interface GlobalState {
   currentPath: string;
   previousPath: string;
   setCurrentPath: (path: string) => void;
+  initialPath: string | null;
+  setInitialPath: (path: string) => void;
   environment: Environment;
   setEnvironment: (env: Environment) => void;
   isDev: boolean;
@@ -36,6 +38,14 @@ export default create<GlobalState>((set, get) => ({
     previousPath: state.currentPath,
     currentPath: path,
   })),
+  initialPath: null,
+  setInitialPath: (path) => set((state) => {
+    // Only set initial path if it hasn't been set yet
+    if (state.initialPath === null) {
+      return { initialPath: path };
+    }
+    return state;
+  }),
   environment: 'development',
   setEnvironment: (env) => set((state) => ({
     environment: env,

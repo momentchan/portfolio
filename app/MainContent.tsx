@@ -43,9 +43,11 @@ export default function MainContent({ children }: { children: React.ReactNode })
         <div className="flex-1">
           {children}
         </div>
-        <div className="text-xs lg:text-sm text-white/60 pb-4 z-30">
-          © 2025
-        </div>
+        {!isHomepage && (
+          <div className="text-xs lg:text-sm text-white/60 pb-4 z-30">
+            © 2025
+          </div>
+        )}
       </div>
     </main>
   );

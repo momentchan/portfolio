@@ -1,19 +1,40 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import GlobalStates from '@/components/common/GlobalStates';
 
 export default function HintMessage() {
-    const { started, isMobile } = GlobalStates();
+    const { started, isMobile, currentPath } = GlobalStates();
     const containerRef = useRef<HTMLDivElement>(null);
+    const [hintShown, setHintShown] = useState(false);
+    const prevPathRef = useRef(currentPath);
+    const isHomepage = currentPath === '/';
 
     const hintText = isMobile
         ? "Touch or swipe — let it bloom"
         : "Click or drag — let it bloom";
 
+    // Reset hint when navigating TO homepage (not just being on homepage)
     useEffect(() => {
-        if (!containerRef.current) return;
+        const prevPath = prevPathRef.current;
+        const navigatedToHomepage = !prevPath || (prevPath !== '/' && currentPath === '/');
+
+        if (navigatedToHomepage && started) {
+            setHintShown(false);
+            if (containerRef.current) {
+                gsap.set(containerRef.current, {
+                    opacity: 0,
+                    display: 'flex'
+                });
+            }
+        }
+
+        prevPathRef.current = currentPath;
+    }, [currentPath, started]);
+
+    useEffect(() => {
+        if (!containerRef.current || hintShown || !isHomepage) return;
 
         if (started) {
             // Create GSAP timeline
@@ -35,10 +56,11 @@ export default function HintMessage() {
                         duration: 2,
                         ease: "power2.out",
                         onComplete: () => {
-                            // Hide the element after fade out
+                            // Hide the element after fade out and mark as shown
                             if (containerRef.current) {
                                 containerRef.current.style.display = 'none';
                             }
+                            setHintShown(true);
                         }
                     }
                 );
@@ -55,7 +77,7 @@ export default function HintMessage() {
                 });
             }
         }
-    }, [started]);
+    }, [started, hintShown, isHomepage]);
 
     return (
         <div

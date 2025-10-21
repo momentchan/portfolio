@@ -11,12 +11,13 @@ const WORDS = ['seen.', 'felt.', 'remembered.'];
 const showStats = false// process.env.NODE_ENV === 'development';
 
 export default function LoadingPage() {
-  const { started, setStarted } = GlobalStates();
+  const { started, setStarted, initialPath } = GlobalStates();
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const { progress, active } = useProgress();
   const [loadingComplete, setLoadingComplete] = useState(false);
 
-  // Handle loading completion callback
+  const shouldShowSplitText = initialPath === '/';
+
   const handleLoadingComplete = useCallback((metrics: LoadingMetrics) => {
     setLoadingComplete(true);
   }, []);
@@ -40,6 +41,16 @@ export default function LoadingPage() {
       return () => clearTimeout(timer);
     }
   }, [loadingComplete, currentWordIndex, setStarted]);
+
+  // If initial entry was not homepage, start the app immediately to skip loading screen
+  useEffect(() => {
+    if (!shouldShowSplitText) {
+      const timer = setTimeout(() => {
+        setStarted(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowSplitText, setStarted]);
 
   const handleWordComplete = useCallback(() => {
     if (currentWordIndex < WORDS.length - 1) {
@@ -65,17 +76,19 @@ export default function LoadingPage() {
             justifyContent: 'center',
           }}
         >
-          <div className="overflow-hidden">
-            <SplitText
-              text={WORDS[currentWordIndex]}
-              delay={currentWordIndex === 0 ? 1.0 : 0}
-              duration={0.75}
-              stagger={0.0}
-              spin={false}
-              move={false}
-              onComplete={handleWordComplete}
-            />
-          </div>
+          {shouldShowSplitText && (
+            <div className="overflow-hidden">
+              <SplitText
+                text={WORDS[currentWordIndex]}
+                delay={currentWordIndex === 0 ? 1.0 : 0}
+                duration={0.75}
+                stagger={0.0}
+                spin={false}
+                move={false}
+                onComplete={handleWordComplete}
+              />
+            </div>
+          )}
         </div>
 
         {/* Loading statistics component */}

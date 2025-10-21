@@ -14,6 +14,7 @@ import GlobalState from '../common/GlobalStates';
 import WebGLLoadingComponent from '../common/WebGLLoadingComponent';
 import WebGLErrorComponent from '../common/WebGLErrorComponent';
 import { getEnvironment } from '../../utils/environment';
+import HintMessage from './HintMessage';
 
 export default function Scene() {
   const { setIsMobile, setPaused, paused, setEnvironment, isProd } = GlobalState();
@@ -81,7 +82,6 @@ export default function Scene() {
     };
   }, [setPaused, isProd]);
 
-
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <WebGLCanvas
@@ -114,6 +114,7 @@ export default function Scene() {
         </Suspense>
         <Preload all />
       </WebGLCanvas>
+      <HintMessage />
     </div >
   );
 }

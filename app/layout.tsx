@@ -57,9 +57,6 @@ export default function RootLayout({
           {/* Main content area - pointer-events-none on homepage allows scene interaction */}
           <MainContent>{children}</MainContent>
 
-          {/* <footer className="relative z-20 border-t px-6 py-4 text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Ming Jyun Hung. All rights reserved.
-          </footer> */}
         </ViewportHeightProvider>
       </body>
     </html>

@@ -3,23 +3,23 @@
 import React, { useEffect } from 'react';
 import Scene from '@/components/scene/Scene';
 import LoadingPage from '@/components/ui/LoadingPage';
-import HintMessage from '@/components/ui/HintMessage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';
 import { Leva } from 'leva';
 import GlobalState from '@/components/common/GlobalStates';
 
-/**
- * PersistentScene - Loads once and persists across all routes
- * Hides and pauses when not on homepage to save performance
- */
 function PersistentSceneComponent() {
-  const { setPaused, isDev, currentPath } = GlobalState();
+  const { setPaused, isDev, currentPath, initialPath } = GlobalState();
   const isHomepage = currentPath === '/';
 
   useEffect(() => {
-    setPaused(!isHomepage);
-  }, [isHomepage, setPaused]);
+    if (initialPath !== '/' && !isHomepage) {
+      setPaused(true);
+    } else {
+      setPaused(!isHomepage);
+    }
+  }, [isHomepage, setPaused, initialPath]);
+
 
   return (
     <>
@@ -34,7 +34,6 @@ function PersistentSceneComponent() {
         <Scene />
       </div>
       <LoadingPage />
-      <HintMessage />
       <AudioUICanvas radius={10} bottomOffset={5} rightOffset={5} />
     </>
   );
