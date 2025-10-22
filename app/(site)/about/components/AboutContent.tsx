@@ -17,9 +17,9 @@ function PairedContentSection({ title, description, content }: PairedContentProp
     return (
         <div className="flex flex-col lg:flex-row gap-2 lg:gap-16">
             {/* Left side - Title and short description */}
-            <div className="lg:space-y-2 lg:w-96 lg:flex-shrink-0 lg:self-start">
+            <div className="lg:space-y-2 lg:w-96 lg:flex-shrink-0 lg:self-start is-pc">
                 <h3 className="text-xl lg:text-4xl font-semibold text-white">{title}</h3>
-                <p className="text-sm lg:text-base text-white/70 whitespace-nowrap is-pc">{description}</p>
+                <p className="text-sm lg:text-base text-white/70 whitespace-nowrap">{description}</p>
             </div>
 
             {/* Right side - Detailed content */}
@@ -83,9 +83,19 @@ export default function AboutContent() {
     ];
 
     return (
-        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed select-none text-sm sm:text-base lg:pointer-events-none">
+        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed  text-sm sm:text-base lg:pointer-events-none">
+            {/* Mobile-only header text */}
+            <div className="is-sp mb-6">
+                <h1 className="text-lg font-semibold text-white mb">
+                    Attention | Resonance | Memory
+                </h1>
+                <p className="text-sm text-white/80">
+                    The rhythm behind everything I create.
+                </p>
+            </div>
+
             {/* Main content layout - paired sections */}
-            <div className="space-y-8 lg:space-y-12">
+            <div className="space-y-4 lg:space-y-12">
                 {pairedContent.map((section, index) => (
                     <div
                         key={index}
