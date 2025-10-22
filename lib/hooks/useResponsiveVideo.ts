@@ -12,10 +12,6 @@ import GlobalState from '@/components/common/GlobalStates';
 export function useResponsiveVideo(videoUrl1080p: string, videoUrl720p?: string) {
   const { isMobile } = GlobalState();
 
-  useEffect(() => {
-    console.log('isMobile:', isMobile, 'videoUrl1080p:', videoUrl1080p, 'videoUrl720p:', videoUrl720p);
-  }, [isMobile, videoUrl1080p, videoUrl720p]);
-
   return useMemo(() => {
     // If 720p URL is provided and we're on mobile, use it; otherwise use 1080p
     const selectedUrl = (isMobile && videoUrl720p) ? videoUrl720p : videoUrl1080p;

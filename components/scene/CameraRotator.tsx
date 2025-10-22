@@ -11,7 +11,7 @@ import { useCallback } from 'react';
 
 export default function CameraRotator() {
   const { camera } = useThree();
-  const { started, isMobile, isTouchDevice } = GlobalState();
+  const { started, isTouchDevice } = GlobalState();
   const { gyroEnabled, gyroActive, setGyroEnabled, setShowPermissionButton, setGyroValues } = useGyroscope();
   const { calculateSpeeds } = useGyroscopeControl();
 

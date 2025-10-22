@@ -97,3 +97,23 @@ body {
     opacity: 1;
   }
 }
+
+/* Global device type classes - visibility toggles */
+.is-sp {
+  /* Only show on smartphone */
+  display: block;
+}
+
+.is-pc {
+  /* Only show on PC/desktop */
+  display: block;
+}
+
+/* Hide elements based on device type */
+body:not(.is-sp) .is-sp {
+  display: none !important;
+}
+
+body:not(.is-pc) .is-pc {
+  display: none !important;
+}

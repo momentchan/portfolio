@@ -204,7 +204,7 @@ void main() {
   // stripeWithGrain += (traceTex.rrr) * 5.0 * stripeWithGrain;
 
     // Final color mixing
-  vec3 finalColor = mix(stripeWithGrain * 0.75, (traceTex.rrr) * 2.0 * stripeWithGrain, uMouseOn);
+  vec3 finalColor = mix(stripeWithGrain * 0.75, (0.3 + (traceTex.rrr) * 2.0) * stripeWithGrain, uMouseOn);
 
     // Output
   gl_FragColor = vec4(finalColor, uOpacity);

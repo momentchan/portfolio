@@ -28,7 +28,18 @@ export default function MobileDetector() {
 
         const checkIsMobile = () => {
             const isMobileWidth = window.innerWidth <= 768;
+            const isLargeWidth = window.innerWidth >= 1024; // lg breakpoint
             setIsMobile(isMobileWidth);
+
+            // Apply global CSS classes to body
+            const body = document.body;
+            if (isLargeWidth) {
+                body.classList.remove('is-sp');
+                body.classList.add('is-pc');
+            } else {
+                body.classList.remove('is-pc');
+                body.classList.add('is-sp');
+            }
         };
 
         checkIsTouchDevice(); // Only check once (device type doesn't change)
