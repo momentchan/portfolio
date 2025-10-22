@@ -1,7 +1,7 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -9,34 +9,53 @@ interface GyroscopeIconProps {
     radius?: number;
     active?: boolean;
     color?: string;
-    needsPermission?: boolean;
 }
 
 export default function GyroscopeIcon({
     radius = 15,
     active = false,
     color = '#888888',
-    needsPermission = false,
 }: GyroscopeIconProps) {
     const ring1Ref = useRef<THREE.Group>(null);
     const ring2Ref = useRef<THREE.Group>(null);
     const ring3Ref = useRef<THREE.Group>(null);
     const centerDotRef = useRef<THREE.Mesh>(null);
     const groupRef = useRef<THREE.Group>(null);
-    const [pulseOpacity, setPulseOpacity] = useState(1);
+    const waveRingRef = useRef<THREE.Mesh>(null!);
+    const waveMaterialRef = useRef<THREE.MeshBasicMaterial>(null!);
 
     // Shared material for all meshes
     const sharedMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: needsPermission ? pulseOpacity : 1,
+        opacity: 1,
         blending: THREE.AdditiveBlending,
     });
 
-    // Rest sizes for each ring when inactive
-    const restSizes = [radius * 0.7, radius * 0.5, radius * 0.4];
-    const activeSize = radius * 0.6;
-    const torusThickness = 0.4;
+    // Wave ring material
+    const waveMaterial = useMemo(() => new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+    }), [color]);
+
+    // Store material ref for GSAP animation
+    useEffect(() => {
+        waveMaterialRef.current = waveMaterial;
+    }, [waveMaterial]);
+
+    // Constants
+    const REST_SIZE_MULTIPLIERS = [0.7, 0.5, 0.4, 0.5];
+    const ACTIVE_SIZE_MULTIPLIER = 0.6;
+    const TORUS_THICKNESS = 0.4;
+    const WAVE_TARGET_MULTIPLIER = 1.2;
+    const WAVE_SCALE_DURATION = 0.5;
+    const WAVE_OPACITY_DURATION = 2;
+
+    // Calculated values
+    const restSizes = REST_SIZE_MULTIPLIERS.map(mult => radius * mult);
+    const activeSize = radius * ACTIVE_SIZE_MULTIPLIER;
 
     // Animate to reset or active state
     useEffect(() => {
@@ -110,6 +129,56 @@ export default function GyroscopeIcon({
         }
     }, [active, activeSize, restSizes]);
 
+    // Wave animation when not active
+    useEffect(() => {
+        let shouldContinue = !active;
+
+        if (!active && waveRingRef.current && centerDotRef.current) {
+            // Create continuous wave animation
+            const createWave = () => {
+                if (!waveRingRef.current || !centerDotRef.current || !shouldContinue) return;
+
+                // Reset to initial state
+                gsap.set(waveRingRef.current.scale, { x: 0, y: 0, z: 0 });
+                gsap.set(centerDotRef.current.scale, { x: 1, y: 1, z: 1 });
+                gsap.set(waveMaterialRef.current, { opacity: 1 });
+
+                // Animate scale from 0 to activeSize with ease (both wave and center dot)
+                const targetScale = WAVE_TARGET_MULTIPLIER * activeSize / restSizes[3];
+
+                gsap.to(waveRingRef.current.scale, {
+                    x: targetScale,
+                    y: targetScale,
+                    z: targetScale,
+                    duration: 1.5,
+                    ease: 'power2.out',
+                });
+
+                gsap.to(centerDotRef.current.scale, {
+                    x: targetScale,
+                    y: targetScale,
+                    z: targetScale,
+                    duration: WAVE_SCALE_DURATION,
+                    ease: 'power2.out',
+                });
+
+                gsap.to(waveMaterialRef.current, {
+                    opacity: 0,
+                    duration: WAVE_OPACITY_DURATION,
+                    ease: 'power5.out',
+                    onComplete: createWave,
+                });
+            };
+
+            createWave();
+            return () => {
+                shouldContinue = false;
+            };
+        } else {
+            shouldContinue = false;
+        }
+    }, [active, activeSize, radius]);
+
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
 
@@ -135,22 +204,6 @@ export default function GyroscopeIcon({
                 ring3Ref.current.rotation.z += delta * 1.0;
             }
         }
-
-        // Pulse center dot when active
-        if (centerDotRef.current) {
-            const scale = active ? 1 + Math.sin(time * 4) * 0.3 : 1;
-            centerDotRef.current.scale.set(scale, scale, scale);
-        }
-
-        // Opacity pulse for permission request
-        if (needsPermission) {
-            const opacity = 0.6 + Math.sin(time * 3) * 0.4;
-            setPulseOpacity(opacity);
-            sharedMaterial.opacity = opacity;
-        } else {
-            setPulseOpacity(1);
-            sharedMaterial.opacity = 1;
-        }
     });
 
     return (
@@ -158,7 +211,7 @@ export default function GyroscopeIcon({
             {/* Ring 1 - Perpendicular to X axis */}
             <group ref={ring1Ref}>
                 <mesh rotation={[Math.PI / 2, 0, 0]}>
-                    <torusGeometry args={[restSizes[0], torusThickness, 16, 32]} />
+                    <torusGeometry args={[restSizes[0], TORUS_THICKNESS, 16, 32]} />
                     <primitive object={sharedMaterial} />
                 </mesh>
             </group>
@@ -166,7 +219,7 @@ export default function GyroscopeIcon({
             {/* Ring 2 - Perpendicular to Y axis */}
             <group ref={ring2Ref}>
                 <mesh rotation={[0, Math.PI / 2, 0]}>
-                    <torusGeometry args={[restSizes[1], torusThickness, 16, 32]} />
+                    <torusGeometry args={[restSizes[1], TORUS_THICKNESS, 16, 32]} />
                     <primitive object={sharedMaterial} />
                 </mesh>
             </group>
@@ -174,16 +227,23 @@ export default function GyroscopeIcon({
             {/* Ring 3 - Perpendicular to Z axis */}
             <group ref={ring3Ref}>
                 <mesh>
-                    <torusGeometry args={[restSizes[2], torusThickness, 16, 32]} />
+                    <torusGeometry args={[restSizes[2], TORUS_THICKNESS, 16, 32]} />
                     <primitive object={sharedMaterial} />
                 </mesh>
             </group>
+
+            {/* Wave ring - faces forward and expands during permission request */}
+            <mesh ref={waveRingRef} position={[0, 0, 0.1]}>
+                <torusGeometry args={[restSizes[3], TORUS_THICKNESS, 16, 32]} />
+                <primitive object={waveMaterial} />
+            </mesh>
 
             {/* Center dot */}
             <mesh ref={centerDotRef}>
                 <sphereGeometry args={[radius * 0.1, 16, 16]} />
                 <primitive object={sharedMaterial} />
             </mesh>
+
         </group>
     );
 }

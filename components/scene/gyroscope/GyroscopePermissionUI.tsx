@@ -21,7 +21,6 @@ export default function GyroscopePermissionUI() {
         deniedReason
     } = useGyroscope();
     const { state, request } = useMotionOrientationPermission();
-    const [hovered, setHovered] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
 
     // Sync permission state
@@ -37,21 +36,23 @@ export default function GyroscopePermissionUI() {
         }
     }, [state, setGyroEnabled, setGyroActive, setShowPermissionButton, setPermissionDenied]);
 
+    // Notification timing constants
+    const NOTIFICATION_DISPLAY_DURATION = 3000;
+    const NOTIFICATION_FADE_DURATION = 300;
+    const TOTAL_NOTIFICATION_DURATION = NOTIFICATION_DISPLAY_DURATION + NOTIFICATION_FADE_DURATION;
+
     // Show/hide notification with CSS fade animation
     useEffect(() => {
         if (permissionDenied) {
-            // Show notification
             setShowNotification(true);
 
-            // Auto-hide after 3 seconds
             const hideTimer = setTimeout(() => {
                 setShowNotification(false);
-            }, 3000);
+            }, NOTIFICATION_DISPLAY_DURATION);
 
-            // Clear permission denied state after fade out (300ms CSS transition)
             const clearTimer = setTimeout(() => {
                 setPermissionDenied(false);
-            }, 3300);
+            }, TOTAL_NOTIFICATION_DURATION);
 
             return () => {
                 clearTimeout(hideTimer);
@@ -65,7 +66,6 @@ export default function GyroscopePermissionUI() {
 
     const handleClick = () => {
         if (!gyroEnabled) {
-            // Request permission (first time or retry)
             // Clear denied notification immediately on retry
             if (permissionDenied) {
                 setShowNotification(false);
@@ -73,14 +73,13 @@ export default function GyroscopePermissionUI() {
             }
             request();
         } else {
-            // After permission granted: toggle on/off
+            // Toggle gyroscope on/off
             setGyroActive(!gyroActive);
         }
     };
 
     // Determine icon state
     const isActive = gyroEnabled && gyroActive;
-    const needsPermission = !gyroEnabled;
 
     return (
         <>
@@ -95,14 +94,12 @@ export default function GyroscopePermissionUI() {
                 cameraNear={-50}
                 cameraFar={50}
                 onClick={handleClick}
-                onHoverChange={setHovered}
                 hoverRadius={30}
             >
                 <GyroscopeIcon
                     radius={18}
                     active={isActive}
                     color='#aaaaaa'
-                    needsPermission={needsPermission}
                 />
             </UICanvas>
 
@@ -119,7 +116,7 @@ export default function GyroscopePermissionUI() {
                         fontSize: '11px',
                         fontWeight: '600',
                         pointerEvents: 'none',
-                        transition: 'opacity 0.3s ease-in-out',
+                        transition: `opacity ${NOTIFICATION_FADE_DURATION}ms ease-in-out`,
                     }}
                 >
                     Permission denied
