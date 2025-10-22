@@ -4,6 +4,8 @@ import { Environment } from "../../utils/environment";
 interface GlobalState {
   isMobile: boolean;
   setIsMobile: (value: boolean) => void;
+  isTouchDevice: boolean;
+  setIsTouchDevice: (value: boolean) => void;
   started: boolean;
   setStarted: (value: boolean) => void;
   paused: boolean;
@@ -24,6 +26,8 @@ interface GlobalState {
 export default create<GlobalState>((set, get) => ({
   isMobile: false,
   setIsMobile: (value) => set({ isMobile: value }),
+  isTouchDevice: false,
+  setIsTouchDevice: (value) => set({ isTouchDevice: value }),
   started: false,
   setStarted: (value) => set({ started: value }),
   paused: false,

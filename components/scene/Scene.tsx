@@ -15,6 +15,7 @@ import WebGLLoadingComponent from '../common/WebGLLoadingComponent';
 import WebGLErrorComponent from '../common/WebGLErrorComponent';
 import { getEnvironment } from '../../utils/environment';
 import HintMessage from './HintMessage';
+import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
 
 export default function Scene() {
   const { setPaused, paused, setEnvironment, isProd } = GlobalState();
@@ -66,38 +67,41 @@ export default function Scene() {
   }, [setPaused, isProd]);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <WebGLCanvas
-        shadows
-        frameloop={paused ? 'never' : 'always'}
-        loadingComponent={<WebGLLoadingComponent />}
-        errorComponent={<WebGLErrorComponent />}
-        forceLoading={forceLoading}
-        forceError={forceError}
-      >
-        <Suspense fallback={null}>
-          <color attach="background" args={['#000000']} />
+    <GyroscopeProvider>
+      <div style={{ width: '100%', height: '100%' }}>
+        <WebGLCanvas
+          shadows
+          frameloop={paused ? 'never' : 'always'}
+          loadingComponent={<WebGLLoadingComponent />}
+          errorComponent={<WebGLErrorComponent />}
+          forceLoading={forceLoading}
+          forceError={forceError}
+        >
+          <Suspense fallback={null}>
+            <color attach="background" args={['#000000']} />
 
-          <PerspectiveCamera
-            makeDefault
-            position={[0, 0, 0.75]}
-            zoom={1}
-            near={0.01}
-            far={5}
-            fov={60}
-          />
+            <PerspectiveCamera
+              makeDefault
+              position={[0, 0, 0.75]}
+              zoom={1}
+              near={0.01}
+              far={5}
+              fov={60}
+            />
 
-          <CameraRotator />
-          <CustomTrail />
-          <FlowFieldParticleSystem />
-          <VATMeshSpawner />
-          <EnvironmentSetup />
-          <DirectionalLights />
-          <Effects />
-        </Suspense>
-        <Preload all />
-      </WebGLCanvas>
-      <HintMessage />
-    </div >
+            <CameraRotator />
+            <CustomTrail />
+            <FlowFieldParticleSystem />
+            <VATMeshSpawner />
+            <EnvironmentSetup />
+            <DirectionalLights />
+            <Effects />
+          </Suspense>
+          <Preload all />
+        </WebGLCanvas>
+        <HintMessage />
+        <GyroscopePermissionUI />
+      </div >
+    </GyroscopeProvider>
   );
 }
