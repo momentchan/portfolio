@@ -1,121 +1,133 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMotionOrientationPermission } from './hooks/useMotionOrientationPermission';
 import { useGyroscope } from './GyroscopeContext';
+import { useMotionOrientationPermission } from './hooks/useMotionOrientationPermission';
 import GlobalState from '@/components/common/GlobalStates';
-import GyroscopeDebugUI from './GyroscopeDebugUI';
-import GyroscopeToggle from './GyroscopeToggle';
+import GyroscopeIcon from './GyroscopeIcon';
+import UICanvas from '@/components/ui/common/UICanvas';
 
 export default function GyroscopePermissionUI() {
     const { isTouchDevice } = GlobalState();
-    const { setGyroEnabled, setGyroActive, showPermissionButton, setShowPermissionButton } = useGyroscope();
-    const { state, reason, request } = useMotionOrientationPermission();
-    const [showDenied, setShowDenied] = useState(false);
+    const {
+        gyroEnabled,
+        gyroActive,
+        setGyroEnabled,
+        setGyroActive,
+        showPermissionButton,
+        setShowPermissionButton,
+        permissionDenied,
+        setPermissionDenied,
+        deniedReason
+    } = useGyroscope();
+    const { state, request } = useMotionOrientationPermission();
+    const [hovered, setHovered] = useState(false);
+    const [showNotification, setShowNotification] = useState(false);
 
-    // Sync permission state with context
+    // Sync permission state
     useEffect(() => {
         if (state === 'granted') {
             setGyroEnabled(true);
-            setGyroActive(true); // Auto-enable when permission granted
+            setGyroActive(true);
             setShowPermissionButton(false);
-            setShowDenied(false);
+            setPermissionDenied(false);
         } else if (state === 'denied' || state === 'unavailable') {
-            setShowDenied(true);
+            setPermissionDenied(true);
             setShowPermissionButton(false);
         }
-    }, [state, setGyroEnabled, setGyroActive, setShowPermissionButton]);
+    }, [state, setGyroEnabled, setGyroActive, setShowPermissionButton, setPermissionDenied]);
 
-    // Auto-hide denied message after 10 seconds
+    // Show/hide notification with CSS fade animation
     useEffect(() => {
-        if (showDenied) {
-            const timer = setTimeout(() => setShowDenied(false), 10000);
-            return () => clearTimeout(timer);
+        if (permissionDenied) {
+            // Show notification
+            setShowNotification(true);
+
+            // Auto-hide after 3 seconds
+            const hideTimer = setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+
+            // Clear permission denied state after fade out (300ms CSS transition)
+            const clearTimer = setTimeout(() => {
+                setPermissionDenied(false);
+            }, 3300);
+
+            return () => {
+                clearTimeout(hideTimer);
+                clearTimeout(clearTimer);
+            };
         }
-    }, [showDenied]);
+    }, [permissionDenied, setPermissionDenied]);
 
     // Only show on real touch devices (not just small viewports)
     if (!isTouchDevice) return null;
 
+    const handleClick = () => {
+        if (!gyroEnabled) {
+            // Request permission (first time or retry)
+            // Clear denied notification immediately on retry
+            if (permissionDenied) {
+                setShowNotification(false);
+                setPermissionDenied(false);
+            }
+            request();
+        } else {
+            // After permission granted: toggle on/off
+            setGyroActive(!gyroActive);
+        }
+    };
+
+    // Determine icon state
+    const isActive = gyroEnabled && gyroActive;
+    const needsPermission = !gyroEnabled;
+
     return (
         <>
-            {/* <GyroscopeDebugUI /> */}
-            <GyroscopeToggle />
-            {/* Permission Request Icon - bottom left corner */}
-            {showPermissionButton && (
-                <button
-                    onClick={request}
-                    disabled={state === 'asking'}
-                    style={{
-                        position: 'fixed',
-                        bottom: '80px',
-                        left: '20px',
-                        zIndex: 1000,
-                        width: '48px',
-                        height: '48px',
-                        padding: '0',
-                        background: state === 'asking' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.9)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        cursor: state === 'asking' ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '24px',
-                        transition: 'all 0.2s ease',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-                        opacity: state === 'asking' ? 0.6 : 1,
-                    }}
-                    title="Enable gyroscope control"
-                >
-                    {state === 'asking' ? '⏳' : '📱'}
-                </button>
-            )}
+            {/* Gyroscope Icon - Smart toggle (permission on first click, then on/off) */}
+            <UICanvas
+                size={40}
+                bottom={0}
+                left={0}
+                zIndex={20}
+                cameraPosition={[0, 0, 1]}
+                cameraZoom={1}
+                cameraNear={-50}
+                cameraFar={50}
+                onClick={handleClick}
+                onHoverChange={setHovered}
+                hoverRadius={30}
+            >
+                <GyroscopeIcon
+                    radius={18}
+                    active={isActive}
+                    color={needsPermission ? '#ffffff' : '#888888'}
+                    activeColor="#888888"
+                />
+            </UICanvas>
 
-            {/* Permission Denied - Small notification */}
-            {showDenied && (
+            {/* Permission Denied - Small notification with CSS fade animation */}
+            {permissionDenied && (
                 <div
                     style={{
                         position: 'fixed',
-                        bottom: '80px',
-                        left: '20px',
+                        bottom: '10px',
+                        left: '50px',
                         zIndex: 999,
-                        padding: '8px 12px',
-                        background: 'rgba(255, 102, 0, 0.9)',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(10px)',
-                        color: 'white',
+                        color: '#ff6600',
+                        opacity: showNotification ? 1 : 0,
                         fontSize: '11px',
-                        maxWidth: '200px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
+                        fontWeight: '600',
+                        pointerEvents: 'none',
+                        transition: 'opacity 0.3s ease-in-out',
                     }}
                 >
-                    <span>⚠️</span>
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: '600', marginBottom: '2px' }}>Permission denied</div>
-                        {reason && <div style={{ opacity: 0.9, fontSize: '10px' }}>{reason}</div>}
-                    </div>
-                    <button
-                        onClick={() => {
-                            setShowDenied(false);
-                            setShowPermissionButton(true);
-                        }}
-                        style={{
-                            padding: '4px 8px',
-                            background: 'white',
-                            color: '#ff6600',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Retry
-                    </button>
+                    Permission denied
+                    {deniedReason && (
+                        <div style={{ opacity: 0.7, fontSize: '10px', marginTop: '2px', fontWeight: '400' }}>
+                            {deniedReason}
+                        </div>
+                    )}
                 </div>
             )}
         </>

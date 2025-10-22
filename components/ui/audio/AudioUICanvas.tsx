@@ -1,14 +1,11 @@
 'use client';
 
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrthographicCamera } from '@react-three/drei';
 import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
 import DistortedCircle from './DistortedCircle';
 import GlobalStates from '@/components/common/GlobalStates';
 import BGM from './Bgm';
 import gsap from 'gsap';
-
+import UICanvas from '@/components/ui/common/UICanvas';
 
 interface AudioUICanvasProps {
     radius?: number;
@@ -19,54 +16,6 @@ interface AudioUICanvasProps {
     frequencyRange?: [number, number];
     speedRange?: [number, number];
     onClick?: () => void;
-}
-
-function CameraSetup({ canvasSize }: { canvasSize: number }) {
-    const { camera } = useThree();
-
-    useEffect(() => {
-        if (camera instanceof THREE.OrthographicCamera) {
-            camera.left = -canvasSize / 2;
-            camera.right = canvasSize / 2;
-            camera.top = canvasSize / 2;
-            camera.bottom = -canvasSize / 2;
-            camera.updateProjectionMatrix();
-        }
-    }, [camera, canvasSize]);
-
-    return null;
-}
-
-function HoverPlane({
-    radius,
-    onClick,
-    onHoverChange
-}: {
-    radius: number;
-    onClick: () => void;
-    onHoverChange: (hovered: boolean) => void;
-}) {
-    const { gl } = useThree();
-
-    return (
-        <mesh
-            position={[0, 0, 1]}
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            onPointerOver={(e) => {
-                e.stopPropagation();
-                onHoverChange(true);
-                gl.domElement.style.cursor = 'pointer';
-            }}
-            onPointerOut={(e) => {
-                e.stopPropagation();
-                onHoverChange(false);
-                gl.domElement.style.cursor = 'auto';
-            }}
-        >
-            <circleGeometry args={[radius, 4]} />
-            <meshBasicMaterial />
-        </mesh>
-    );
 }
 
 export default function AudioUICanvas({
@@ -82,7 +31,6 @@ export default function AudioUICanvas({
     const strengthRef = useRef({ value: 0 });
 
     const seeds = [12.35, 0.58, 3.67];
-
 
     useEffect(() => {
         gsap.to(strengthRef.current, {
@@ -101,53 +49,38 @@ export default function AudioUICanvas({
     };
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                bottom: bottomOffset,
-                right: rightOffset,
-                width: canvasSize,
-                height: canvasSize,
-                zIndex: 20,
-            }}
+        <UICanvas
+            size={canvasSize}
+            bottom={0}
+            right={0}
+            zIndex={20}
+            cameraPosition={[0, 0, 1]}
+            cameraZoom={1}
+            cameraNear={0.1}
+            cameraFar={100}
+            onClick={handleClick}
+            onHoverChange={setHovered}
+            hoverRadius={radius * 5}
         >
-            <Canvas
-                gl={{
-                    alpha: true,
-                    antialias: true,
-                }}
-                dpr={[2, 3]} // Use device pixel ratio, clamped between 1 and 2
-            >
-                <OrthographicCamera makeDefault position={[0, 0, 1]} zoom={1} near={0.1} far={100} />
-                <CameraSetup canvasSize={canvasSize} />
+            {/* BGM Component - handles all audio in the same canvas as the UI */}
+            <BGM />
 
-                {/* BGM Component - handles all audio in the same canvas as the UI */}
-                <BGM />
-
-                {/* Multiple overlapping circles */}
-                {seeds.map((seed, i) => (
-                    <DistortedCircle
-                        key={i}
-                        radius={radius}
-                        segments={32}
-                        color="#888888"
-                        distortionStrength={animatedStrength}
-                        distortionSpeed={1}
-                        distortionFrequency={0.3}
-                        seed={seed}
-                        lineWidth={5}
-                        isHovered={hovered}
-                    />
-                ))}
-
-                {/* Single hover plane for all circles */}
-                <HoverPlane
-                    radius={radius * 5}
-                    onClick={handleClick}
-                    onHoverChange={setHovered}
+            {/* Multiple overlapping circles */}
+            {seeds.map((seed, i) => (
+                <DistortedCircle
+                    key={i}
+                    radius={radius}
+                    segments={32}
+                    color="#888888"
+                    distortionStrength={animatedStrength}
+                    distortionSpeed={1}
+                    distortionFrequency={0.3}
+                    seed={seed}
+                    lineWidth={5}
+                    isHovered={hovered}
                 />
-            </Canvas>
-        </div>
+            ))}
+        </UICanvas>
     );
 }
 

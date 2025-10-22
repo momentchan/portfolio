@@ -17,6 +17,10 @@ interface GyroscopeContextType {
     setShowPermissionButton: (value: boolean) => void;
     gyroValues: GyroscopeValues;
     setGyroValues: (values: GyroscopeValues) => void;
+    permissionDenied: boolean;
+    setPermissionDenied: (value: boolean) => void;
+    deniedReason: string | null;
+    setDeniedReason: (reason: string | null) => void;
 }
 
 const GyroscopeContext = createContext<GyroscopeContextType | undefined>(undefined);
@@ -25,6 +29,8 @@ export function GyroscopeProvider({ children }: { children: ReactNode }) {
     const [gyroEnabled, setGyroEnabled] = useState(false);
     const [gyroActive, setGyroActive] = useState(false);
     const [showPermissionButton, setShowPermissionButton] = useState(false);
+    const [permissionDenied, setPermissionDenied] = useState(false);
+    const [deniedReason, setDeniedReason] = useState<string | null>(null);
     const [gyroValues, setGyroValues] = useState<GyroscopeValues>({
         alpha: 0,
         beta: 0,
@@ -42,6 +48,10 @@ export function GyroscopeProvider({ children }: { children: ReactNode }) {
                 setShowPermissionButton,
                 gyroValues,
                 setGyroValues,
+                permissionDenied,
+                setPermissionDenied,
+                deniedReason,
+                setDeniedReason,
             }}
         >
             {children}
