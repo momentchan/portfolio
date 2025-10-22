@@ -1,7 +1,7 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -9,23 +9,34 @@ interface GyroscopeIconProps {
     radius?: number;
     active?: boolean;
     color?: string;
-    activeColor?: string;
+    needsPermission?: boolean;
 }
 
 export default function GyroscopeIcon({
     radius = 15,
     active = false,
     color = '#888888',
-    activeColor = '#ffffff',
+    needsPermission = false,
 }: GyroscopeIconProps) {
     const ring1Ref = useRef<THREE.Group>(null);
     const ring2Ref = useRef<THREE.Group>(null);
     const ring3Ref = useRef<THREE.Group>(null);
     const centerDotRef = useRef<THREE.Mesh>(null);
+    const groupRef = useRef<THREE.Group>(null);
+    const [pulseOpacity, setPulseOpacity] = useState(1);
+
+    // Shared material for all meshes
+    const sharedMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: needsPermission ? pulseOpacity : 1,
+        blending: THREE.AdditiveBlending,
+    });
 
     // Rest sizes for each ring when inactive
     const restSizes = [radius * 0.7, radius * 0.5, radius * 0.4];
     const activeSize = radius * 0.6;
+    const torusThickness = 0.4;
 
     // Animate to reset or active state
     useEffect(() => {
@@ -130,52 +141,48 @@ export default function GyroscopeIcon({
             const scale = active ? 1 + Math.sin(time * 4) * 0.3 : 1;
             centerDotRef.current.scale.set(scale, scale, scale);
         }
+
+        // Opacity pulse for permission request
+        if (needsPermission) {
+            const opacity = 0.6 + Math.sin(time * 3) * 0.4;
+            setPulseOpacity(opacity);
+            sharedMaterial.opacity = opacity;
+        } else {
+            setPulseOpacity(1);
+            sharedMaterial.opacity = 1;
+        }
     });
 
-    const currentColor = active ? activeColor : color;
-
     return (
-        <group>
+        <group ref={groupRef}>
             {/* Ring 1 - Perpendicular to X axis */}
             <group ref={ring1Ref}>
                 <mesh rotation={[Math.PI / 2, 0, 0]}>
-                    <torusGeometry args={[restSizes[0], 0.3, 16, 32]} />
-                    <meshBasicMaterial
-                        color={currentColor}
-                        transparent={true}
-                        opacity={1}
-                    />
+                    <torusGeometry args={[restSizes[0], torusThickness, 16, 32]} />
+                    <primitive object={sharedMaterial} />
                 </mesh>
             </group>
 
             {/* Ring 2 - Perpendicular to Y axis */}
             <group ref={ring2Ref}>
                 <mesh rotation={[0, Math.PI / 2, 0]}>
-                    <torusGeometry args={[restSizes[1], 0.3, 16, 32]} />
-                    <meshBasicMaterial
-                        color={currentColor}
-                        transparent={true}
-                        opacity={1}
-                    />
+                    <torusGeometry args={[restSizes[1], torusThickness, 16, 32]} />
+                    <primitive object={sharedMaterial} />
                 </mesh>
             </group>
 
             {/* Ring 3 - Perpendicular to Z axis */}
             <group ref={ring3Ref}>
                 <mesh>
-                    <torusGeometry args={[restSizes[2], 0.3, 16, 32]} />
-                    <meshBasicMaterial
-                        color={currentColor}
-                        transparent={true}
-                        opacity={1}
-                    />
+                    <torusGeometry args={[restSizes[2], torusThickness, 16, 32]} />
+                    <primitive object={sharedMaterial} />
                 </mesh>
             </group>
 
             {/* Center dot */}
             <mesh ref={centerDotRef}>
                 <sphereGeometry args={[radius * 0.1, 16, 16]} />
-                <meshBasicMaterial color={currentColor} transparent opacity={1} />
+                <primitive object={sharedMaterial} />
             </mesh>
         </group>
     );

@@ -88,7 +88,7 @@ export default function GyroscopePermissionUI() {
             <UICanvas
                 size={40}
                 bottom={0}
-                left={0}
+                left={2}
                 zIndex={20}
                 cameraPosition={[0, 0, 1]}
                 cameraZoom={1}
@@ -101,8 +101,8 @@ export default function GyroscopePermissionUI() {
                 <GyroscopeIcon
                     radius={18}
                     active={isActive}
-                    color={needsPermission ? '#ffffff' : '#888888'}
-                    activeColor="#888888"
+                    color='#aaaaaa'
+                    needsPermission={needsPermission}
                 />
             </UICanvas>
 
@@ -114,7 +114,7 @@ export default function GyroscopePermissionUI() {
                         bottom: '10px',
                         left: '50px',
                         zIndex: 999,
-                        color: '#ff6600',
+                        color: '#ffffff',
                         opacity: showNotification ? 1 : 0,
                         fontSize: '11px',
                         fontWeight: '600',

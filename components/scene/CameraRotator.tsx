@@ -115,7 +115,7 @@ export default function CameraRotator() {
     } else {
       // Desktop/Auto mode: Original time-based automatic rotation
       const speed = controls.speed * rotateLerpRef.current.value;
-      rotationAngleRef.current += (started) ? delta * speed : 0;
+      rotationAngleRef.current += (started) ? Math.min(delta, 1 / 30) * speed : 0;
 
       // Gradually reset radius offset to 0 when switching from gyro mode
       radiusOffsetRef.current = THREE.MathUtils.lerp(radiusOffsetRef.current, 0, 0.05);
