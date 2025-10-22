@@ -12,6 +12,7 @@ import { usePointerTracking } from "./hooks/usePointerTracking";
 import GlobalState from "../../common/GlobalStates";
 
 export default function FlowFieldParticleSystem() {
+    const { isMobile } = GlobalState();
     const { camera, viewport } = useThree();
     const { started } = GlobalState();
 
@@ -79,7 +80,7 @@ export default function FlowFieldParticleSystem() {
         behavior.uniforms.uPointer.value.set(state.pointer.x, state.pointer.y);
         behavior.uniforms.uPointerSpeedMultiplier.value = pointerSpeedMultiplier;
         behavior.uniforms.uAvoidanceStrength.value = controls.avoidanceStrength;
-        behavior.uniforms.uAvoidanceRadius.value = controls.avoidanceRadius;
+        behavior.uniforms.uAvoidanceRadius.value = isMobile ? 0.5 : 0.25
         behavior.uniforms.uModelViewProjectionMatrix.value.copy(modelViewProjectionMatrix);
         behavior.uniforms.uInverseModelViewProjectionMatrix.value.copy(inverseModelViewProjectionMatrix);
         behavior.uniforms.uAspect.value = viewport.aspect;
@@ -93,6 +94,6 @@ export default function FlowFieldParticleSystem() {
             behavior={behaviorRef.current}
             customMaterial={customMaterial}
             update={started}
-        />  
+        />
     );
 }

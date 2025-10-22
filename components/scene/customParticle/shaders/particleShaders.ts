@@ -96,6 +96,7 @@ export const createParticleFragmentShader = (type: ParticleSystemType) => {
             ${isFlowField ? /*glsl*/ `
                 // Add velocity-based glow
                 float speed = smoothstep(0.0, 0.5, length(vVel.xyz));
+                color = HSVShift(color, vec3(vVel.w * 0.2, 0.0, 0.5));
                 color *= (1.0 + pow(speed, 2.0) * 100.0);
                 color *= (1.0 + vVel.w * 2.0);
             ` : ''}
