@@ -11,7 +11,8 @@ export function createVATMaterial(
   maskTex: THREE.Texture | null,
   envMap: THREE.Texture | null,
   meta: VATMeta,
-  materialProps: VATMaterialControls
+  materialProps: VATMaterialControls,
+  manual?: boolean
 ): CustomShaderMaterial {
   const uniforms = {
     uPosTex: { value: posTex },
@@ -25,6 +26,7 @@ export function createVATMaterial(
     uNormalsCompressed: { value: meta.normalsCompressed ? 1 : 0 },
     uTime: { value: 0.0 },
     uSeed: { value: 0.0 },
+    uManual: { value: manual ? 1 : 0 },
     uTriggerRate: { value: 0.0 },
     // Shader uniforms from material controls
     uHueShift: { value: 0.0 },
@@ -59,6 +61,7 @@ export function createVATMaterial(
     baseMaterial: THREE.MeshPhysicalMaterial,
     vertexShader: VAT_VERTEX_SHADER,
     fragmentShader: VAT_FRAGMENT_SHADER,
+    transparent: true,
     uniforms,
     envMap: envMap,
     bumpMap: mapTex,
@@ -71,7 +74,8 @@ export function createVATMaterial(
 export function createVATDepthMaterial(
   posTex: THREE.Texture,
   nrmTex: THREE.Texture | null,
-  meta: VATMeta
+  meta: VATMeta,
+  manual?: boolean
 ): CustomShaderMaterial {
   const uniforms = {
     uPosTex: { value: posTex },
@@ -87,6 +91,7 @@ export function createVATDepthMaterial(
     uNoiseStrength: { value: 0.1 },
     uTriggerRate: { value: 0.0 },
     uSeed: { value: 0.0 },
+    uManual: { value: manual ? 1 : 0 },
   }
 
   return new CustomShaderMaterial({

@@ -3,6 +3,7 @@ uniform sampler2D uMaskTex;
 uniform float uHueShift;
 uniform float uTime;
 uniform float uSeed;
+uniform float uManual;
 uniform float uTriggerRate;
 
 varying vec2 vUv;
@@ -11,18 +12,18 @@ varying vec2 vUv2;
 void main() {
   vec4 color = texture2D(uMapTex, vUv);
   vec4 mask = texture2D(uMaskTex, vUv);
-  
-  if (mask.r > 0.5) {
+
+  if(mask.r > 0.5) {
     discard;
   }
 
   float shift = uHueShift + fract(uSeed) * 0.2;
   color.rgb = HSVShift(color.rgb, vec3(shift, 0.0, 0.0));
-  color.a = 0.1;
-  
+  color.a = mix(0.3, 1.0, uManual);
+
   csm_DiffuseColor = color;
 
-  float l =  1.0 - vUv.y;
+  float l = 1.0 - vUv.y;
   // Create smooth animated gradient with seamless looping
   float animatedPos = mod(uTime + uSeed, 1.0);
   float distance1 = abs(l - animatedPos);

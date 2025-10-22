@@ -16,24 +16,25 @@ export function setupVATMaterials(
   envMap: THREE.Texture | null,
   metaData: VATMeta,
   materialControls: any,
-  useDepthMaterial: boolean
+  useDepthMaterial: boolean,
+  manual?: boolean
 ): CustomShaderMaterial[] {
   const materials: CustomShaderMaterial[] = []
 
   ensureUV2ForVAT(mesh.geometry, metaData)
 
-  const vatMaterial = createVATMaterial(posTex, nrmTex, mapTex, maskTex, envMap, metaData, materialControls)
+  const vatMaterial = createVATMaterial(posTex, nrmTex, mapTex, maskTex, envMap, metaData, materialControls, manual)
   mesh.material = vatMaterial
   materials.push(vatMaterial)
 
   if (useDepthMaterial) {
-    const vatDepthMaterial = createVATDepthMaterial(posTex, nrmTex, metaData)
+    const vatDepthMaterial = createVATDepthMaterial(posTex, nrmTex, metaData, manual)
     mesh.customDepthMaterial = vatDepthMaterial
     materials.push(vatDepthMaterial)
   }
 
-  mesh.castShadow = true
-  mesh.receiveShadow = true
+  // mesh.castShadow = true
+  // mesh.receiveShadow = true
   mesh.frustumCulled = false
 
   return materials
@@ -51,7 +52,8 @@ export function cloneAndSetupVATScene(
   envMap: THREE.Texture | null,
   metaData: VATMeta,
   materialControls: any,
-  useDepthMaterial: boolean
+  useDepthMaterial: boolean,
+  manual?: boolean
 ): {
   scene: THREE.Group
   materials: CustomShaderMaterial[]
@@ -65,7 +67,7 @@ export function cloneAndSetupVATScene(
     if (object.isMesh) {
       const mesh = object as THREE.Mesh
       const meshMaterials = setupVATMaterials(
-        mesh, posTex, nrmTex, mapTex, maskTex, envMap, metaData, materialControls, useDepthMaterial
+        mesh, posTex, nrmTex, mapTex, maskTex, envMap, metaData, materialControls, useDepthMaterial, manual
       )
       materials.push(...meshMaterials)
       vatMesh = mesh

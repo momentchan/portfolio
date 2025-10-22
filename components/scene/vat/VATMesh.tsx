@@ -26,6 +26,7 @@ export function VATMesh({
   triggerSize = 1,
   id,
   globalRatio,
+  manual = false,
   ...rest
 }: VATMeshProps) {
   const materialPropertiesControls = useControls('VAT.Material', {
@@ -84,7 +85,7 @@ export function VATMesh({
     }
 
     const { scene: clonedScene, materials, mesh } = cloneAndSetupVATScene(
-      gltf, posTex, nrmTex, mapTex, maskTex, scene.environment, metaData, materialControls, useDepthMaterial
+      gltf, posTex, nrmTex, mapTex, maskTex, scene.environment, metaData, materialControls, useDepthMaterial, manual
     )
 
     materialsRef.current = materials
@@ -100,7 +101,7 @@ export function VATMesh({
         groupRef.current.remove(clonedSceneRef.current)
       }
     }
-  }, [gltf, posTex, nrmTex, metaData, useDepthMaterial])
+  }, [gltf, posTex, nrmTex, metaData, useDepthMaterial, manual])
 
   useEffect(() => {
     for (const material of materialsRef.current) {
@@ -128,6 +129,7 @@ export function VATMesh({
       material.uniforms.uNoiseStrength.value = shaderControls.noiseStrength
       material.uniforms.uHueShift.value = (spawnTimeRef.current / HUE_CYCLE) % 1
       material.uniforms.uTriggerRate.value = triggerRate.current.value
+      material.uniforms.uManual.value = manual ? 1 : 0
     }
   })
 
