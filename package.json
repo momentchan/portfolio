@@ -17,6 +17,7 @@
     "leva": "^0.10.0",
     "next": "15.5.2",
     "next-mdx-remote": "^5.0.0",
+    "r3f-perf": "^7.2.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "rehype-slug": "^6.0.0",

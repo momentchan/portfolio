@@ -18,11 +18,16 @@ import HintMessage from './HintMessage';
 import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
 
 export default function Scene() {
-  const { setPaused, paused, setEnvironment, isProd } = GlobalState();
+  const { setPaused, paused, setEnvironment, isProd, isMobile } = GlobalState();
 
   // Testing states for WebGLCanvas loading and error layouts
   const [forceLoading, setForceLoading] = useState(false);
   const [forceError, setForceError] = useState(false);
+
+  // Calculate actual values based on isMobile (used in component props)
+  const particleCount = isMobile ? 2048 : 2024;
+  const shadowQuality = isMobile ? 2048 : 4096;
+  const environmentQuality = isMobile ? 128 : 256;
 
   // Initialize environment detection
   useEffect(() => {
@@ -88,13 +93,13 @@ export default function Scene() {
               far={5}
               fov={60}
             />
-
             <CameraRotator />
+            {/* <CameraControls /> */}
             <CustomTrail />
-            <FlowFieldParticleSystem />
+            <FlowFieldParticleSystem particleCount={particleCount} />
             <VATMeshSpawner />
-            <EnvironmentSetup />
-            <DirectionalLights />
+            <EnvironmentSetup quality={environmentQuality} />
+            <DirectionalLights shadowQuality={shadowQuality} />
             <Effects />
           </Suspense>
           <Preload all />

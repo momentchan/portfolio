@@ -11,7 +11,11 @@ import { useParticleAnimation } from "./hooks/useParticleAnimation";
 import { usePointerTracking } from "./hooks/usePointerTracking";
 import GlobalState from "../../common/GlobalStates";
 
-export default function FlowFieldParticleSystem() {
+interface FlowFieldParticleSystemProps {
+    particleCount?: number;
+}
+
+export default function FlowFieldParticleSystem({ particleCount = 2048 }: FlowFieldParticleSystemProps) {
     const { isMobile } = GlobalState();
     const { camera, viewport } = useThree();
     const { started } = GlobalState();
@@ -89,7 +93,7 @@ export default function FlowFieldParticleSystem() {
     return (
         <ParticleSystem
             ref={particleSystemRef}
-            count={2048}
+            count={particleCount}
             config={config}
             behavior={behaviorRef.current}
             customMaterial={customMaterial}

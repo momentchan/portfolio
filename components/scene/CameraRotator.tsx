@@ -26,7 +26,7 @@ export default function CameraRotator() {
     height: { value: 0, min: -2, max: 2, step: 0.01 },
     enabled: true,
     gyroSensitivity: { value: 0.01, min: 0.001, max: 0.05, step: 0.001, label: 'Gyro Sensitivity' }
-  });
+  }, { collapsed: true });
 
   const rotateLerpRef = useRef({ value: 0 });
 

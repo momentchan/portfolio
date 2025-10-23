@@ -7,6 +7,7 @@ import WebGLCanvas from '../../../../components/common/WebGLCanvas';
 import StripeEffect from './StripeEffect';
 import DynamicCamera from './DynamicCamera';
 import InteractiveEffects from './InteractiveEffects';
+import { Perf } from 'r3f-perf'
 
 /**
  * About Scene - 3D interactive background for the about page

@@ -3,18 +3,22 @@ import { useControls } from "leva";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
-export default function DirectionalLights() {
+interface DirectionalLightsProps {
+    shadowQuality?: number;
+}
+
+export default function DirectionalLights({ shadowQuality = 4096 }: DirectionalLightsProps) {
     const debug = false;
     const keyLightControls = useControls('Lights.Key Light', {
         intensity: { value: 1, min: 0, max: 10, step: 0.1 },
         height: { value: 15, min: 5, max: 25, step: 1 },
-    });
+    }, { collapsed: true });
 
     const fillLightControls = useControls('Lights.Fill Light', {
         intensity: { value: 0.1, min: 0, max: 2, step: 0.01 },
         height: { value: 8, min: 3, max: 20, step: 1 },
         offset: { value: 180, min: 0, max: 360, step: 10 }, // Offset in degrees
-    });
+    }, { collapsed: true });
 
     const keyLightRef = useRef<THREE.DirectionalLight | null>(null);
     const keyHelperRef = useRef<THREE.DirectionalLightHelper | null>(null);
@@ -62,8 +66,8 @@ export default function DirectionalLights() {
                 position={[0, keyLightControls.height, 0]}
                 intensity={keyLightControls.intensity}
                 castShadow
-                shadow-mapSize-width={4096}
-                shadow-mapSize-height={4096}
+                shadow-mapSize-width={shadowQuality}
+                shadow-mapSize-height={shadowQuality}
                 shadow-camera-left={-10}
                 shadow-camera-right={10}
                 shadow-camera-top={10}

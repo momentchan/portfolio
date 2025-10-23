@@ -1,21 +1,44 @@
 'use client';
 
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, useRef, ReactNode, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useControls } from 'leva';
+import { Perf } from 'r3f-perf';
 
-// WebGL detection function
-function isWebGLAvailable(): boolean {
+// WebGL detection utility
+const isWebGLAvailable = (): boolean => {
     if (typeof window === 'undefined') return false;
 
     try {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         return !!gl;
-    } catch (e) {
+    } catch {
         return false;
     }
-}
+};
+
+// Style constants
+const loadingStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+    color: '#ffffff'
+};
+
+const errorStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+    color: '#ffffff',
+    flexDirection: 'column',
+    gap: '1rem',
+    padding: '2rem',
+    textAlign: 'center'
+};
 
 interface WebGLCanvasProps {
     children: ReactNode;
@@ -49,62 +72,144 @@ export default function WebGLCanvas({
     forceError = false,
     ...props
 }: WebGLCanvasProps) {
+    // State management
     const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
     const [hasError, setHasError] = useState(false);
+    const [adaptiveDPR, setAdaptiveDPR] = useState(2);
 
+    // Performance monitoring refs
+    const frameCountRef = useRef(0);
+    const lastTimeRef = useRef(performance.now());
+    const dprRef = useRef(2);
+    const lastDPRChangeRef = useRef(0);
+    const consecutiveLowFPSRef = useRef(0);
+    const consecutiveHighFPSRef = useRef(0);
+
+    // Adaptive DPR controls
+    const perfControls = useControls('Performance', {
+        showPerf: { value: false, label: 'Show Performance Monitor' },
+        enableAdaptiveDRP: { value: true, label: 'Enable Adaptive DPR' },
+        targetFPS: { value: 30, min: 30, max: 60, step: 5, label: 'Target FPS' },
+        minDPR: { value: 1, min: 0.25, max: 1, step: 0.25, label: 'Min DPR' },
+        maxDPR: { value: 2, min: 1, max: 3, step: 0.25, label: 'Max DPR' }
+    }, { collapsed: true });
+
+    // Initialize WebGL availability check
     useEffect(() => {
         setWebglAvailable(isWebGLAvailable());
     }, []);
 
-    // Show loading state while checking WebGL availability or when forced
-    if (webglAvailable === null || forceLoading) {
-        if (loadingComponent) {
-            return <>{loadingComponent}</>;
-        }
+    // Adaptive DPR adjustment logic
+    const adjustDPR = useCallback((fps: number, currentTime: number) => {
+        const timeSinceLastChange = currentTime - lastDPRChangeRef.current;
 
-        return (
-            <div
-                className={className}
-                style={{
-                    ...style,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#000000',
-                    color: '#ffffff'
-                }}
-            >
+        if (timeSinceLastChange < 3000) return; // Cooldown period
+
+        if (fps < perfControls.targetFPS - 5) {
+            // Performance is poor, reduce DPR
+            consecutiveLowFPSRef.current++;
+            consecutiveHighFPSRef.current = 0;
+
+            if (consecutiveLowFPSRef.current >= 1 && dprRef.current > perfControls.minDPR) {
+                dprRef.current = Math.max(perfControls.minDPR, dprRef.current - 0.25);
+                setAdaptiveDPR(dprRef.current);
+                lastDPRChangeRef.current = currentTime;
+            }
+        } else if (fps > perfControls.targetFPS + 15) {
+            // Performance is good, increase DPR
+            consecutiveHighFPSRef.current++;
+            consecutiveLowFPSRef.current = 0;
+
+            if (consecutiveHighFPSRef.current >= 2 && dprRef.current < perfControls.maxDPR) {
+                dprRef.current = Math.min(perfControls.maxDPR, dprRef.current + 0.25);
+                setAdaptiveDPR(dprRef.current);
+                lastDPRChangeRef.current = currentTime;
+            }
+        } else {
+            // FPS is in acceptable range, reset counters
+            consecutiveLowFPSRef.current = 0;
+            consecutiveHighFPSRef.current = 0;
+        }
+    }, [perfControls.targetFPS, perfControls.minDPR, perfControls.maxDPR]);
+
+    // FPS monitoring and adaptive DPR
+    useEffect(() => {
+        if (!webglAvailable || !perfControls.enableAdaptiveDRP) return;
+
+        const monitorFPS = () => {
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastTimeRef.current;
+            frameCountRef.current++;
+
+            if (deltaTime >= 2000) {
+                const fps = (frameCountRef.current * 1000) / deltaTime;
+                adjustDPR(fps, currentTime);
+
+                frameCountRef.current = 0;
+                lastTimeRef.current = currentTime;
+            }
+
+            requestAnimationFrame(monitorFPS);
+        };
+
+        const animationId = requestAnimationFrame(monitorFPS);
+        return () => cancelAnimationFrame(animationId);
+    }, [webglAvailable, perfControls.enableAdaptiveDRP, adjustDPR]);
+
+    // Canvas configuration
+    const canvasConfig = {
+        shadows,
+        dpr: adaptiveDPR,
+        gl: {
+            shadowMapType: THREE.PCFSoftShadowMap,
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance" as const,
+            ...gl
+        },
+        frameloop,
+        className,
+        style,
+        onCreated: (state: any) => {
+            if (state.gl) {
+                state.gl.setClearColor('#000000');
+            }
+
+            // Suppress WebGL warnings
+            const originalError = console.error;
+            console.error = function (...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('WebGL')) {
+                    return;
+                }
+                originalError.apply(console, args);
+            };
+
+            onCreated?.(state);
+        },
+        onError: (error: any) => {
+            console.warn('Canvas error handled:', error);
+            setHasError(true);
+            onError?.(error);
+        },
+        ...props
+    };
+
+    // Loading state
+    if (webglAvailable === null || forceLoading) {
+        return loadingComponent ? <>{loadingComponent}</> : (
+            <div className={className} style={{ ...style, ...loadingStyles }}>
                 <div>Loading...</div>
             </div>
         );
     }
 
-    // Fallback UI when WebGL is not available or has errors or when forced
+    // Error state
     if (!webglAvailable || hasError || forceError) {
-        if (fallback) {
-            return <>{fallback}</>;
-        }
-
-        if (errorComponent) {
-            return <>{errorComponent}</>;
-        }
+        if (fallback) return <>{fallback}</>;
+        if (errorComponent) return <>{errorComponent}</>;
 
         return (
-            <div
-                className={className}
-                style={{
-                    ...style,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    padding: '2rem',
-                    textAlign: 'center'
-                }}
-            >
+            <div className={className} style={{ ...style, ...errorStyles }}>
                 <div>WebGL is not available</div>
                 <div style={{ fontSize: '0.875rem', opacity: 0.7 }}>
                     This experience requires WebGL support. Please enable WebGL in your browser settings or try a different browser.
@@ -113,48 +218,8 @@ export default function WebGLCanvas({
         );
     }
 
-    return (
-        <Canvas
-            shadows={shadows}
-            gl={{
-                shadowMapType: THREE.PCFSoftShadowMap,
-                antialias: true,
-                alpha: false,
-                powerPreference: "high-performance",
-                ...gl
-            }}
-            frameloop={frameloop}
-            className={className}
-            style={style}
-            onCreated={(state) => {
-                // Add error handling for WebGL context creation
-                if (state.gl) {
-                    state.gl.setClearColor('#000000');
-                }
-
-                // Suppress WebGL warnings in console
-                const originalError = console.error;
-                console.error = function (...args) {
-                    if (args[0] && typeof args[0] === 'string' && args[0].includes('WebGL')) {
-                        return; // Suppress WebGL-related console errors
-                    }
-                    originalError.apply(console, args);
-                };
-
-                if (onCreated) {
-                    onCreated(state);
-                }
-            }}
-            onError={(error) => {
-                console.warn('Canvas error handled:', error);
-                setHasError(true);
-                if (onError) {
-                    onError(error);
-                }
-            }}
-            {...props}
-        >
-            {children}
-        </Canvas>
-    );
+    return <Canvas {...canvasConfig}>
+        {children}
+        {perfControls.showPerf && <Perf />}
+    </Canvas>;
 }
