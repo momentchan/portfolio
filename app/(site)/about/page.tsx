@@ -1,5 +1,5 @@
-import Scene from '@/app/(site)/about/components/Scene';
-import AboutContent from '@/app/(site)/about/components/AboutContent';
+import Scene from '@/app/(site)/about/_components/Scene';
+import AboutContent from '@/app/(site)/about/_components/AboutContent';
 
 export default function AboutPage() {
   return (

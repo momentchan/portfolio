@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import gsap from 'gsap';
-import GlobalState from '../../../common/GlobalStates';
+import GlobalState from '@/components/common/GlobalStates';
 
 /**
  * Shared hook for particle fade-in animation

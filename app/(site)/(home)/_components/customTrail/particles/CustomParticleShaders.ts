@@ -1,4 +1,4 @@
-import noise4D from '../../../../lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
+import noise4D from '@/lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
 
 // Custom Velocity Shader for Particle System
 // Calculates forces and updates velocity for custom particle behavior

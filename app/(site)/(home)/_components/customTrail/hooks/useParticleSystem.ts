@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useControls } from 'leva';
-import { useParticles } from '../../../../lib/trail-gpu';
-import { ParticleConfig, ParticleShaderConfig } from '../../../../lib/trail-gpu/types';
+import { useParticles } from '@/lib/trail-gpu';
+import { ParticleConfig, ParticleShaderConfig } from '@/lib/trail-gpu/types';
 import { customVelocityShader, customPositionShader } from '../particles';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
-import GlobalState from '../../../common/GlobalStates';
+import GlobalState from '@/components/common/GlobalStates';
 
 export function useParticleSystem(trailsNum: number) {
   const { started, paused } = GlobalState();

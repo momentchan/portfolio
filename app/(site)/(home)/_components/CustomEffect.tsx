@@ -3,7 +3,7 @@ import { Effect } from 'postprocessing';
 import { Uniform } from 'three';
 import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
-import GlobalState from '../common/GlobalStates';
+import GlobalState from '@/components/common/GlobalStates';
 
 const fragmentShader = /* glsl */`
 uniform float uBlurAmount;

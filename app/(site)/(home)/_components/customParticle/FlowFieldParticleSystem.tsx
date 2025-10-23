@@ -9,7 +9,7 @@ import { createFlowFieldParticleMaterial, updateCommonMaterialUniforms } from ".
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { useParticleAnimation } from "./hooks/useParticleAnimation";
 import { usePointerTracking } from "./hooks/usePointerTracking";
-import GlobalState from "../../common/GlobalStates";
+import GlobalState from "@/components/common/GlobalStates";
 
 interface FlowFieldParticleSystemProps {
     particleCount?: number;

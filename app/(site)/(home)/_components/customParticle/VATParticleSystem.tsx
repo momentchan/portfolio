@@ -11,7 +11,7 @@ import { generateRandomVertexIds, generateBasePosTexture, generateUV2Texture } f
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { usePointerTracking } from "./hooks/usePointerTracking";
 import { useParticleAnimation } from "./hooks/useParticleAnimation";
-import GlobalState from "../../common/GlobalStates";
+import GlobalState from "@/components/common/GlobalStates";
 
 export default function VATParticleSystem({
     frame,
@@ -24,8 +24,8 @@ export default function VATParticleSystem({
 }: VATParticleSystemProps) {
     const { gl, camera, viewport } = useThree();
     const particleCount = 128;
-    const { started } = GlobalState();  
-    
+    const { started } = GlobalState();
+
     const controls = useControls('Particles.VAT Particles', {
         glowColor: { value: '#ffd3d3' },
         glowIntensity: { value: 0.4, min: 0, max: 10, step: 0.01 },

@@ -4,27 +4,29 @@ GSAP-based animation utilities for VAT lifecycle management.
 
 ## createVATLifecycleTimeline()
 
-Creates a complete GSAP timeline for VAT mesh lifecycle animation including frame playback, scaling, and rotation.
+Creates a complete GSAP timeline for VAT mesh lifecycle animation including frame playback, scaling,
+and rotation.
 
 ### Parameters
 
 **config** (`TimelineAnimationConfig`):
+
 ```typescript
 {
   // Frame timing
   frameForwardDuration: number;    // Duration to animate forward (0→1)
   frameHoldDuration: number;       // Duration to hold at frame 1
   frameBackwardDuration: number;   // Duration to animate backward (1→0)
-  
+
   // Scaling timing
   scaleInDuration: number;         // Duration to scale in
   scaleOutDuration: number;        // Duration to scale out
   maxScale: number;                // Maximum scale value
-  
+
   // Rotation timing
   rotateInDuration: number;        // Duration to rotate in
   rotateOutDuration: number;       // Duration to rotate out
-  
+
   // Callbacks
   onComplete?: () => void;                // Called when timeline completes
   onFrameUpdate?: (value: number) => void;  // Called on frame updates
@@ -33,12 +35,21 @@ Creates a complete GSAP timeline for VAT mesh lifecycle animation including fram
 ```
 
 **refs** (`AnimationRefs`):
+
 ```typescript
 {
-  frameRef: { value: number };        // Frame animation ref (0-1)
-  scaleRef: { value: number };        // Scale animation ref
-  rotationRef: { value: number };     // Rotation animation ref
-  globalRatioRef: { value: number };  // Global animation ratio ref (0-1)
+  frameRef: {
+    value: number
+  } // Frame animation ref (0-1)
+  scaleRef: {
+    value: number
+  } // Scale animation ref
+  rotationRef: {
+    value: number
+  } // Rotation animation ref
+  globalRatioRef: {
+    value: number
+  } // Global animation ratio ref (0-1)
 }
 ```
 
@@ -49,7 +60,7 @@ Creates a complete GSAP timeline for VAT mesh lifecycle animation including fram
 ### Example
 
 ```tsx
-import { createVATLifecycleTimeline } from '@scene/vat'
+import { createVATLifecycleTimeline } from '@/app/(site)/(home)/_components/vat'
 
 const frameRef = useRef({ value: 0 })
 const scaleRef = useRef({ value: 0 })
@@ -69,14 +80,14 @@ useEffect(() => {
       rotateOutDuration: 2,
       onComplete: () => console.log('Animation complete'),
       onFrameUpdate: (value) => setCurrentFrame(value),
-      onGlobalRatioUpdate: (value) => setGlobalRatio(value)
+      onGlobalRatioUpdate: (value) => setGlobalRatio(value),
     },
     {
       frameRef: frameRef.current,
       scaleRef: scaleRef.current,
       rotationRef: rotationRef.current,
-      globalRatioRef: globalRatioRef.current
-    }
+      globalRatioRef: globalRatioRef.current,
+    },
   )
 
   return () => timeline.kill()
@@ -95,6 +106,7 @@ Global:   ──────────────────────Line
 ```
 
 The timeline coordinates three parallel animations:
+
 1. **Frame**: Forward → Hold → Backward
 2. **Scale**: In → Hold → Out
 3. **Rotation**: In → Hold → Out
@@ -108,4 +120,3 @@ All animations are synchronized with the frame timeline duration.
 - **Callback Support**: React to animation events
 - **Easy Cleanup**: Single timeline.kill() clears everything
 - **Type Safe**: Full TypeScript support
-

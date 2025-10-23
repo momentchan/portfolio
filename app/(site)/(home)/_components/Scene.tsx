@@ -1,7 +1,7 @@
 'use client';
 
 import { CameraControls, PerspectiveCamera, Preload } from '@react-three/drei';
-import WebGLCanvas from '../common/WebGLCanvas';
+import WebGLCanvas from '@/components/common/WebGLCanvas';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './Effects';
 import { CustomTrail } from './customTrail/CustomTrail';
@@ -10,10 +10,10 @@ import CameraRotator from './CameraRotator';
 import DirectionalLights from './DirectionalLights';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
 import React, { Suspense, useEffect, useState } from 'react';
-import GlobalState from '../common/GlobalStates';
-import WebGLLoadingComponent from '../common/WebGLLoadingComponent';
-import WebGLErrorComponent from '../common/WebGLErrorComponent';
-import { getEnvironment } from '../../utils/environment';
+import GlobalState from '@/components/common/GlobalStates';
+import WebGLLoadingComponent from '@/components/common/WebGLLoadingComponent';
+import WebGLErrorComponent from '@/components/common/WebGLErrorComponent';
+import { getEnvironment } from '@/utils/environment';
 import HintMessage from './HintMessage';
 import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
 

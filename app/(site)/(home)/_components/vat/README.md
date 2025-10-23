@@ -1,6 +1,7 @@
 # VAT (Vertex Animation Texture) System
 
-A complete system for working with Vertex Animation Textures in React Three Fiber, featuring lifecycle management, particle effects, and interactive triggers.
+A complete system for working with Vertex Animation Textures in React Three Fiber, featuring
+lifecycle management, particle effects, and interactive triggers.
 
 ## Structure
 
@@ -37,9 +38,9 @@ vat/
 The base VAT mesh component with material controls and particle system integration.
 
 ```tsx
-import { VATMesh } from '@scene/vat'
+import { VATMesh } from '@/app/(site)/(home)/_components/vat'
 
-<VATMesh
+;<VATMesh
   gltf={gltfScene}
   posTex={positionTexture}
   nrmTex={normalTexture}
@@ -49,7 +50,7 @@ import { VATMesh } from '@scene/vat'
   speed={1}
   paused={false}
   useDepthMaterial={true}
-  frame={0.5}          // Optional: 0-1 for external control
+  frame={0.5} // Optional: 0-1 for external control
   interactive={true}
   triggerSize={0.05}
   globalRatio={0.8}
@@ -57,6 +58,7 @@ import { VATMesh } from '@scene/vat'
 ```
 
 **Features:**
+
 - Automatic material creation and management
 - Custom depth materials for shadows
 - Particle system integration
@@ -68,9 +70,9 @@ import { VATMesh } from '@scene/vat'
 VAT mesh with complete lifecycle animations (spawn, animate, despawn).
 
 ```tsx
-import { VATMeshLifecycle } from '@scene/vat'
+import { VATMeshLifecycle } from '@/app/(site)/(home)/_components/vat'
 
-<VATMeshLifecycle
+;<VATMeshLifecycle
   {...vatProps}
   maxScale={1.5}
   frameForwardDuration={3}
@@ -85,6 +87,7 @@ import { VATMeshLifecycle } from '@scene/vat'
 ```
 
 **Animation Timeline:**
+
 - Frame plays forward, holds, then reverses
 - Scale fades in and out with custom timing
 - Rotation animates in and out independently
@@ -95,21 +98,22 @@ import { VATMeshLifecycle } from '@scene/vat'
 High-level spawner with auto-spawn logic and resource management.
 
 ```tsx
-import { VATMeshSpawner } from '@scene/vat'
+import { VATMeshSpawner } from '@/app/(site)/(home)/_components/vat'
 
-<VATMeshSpawner
+;<VATMeshSpawner
   vatData={{
-    gltfPath: "vat/model.gltf",
-    posTexPath: "vat/pos.exr",
-    nrmTexPath: "vat/nrm.png",
-    mapTexPath: "textures/color.png",
-    maskTexPath: "textures/mask.png",
-    metaPath: "vat/meta.json"
+    gltfPath: 'vat/model.gltf',
+    posTexPath: 'vat/pos.exr',
+    nrmTexPath: 'vat/nrm.png',
+    mapTexPath: 'textures/color.png',
+    maskTexPath: 'textures/mask.png',
+    metaPath: 'vat/meta.json',
   }}
 />
 ```
 
 **Features:**
+
 - Automatic resource preloading
 - GPU pre-warming with hidden mesh
 - Auto-spawn with configurable intervals
@@ -147,10 +151,10 @@ Manages interactive trigger rate for hover effects.
 Preloads all VAT resources.
 
 **Returns:**
+
 ```tsx
 {
-  gltf, posTex, nrmTex, mapTex, maskTex, meta,
-  isLoaded  // true when all resources loaded
+  gltf, posTex, nrmTex, mapTex, maskTex, meta, isLoaded // true when all resources loaded
 }
 ```
 
@@ -158,7 +162,8 @@ Preloads all VAT resources.
 
 ### spawnerUtils
 
-- `generateValidPosition(existingMeshes, radius, minDistance, maxAttempts)` - Generate non-colliding spawn position
+- `generateValidPosition(existingMeshes, radius, minDistance, maxAttempts)` - Generate non-colliding
+  spawn position
 - `isPositionValid(position, existingMeshes, minDistance)` - Check position validity
 - `createSpawnId(counter)` - Create unique mesh ID
 
@@ -234,6 +239,7 @@ Component for automatic mesh spawning with burst modes.
 ```
 
 **Features:**
+
 - Random intervals between spawns
 - Burst mode (spawn multiple at once)
 - Visibility API integration (pauses when tab hidden)
@@ -244,6 +250,7 @@ Component for automatic mesh spawning with burst modes.
 ### VATMeta
 
 Core VAT metadata from exported JSON:
+
 - `vertexCount`, `frameCount`, `fps`
 - `texWidth`, `texHeight`, `columns`, `frameStride`
 - `storeDelta`, `normalsCompressed`
@@ -263,19 +270,19 @@ Data structure for spawned meshes (id, position, scale, durations)
 ## Example: Complete Setup
 
 ```tsx
-import { VATMeshSpawner } from '@scene/vat'
+import { VATMeshSpawner } from '@/app/(site)/(home)/_components/vat'
 
 export function Scene() {
   return (
     <>
       <VATMeshSpawner
         vatData={{
-          gltfPath: "vat/flower.gltf",
-          posTexPath: "vat/flower_pos.exr",
-          nrmTexPath: "vat/flower_nrm.png",
-          mapTexPath: "textures/flower_color.png",
-          maskTexPath: "textures/flower_mask.png",
-          metaPath: "vat/flower_meta.json"
+          gltfPath: 'vat/flower.gltf',
+          posTexPath: 'vat/flower_pos.exr',
+          nrmTexPath: 'vat/flower_nrm.png',
+          mapTexPath: 'textures/flower_color.png',
+          maskTexPath: 'textures/flower_mask.png',
+          metaPath: 'vat/flower_meta.json',
         }}
       />
     </>
@@ -284,6 +291,7 @@ export function Scene() {
 ```
 
 This will:
+
 1. Preload all resources
 2. Pre-warm GPU with hidden mesh
 3. Auto-spawn VAT meshes with lifecycle animations
@@ -293,6 +301,7 @@ This will:
 ## Particle Integration
 
 Each VAT mesh automatically spawns a `VATParticleSystem` that:
+
 - Samples positions from the VAT mesh geometry
 - Follows VAT animation frames
 - Responds to interaction (animateRate)

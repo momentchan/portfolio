@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import Scene from '@/components/scene/Scene';
+import Scene from '@/app/(site)/(home)/_components/Scene';
 import LoadingPage from '@/components/ui/LoadingPage';
 import AudioUICanvas from '@/components/ui/audio/AudioUICanvas';
 import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';

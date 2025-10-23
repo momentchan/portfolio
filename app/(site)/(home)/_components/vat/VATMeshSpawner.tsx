@@ -8,7 +8,7 @@ import { AutoSpawner } from './AutoSpawner'
 import { MathUtils, Vector3 } from 'three'
 import { generateValidPosition, createSpawnId } from './utils'
 import { screenToWorldAtDepth } from './utils'
-import GlobalState from '../../common/GlobalStates';
+import GlobalState from '@/components/common/GlobalStates';
 
 export interface VATData {
   gltfPath: string

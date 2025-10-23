@@ -1,5 +1,5 @@
 import { getAllProjects } from "@/lib/mdx";
-import ProjectList from './components/ProjectList';
+import ProjectList from './_components/ProjectList';
 
 export const revalidate = 60;
 

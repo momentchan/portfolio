@@ -5,7 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
 import { gsap } from 'gsap';
 import * as THREE from 'three';
-import GlobalState from '../common/GlobalStates';
+import GlobalState from '@/components/common/GlobalStates';
 import { useGyroscope, useGyroscopeControl, useDeviceOrientation } from './gyroscope';
 import { useCallback } from 'react';
 
