@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -20,7 +21,13 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@scene/*": ["./app/(site)/(home)/_components/*"]
+      "@app/*": ["./app/*"],
+      "@components/*": ["./components/*"],
+      "@utils/*": ["./utils/*"],
+      "@site/*": ["./app/(site)/*"],
+      "@projects/*": ["./app/(site)/projects/_components/*"],
+      "@home/*": ["./app/(site)/(home)/_components/*"],
+      "@about/*": ["./app/(site)/about/_components/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/**/*.d.ts"],

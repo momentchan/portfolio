@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import PersistentScene from "./PersistentScene";
-import Navigation from "./Navigation";
+import Navigation from "./(site)/_shared/Navigation";
 import PathTracker from "./PathTracker";
-import MainContent from "./MainContent";
+import MainContent from "./(site)/_shared/MainContent";
 import ViewportHeightProvider from "./ViewportHeightProvider";
 import MobileDetector from "@/components/common/MobileDetector";
 

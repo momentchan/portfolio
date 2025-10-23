@@ -1,8 +1,7 @@
 'use client';
 
 import { ProjectMeta } from '@/lib/mdx';
-import OptimizedImage from '@/components/ui/OptimizedImage';
-import ResponsiveVideo from '@/components/ui/ResponsiveVideo';
+import { OptimizedImage, ResponsiveVideo } from '@components/ui';
 
 interface ProjectDetailProps {
   meta: ProjectMeta;
