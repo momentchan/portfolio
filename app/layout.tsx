@@ -4,7 +4,7 @@ import "./globals.css";
 import PersistentScene from "@site/_shared/PersistentScene";
 import Navigation from "@site/_shared/ui/navigation/Navigation";
 import PathTrackerProvider from "@site/_shared/providers/PathTrackerProvider";
-import MainContent from "@site/_shared/ui/layout/MainContent";
+import MainContent from "@/app/(site)/_shared/layout/MainContent";
 import ViewportHeightProvider from "@site/_shared/providers/ViewportHeightProvider";
 import MobileDetectorProvider from "@site/_shared/providers/MobileDetectorProvider";
 

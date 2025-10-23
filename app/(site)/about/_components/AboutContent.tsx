@@ -5,34 +5,6 @@
 
 
 
-interface PairedContentProps {
-    title: string;
-    description: string;
-    content: string;
-}
-
-function PairedContentSection({ title, description, content }: PairedContentProps) {
-    const paragraphs = content.split('\n\n').filter(p => p.trim());
-
-    return (
-        <div className="flex flex-col lg:flex-row gap-2 lg:gap-16">
-            {/* Left side - Title and short description */}
-            <div className="lg:space-y-2 lg:w-96 lg:flex-shrink-0 lg:self-start is-pc">
-                <h3 className="text-xl lg:text-4xl font-semibold text-white">{title}</h3>
-                <p className="text-sm lg:text-base text-white/70 whitespace-nowrap">{description}</p>
-            </div>
-
-            {/* Right side - Detailed content */}
-            <div className="space-y-1 lg:flex-1 lg:self-start">
-                {paragraphs.map((paragraph, index) => (
-                    <p key={index} className="text-sm lg:text-base text-white leading-normal lg:leading-relaxed">
-                        {paragraph}
-                    </p>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 interface SocialLinkProps {
     href: string;
@@ -56,23 +28,7 @@ function SocialLink({ href, children, isEmail = false }: SocialLinkProps) {
 }
 
 export default function AboutContent() {
-    const pairedContent = [
-        {
-            title: 'Attention',
-            description: 'Where the moment begins.',
-            content: "I'm Ming Jyun Hung, a creative technologist and technical artist.\n\nI create digital experiences that connect technology, design, and emotion — capturing attention as the first step toward interaction and memory.\n\nMy work explores how movement, form, and interaction draw people in, turning awareness into curiosity."
-        },
-        {
-            title: 'Resonance',
-            description: 'Where interaction becomes emotion.',
-            content: "When attention becomes engagement, it creates resonance — interaction that flows both ways.\n\nI design systems that respond to people in real time, using rendering, shaders, and procedural design to build environments that feel alive and human.\n\nEach project becomes a dialogue between creative intent and audience response, developed with designers, engineers, and artists through close collaboration."
-        },
-        {
-            title: 'Memory',
-            description: 'Where experience turns into something that stays.',
-            content: "When resonance endures, it forms memory — the emotional echo of an experience. I've created large-scale installations and interactive web works for exhibitions, brands, and platforms across Japan and Taiwan, exploring how digital interaction can leave a lasting impression.\n\nI'm always open to collaborating with teams who share a passion for creating meaningful interactive work — bringing new ideas to life together."
-        }
-    ];
+    const aboutContent = "I'm Ming Jyun Hung, a creative technologist and technical artist who creates digital experiences that connect technology, design, and emotion.\n\nI focus on interactive installations and real-time digital visuals — exploring how motion, perception, and responsiveness can turn interaction into a shared moment worth remembering.\n\nMy work spans exhibitions, brands, and digital platforms across Japan and Taiwan, where I collaborate with designers, engineers, and artists to bring ambitious ideas to life. I enjoy turning concepts into experiences that move people — visually and emotionally.\n\nIf you're working on something that pushes interactive storytelling or human-centered technology, I'd love to talk.";
 
 
     const socialLinks = [
@@ -82,44 +38,35 @@ export default function AboutContent() {
         { href: 'mailto:mingjyunhung@gmail.com', label: 'Mail', isEmail: true }
     ];
 
-    return (
-        <div className="relative w-full lg:pt-32 lg:max-w-6xl lg:mx-auto text-white leading-relaxed  text-sm sm:text-base lg:pointer-events-none">
-            {/* Mobile-only header text */}
-            <div className="is-sp mb-6">
-                <h1 className="text-lg font-semibold text-white mb">
-                    Attention | Resonance | Memory
-                </h1>
-                <p className="text-sm text-white/80">
-                    The rhythm behind everything I create.
-                </p>
-            </div>
+    const paragraphs = aboutContent.split('\n\n').filter(p => p.trim());
 
-            {/* Main content layout - paired sections */}
-            <div className="space-y-4 lg:space-y-12">
-                {pairedContent.map((section, index) => (
-                    <div
-                        key={index}
-                        className="animate-crop-down"
-                        style={{
-                            animationDelay: `${index * 150}ms`,
-                            opacity: 0,
-                            animationFillMode: 'forwards',
-                        }}
-                    >
-                        <PairedContentSection
-                            title={section.title}
-                            description={section.description}
-                            content={section.content}
-                        />
+    return (
+        <div className="relative w-full pt-2 lg:pt-0 lg:flex-1 lg:flex lg:flex-col lg:justify-center lg:max-w-[600px] lg:mx-auto text-white leading-relaxed text-sm sm:text-base lg:pointer-events-none pb-20 sm:pb-16 lg:pb-8">
+            {/* Main content */}
+            <div className="space-y-4 lg:space-y-6">
+                <div
+                    className="animate-crop-down"
+                    style={{
+                        animationDelay: '0ms',
+                        opacity: 0,
+                        animationFillMode: 'forwards',
+                    }}
+                >
+                    <div className="space-y-4 lg:space-y-6">
+                        {paragraphs.map((paragraph, index) => (
+                            <p key={index} className="text-sm lg:text-base text-white leading-normal lg:leading-relaxed">
+                                {paragraph}
+                            </p>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
 
             {/* Social Links */}
             <div
-                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 my-6 lg:my-20 border-t border-white/20 lg:justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
+                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 mt-6 lg:mt-20 mb-4 lg:mb-8 border-t border-white/20 lg:justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
                 style={{
-                    animationDelay: `${pairedContent.length * 150}ms`,
+                    animationDelay: '150ms',
                     opacity: 0,
                     animationFillMode: 'forwards',
                 }}

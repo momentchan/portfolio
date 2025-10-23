@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import useGlobalState from "../../state/GlobalStates";
+import useGlobalState from "../state/GlobalStates";
 
 export default function MainContent({ children }: { children: React.ReactNode }) {
   const currentPath = useGlobalState((state) => state.currentPath);
   const previousPath = useGlobalState((state) => state.previousPath);
   const isHomepage = currentPath === '/';
+  const isAbout = currentPath.startsWith('/about');
   const [isVisible, setIsVisible] = useState(true);
 
   // Handle page transition fade effects and scroll reset
@@ -40,11 +41,11 @@ export default function MainContent({ children }: { children: React.ReactNode })
       }}
     >
       <div className="px-4 sm:px-6 lg:px-10 mt-20 sm:mt-24 lg:mt-28 flex flex-col min-h-[calc(100vh-8rem)] sm:min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-7rem)]">
-        <div className="flex-1">
+        <div className={`${isAbout ? 'flex-1 flex flex-col' : 'flex-1 min-h-0'}`}>
           {children}
         </div>
         {!isHomepage && (
-          <div className="text-xs lg:text-sm text-white/60 pb-4 z-30">
+          <div className={`text-xs lg:text-sm text-white/60 pb-4 z-30 ${isAbout ? 'sticky bottom-0 bg-transparent backdrop-blur-0' : ''}`}>
             © 2025
           </div>
         )}

@@ -25,7 +25,7 @@ function PersistentSceneComponent() {
     <>
       {isDev ? <LevaWraper initialHidden={true} /> : <Leva hidden={true} />}
       <div
-        className="fixed inset-0 z-0 transition-opacity duration-2000"
+        className="fixed inset-0 z-0 transition-opacity duration-2000 select-none"
         style={{
           opacity: isHomepage ? 1 : 0,
           visibility: isHomepage ? 'visible' : 'hidden',
