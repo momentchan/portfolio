@@ -1,5 +1,5 @@
 import Image, { ImageProps } from 'next/image';
-import { cf, extractPath, isCloudflareImage, isLocalImage, ImagePreset, imagePresets } from '@/utils/cf';
+import { cf, extractPath, isCloudflareImage, isLocalImage, ImagePreset, imagePresets } from '@site/_shared/utils/cf';
 
 interface OptimizedImageProps extends Omit<ImageProps, 'src' | 'loader'> {
     /**

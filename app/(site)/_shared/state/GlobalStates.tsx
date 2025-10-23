@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Environment } from "@utils/environment";
+import { Environment } from "../utils/environment";
 
 interface GlobalState {
   isMobile: boolean;

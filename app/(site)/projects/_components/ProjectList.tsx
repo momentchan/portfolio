@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ProjectMeta } from '@/lib/mdx';
+import { ProjectMeta } from '../_lib/mdx';
 import { useIntersectionObserver } from '@site/_shared/hooks/useIntersectionObserver';
 import { useProjectLoading } from '@site/_shared/hooks/useProjectLoading';
 import { Category, filterProjectsByCategory, getCoverMedia } from './projectHelpers';

@@ -1,6 +1,7 @@
-import { OptimizedImage, ResponsiveVideo } from '@components/media';
+import { OptimizedImage } from '@components/media';
+import ResponsiveVideo from './ResponsiveVideo';
 import { getCoverMedia } from './projectHelpers';
-import { ProjectMeta } from '@/lib/mdx';
+import { ProjectMeta } from '../_lib/mdx';
 
 interface ProjectMediaProps {
     project: ProjectMeta;

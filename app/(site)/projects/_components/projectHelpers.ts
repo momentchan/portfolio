@@ -1,5 +1,5 @@
-import { ProjectMeta, CategoryType } from '@/lib/mdx';
-import { isCloudflareImage } from '@/utils/cf';
+import { ProjectMeta, CategoryType } from '../_lib/mdx';
+import { isCloudflareImage } from '@site/_shared/utils/cf';
 
 // Re-export ProjectMeta for use in other components
 export type { ProjectMeta, CategoryType };

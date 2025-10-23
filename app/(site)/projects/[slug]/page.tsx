@@ -1,4 +1,4 @@
-import { getAllProjects, getProjectBySlug } from "@/lib/mdx";
+import { getAllProjects, getProjectBySlug } from "../_lib/mdx";
 import Link from 'next/link';
 import ProjectDetail from '../_components/ProjectDetail';
 import { MDXRemote } from 'next-mdx-remote/rsc';

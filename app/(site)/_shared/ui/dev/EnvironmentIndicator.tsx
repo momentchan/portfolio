@@ -2,7 +2,7 @@
 
 import React from 'react';
 import GlobalState from '../../state/GlobalStates';
-import { getEnvironmentDisplay } from '@utils/environment';
+import { getEnvironmentDisplay } from '../../utils/environment';
 
 interface EnvironmentIndicatorProps {
   show?: boolean;

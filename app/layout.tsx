@@ -3,10 +3,10 @@ import localFont from "next/font/local";
 import "./globals.css";
 import PersistentScene from "@site/_shared/PersistentScene";
 import Navigation from "@site/_shared/ui/navigation/Navigation";
-import PathTracker from "@site/_shared/providers/PathTracker";
+import PathTrackerProvider from "@site/_shared/providers/PathTrackerProvider";
 import MainContent from "@site/_shared/ui/layout/MainContent";
 import ViewportHeightProvider from "@site/_shared/providers/ViewportHeightProvider";
-import MobileDetector from "@site/_shared/providers/MobileDetector";
+import MobileDetectorProvider from "@site/_shared/providers/MobileDetectorProvider";
 
 const pragmatica = localFont({
   src: [
@@ -46,10 +46,10 @@ export default function RootLayout({
       <body className={`${pragmatica.variable} antialiased`}>
         <ViewportHeightProvider>
           {/* Initialize mobile detection */}
-          <MobileDetector />
+          <MobileDetectorProvider />
 
           {/* Track current and previous paths */}
-          <PathTracker />
+          <PathTrackerProvider />
 
           {/* Persistent background scene - pauses on other pages */}
           <PersistentScene />

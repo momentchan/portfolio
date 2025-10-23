@@ -1,2 +1,2 @@
 // Ribbon shaders  
-export { customRibbonQuadVertexShader, customRibbonQuadFragmentShader } from './CustomRibbonQuadShaders';
+export { customRibbonQuadVertexShader, customRibbonQuadFragmentShader } from './customRibbonQuadShaders';

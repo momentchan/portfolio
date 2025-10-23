@@ -11,7 +11,7 @@ import DirectionalLights from './DirectionalLights';
 import FlowFieldParticleSystem from './customParticle/FlowFieldParticleSystem';
 import React, { Suspense, useEffect, useState } from 'react';
 import GlobalState from '@site/_shared/state/GlobalStates';
-import { getEnvironment } from '@/utils/environment';
+import { getEnvironment } from '@site/_shared/utils/environment';
 import HintMessage from './HintMessage';
 import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
 
