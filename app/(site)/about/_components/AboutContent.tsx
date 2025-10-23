@@ -41,30 +41,28 @@ export default function AboutContent() {
     const paragraphs = aboutContent.split('\n\n').filter(p => p.trim());
 
     return (
-        <div className="relative w-full pt-2 lg:pt-0 lg:flex-1 lg:flex lg:flex-col lg:justify-center lg:max-w-[600px] lg:mx-auto text-white leading-relaxed text-sm sm:text-base lg:pointer-events-none pb-20 sm:pb-16 lg:pb-8">
+        <div className="relative w-full flex-1 flex flex-col justify-center text-white leading-relaxed text-sm sm:text-base sm:max-w-[600px] sm:px-6 sm:mx-auto lg:pointer-events-none pb-20 sm:pb-16 sm:pb-8">
             {/* Main content */}
-            <div className="space-y-4 lg:space-y-6">
-                <div
-                    className="animate-crop-down"
-                    style={{
-                        animationDelay: '0ms',
-                        opacity: 0,
-                        animationFillMode: 'forwards',
-                    }}
-                >
-                    <div className="space-y-4 lg:space-y-6">
-                        {paragraphs.map((paragraph, index) => (
-                            <p key={index} className="text-sm lg:text-base text-white leading-normal lg:leading-relaxed">
-                                {paragraph}
-                            </p>
-                        ))}
-                    </div>
+            <div
+                className="animate-crop-down"
+                style={{
+                    animationDelay: '0ms',
+                    opacity: 0,
+                    animationFillMode: 'forwards',
+                }}
+            >
+                <div className="space-y-4 sm:space-y-6">
+                    {paragraphs.map((paragraph, index) => (
+                        <p key={index}>
+                            {paragraph}
+                        </p>
+                    ))}
                 </div>
             </div>
 
             {/* Social Links */}
             <div
-                className="flex flex-wrap gap-4 sm:gap-6 pt-2 lg:pt-6 mt-6 lg:mt-20 mb-4 lg:mb-8 border-t border-white/20 lg:justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
+                className="flex flex-wrap gap-4 sm:gap-6 pt-2 sm:pt-6 mt-10 sm:mt-20 border-t border-white/20 sm:justify-center text-xs sm:text-sm lg:text-base pointer-events-auto animate-crop-down"
                 style={{
                     animationDelay: '150ms',
                     opacity: 0,
