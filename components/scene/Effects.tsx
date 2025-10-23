@@ -9,7 +9,6 @@ interface EffectsProps {
 }
 
 export default function Effects({ enabled = true }: EffectsProps) {
-  if (!enabled) return null;
   const bloomParams = useControls('Effects.Bloom', {
     enabled: { value: enabled, label: 'Enable Bloom' },
     intensity: { value: 1, min: 0, max: 3, step: 0.01 },
@@ -30,6 +29,8 @@ export default function Effects({ enabled = true }: EffectsProps) {
   const customEffectParams = useControls('Effects.Custom', {
     enabled: { value: enabled, label: 'Enable Custom Effect' },
   }, { collapsed: true });
+
+  if (!enabled) return null;
 
   const effects = [];
 
