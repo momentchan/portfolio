@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import GlobalState from '@/components/common/GlobalStates';
+import GlobalState from '../state/GlobalStates';
 
 /**
  * Custom hook to determine the appropriate video resolution based on device type

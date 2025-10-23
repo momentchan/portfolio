@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import useGlobalState from "@/components/common/GlobalStates";
+import useGlobalState from "../../state/GlobalStates";
 
 export default function MainContent({ children }: { children: React.ReactNode }) {
   const currentPath = useGlobalState((state) => state.currentPath);

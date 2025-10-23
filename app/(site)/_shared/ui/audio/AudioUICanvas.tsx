@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import DistortedCircle from './DistortedCircle';
-import GlobalStates from '@/components/common/GlobalStates';
+import GlobalStates from '../../state/GlobalStates';
 import BGM from './Bgm';
 import gsap from 'gsap';
-import UICanvas from '@/components/ui/common/UICanvas';
+import UICanvas from '@/components/common/UICanvas';
 
 interface AudioUICanvasProps {
     radius?: number;

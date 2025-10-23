@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useGyroscope } from './GyroscopeContext';
 import { useMotionOrientationPermission } from './hooks/useMotionOrientationPermission';
-import GlobalState from '@/components/common/GlobalStates';
+import GlobalState from '@site/_shared/state/GlobalStates';
 import GyroscopeIcon from './GyroscopeIcon';
-import UICanvas from '@/components/ui/common/UICanvas';
+import UICanvas from '@/components/common/UICanvas';
 
 export default function GyroscopePermissionUI() {
     const { isTouchDevice } = GlobalState();

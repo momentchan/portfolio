@@ -1,5 +1,5 @@
 import { MDXComponents } from 'mdx/types';
-import OptimizedImage from './OptimizedImage';
+import OptimizedImage from '@components/media/OptimizedImage';
 
 /**
  * Custom MDX components for project content

@@ -1,4 +1,4 @@
-import { OptimizedImage, ResponsiveVideo } from '@components/ui';
+import { OptimizedImage, ResponsiveVideo } from '@components/media';
 import { getCoverMedia } from './projectHelpers';
 import { ProjectMeta } from '@/lib/mdx';
 

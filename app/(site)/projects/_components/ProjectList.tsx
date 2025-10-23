@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { ProjectMeta } from '@/lib/mdx';
-import { useIntersectionObserver, useProjectLoading } from '@/lib/hooks';
+import { useIntersectionObserver } from '@site/_shared/hooks/useIntersectionObserver';
+import { useProjectLoading } from '@site/_shared/hooks/useProjectLoading';
 import { Category, filterProjectsByCategory, getCoverMedia } from './projectHelpers';
 import { CategoryFilter, ProjectCard } from '.';
 import HoverCanvas from './HoverCanvas';

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import GlobalStates from '@/components/common/GlobalStates';
+import GlobalStates from '../../state/GlobalStates';
 
 // Audio management types and constants
 interface SoundData {

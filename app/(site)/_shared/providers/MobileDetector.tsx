@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
-import GlobalState from "./GlobalStates";
+import GlobalState from "../state/GlobalStates";
 
 /**
  * Component to initialize mobile detection

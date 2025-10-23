@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import Scene from '@/app/(site)/(home)/_components/Scene';
-import { LoadingPage } from '@components/ui';
-import AudioUICanvas from '@components/ui/audio/AudioUICanvas';
-import LevaWraper from '@/lib/r3f-gist/utility/LevaWraper';
+import Scene from '@home/Scene';
+import LoadingPage from '@home/_landing/LoadingPage';
+import AudioUICanvas from './ui/audio/AudioUICanvas';
+import LevaWraper from '@lib/r3f-gist/utility/LevaWraper';
 import { Leva } from 'leva';
-import GlobalState from '@/components/common/GlobalStates';
+import GlobalState from './state/GlobalStates';
 
 function PersistentSceneComponent() {
   const { setPaused, isDev, currentPath, initialPath } = GlobalState();

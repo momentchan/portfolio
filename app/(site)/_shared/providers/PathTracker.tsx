@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import useGlobalState from '@/components/common/GlobalStates';
+import useGlobalState from '../state/GlobalStates';
 
 /**
  * PathTracker - Tracks current and previous paths in global state

@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import GlobalStates from '@/components/common/GlobalStates';
+import GlobalStates from '@site/_shared/state/GlobalStates';
 import { useProgress } from '@react-three/drei';
-import LoadingStats, { type LoadingMetrics } from './LoadingStats';
+import LoadingStats, { type LoadingMetrics } from '@components/dev/LoadingStats';
 import SplitText from './SplitText';
 
 const WORDS = ['seen.', 'felt.', 'remembered.'];

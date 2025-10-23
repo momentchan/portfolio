@@ -1,6 +1,6 @@
 'use client';
 
-import { useViewportHeight } from '@/lib/hooks';
+import { useViewportHeight } from '../hooks/useViewportHeight';
 
 /**
  * Provider component to initialize dynamic viewport height handling

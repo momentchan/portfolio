@@ -23,10 +23,12 @@
       "@/*": ["./*"],
       "@app/*": ["./app/*"],
       "@components/*": ["./components/*"],
+      "@lib/*": ["./lib/*"],
       "@utils/*": ["./utils/*"],
       "@site/*": ["./app/(site)/*"],
       "@projects/*": ["./app/(site)/projects/_components/*"],
       "@home/*": ["./app/(site)/(home)/_components/*"],
+      "@home/_landing/*": ["./app/(site)/(home)/_landing/*"],
       "@about/*": ["./app/(site)/about/_components/*"]
     }
   },

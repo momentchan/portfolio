@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import GlobalStates from '@/components/common/GlobalStates';
+import GlobalStates from '@site/_shared/state/GlobalStates';
 
 export default function HintMessage() {
     const { started, isMobile, currentPath } = GlobalStates();

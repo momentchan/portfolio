@@ -2,7 +2,7 @@ import { getAllProjects, getProjectBySlug } from "@/lib/mdx";
 import Link from 'next/link';
 import ProjectDetail from '../_components/ProjectDetail';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { mdxComponents } from '@/components/ui/MDXComponents';
+import { mdxComponents } from '../_components/MDXComponents';
 
 export async function generateStaticParams() {
   const projects = await getAllProjects();

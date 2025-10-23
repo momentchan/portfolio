@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { useProjectVideoUrls } from '@/lib/hooks/useResponsiveVideo';
+import { useProjectVideoUrls } from '@site/_shared/hooks/useResponsiveVideo';
 
 interface ResponsiveVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
     src: string;

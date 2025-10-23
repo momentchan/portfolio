@@ -2,7 +2,7 @@ import { Ribbon, ParticleDebugPoints } from '@/lib/trail-gpu';
 import { useFrame } from '@react-three/fiber';
 import { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';
 import { gsap } from 'gsap';
-import GlobalState from '@/components/common/GlobalStates';
+import GlobalState from '@site/_shared/state/GlobalStates';
 import { useRef } from 'react';
 
 export function CustomTrail() {

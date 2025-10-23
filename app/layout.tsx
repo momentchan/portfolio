@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import PersistentScene from "./PersistentScene";
-import Navigation from "./(site)/_shared/Navigation";
-import PathTracker from "./PathTracker";
-import MainContent from "./(site)/_shared/MainContent";
-import ViewportHeightProvider from "./ViewportHeightProvider";
-import MobileDetector from "@/components/common/MobileDetector";
+import PersistentScene from "@site/_shared/PersistentScene";
+import Navigation from "@site/_shared/ui/navigation/Navigation";
+import PathTracker from "@site/_shared/providers/PathTracker";
+import MainContent from "@site/_shared/ui/layout/MainContent";
+import ViewportHeightProvider from "@site/_shared/providers/ViewportHeightProvider";
+import MobileDetector from "@site/_shared/providers/MobileDetector";
 
 const pragmatica = localFont({
   src: [

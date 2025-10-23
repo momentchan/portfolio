@@ -9,7 +9,7 @@ import gradientNoise from '@/lib/r3f-gist/shader/cginc/noise/gradientNoise.glsl'
 import fragment from './fragment.glsl';
 import utility from '@/lib/r3f-gist/shader/cginc/utility.glsl';
 import raymarching from '@/lib/r3f-gist/shader/cginc/raymarching.glsl';
-import GlobalState from '../../../../components/common/GlobalStates';
+import GlobalState from '@site/_shared/state/GlobalStates';
 
 interface StripeEffectProps {
   traceTexture?: THREE.Texture | null;

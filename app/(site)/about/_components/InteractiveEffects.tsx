@@ -4,9 +4,9 @@ import { useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Suspense } from 'react';
 import MouseTraceFBO from '../../../../lib/r3f-gist/utility/MouseTrace';
-import { FBOTextureManager } from '../../../../lib/hooks/useFBOTextureManager';
+import { FBOTextureManager } from '@site/_shared/hooks/useFBOTextureManager';
 import RectangleSpawner from './RectangleSpawner';
-import GlobalState from '../../../../components/common/GlobalStates';
+import GlobalState from '@site/_shared/state/GlobalStates';
 
 interface InteractiveEffectsProps {
     onTextureUpdate: (newTextures: Array<THREE.Texture | null>) => void;

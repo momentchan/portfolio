@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import GlobalState from './GlobalStates';
-import { getEnvironmentDisplay } from '../../utils/environment';
+import GlobalState from '../../state/GlobalStates';
+import { getEnvironmentDisplay } from '@utils/environment';
 
 interface EnvironmentIndicatorProps {
   show?: boolean;
@@ -10,8 +10,8 @@ interface EnvironmentIndicatorProps {
   className?: string;
 }
 
-export default function EnvironmentIndicator({ 
-  show = true, 
+export default function EnvironmentIndicator({
+  show = true,
   position = 'top-right',
   className = ''
 }: EnvironmentIndicatorProps) {

@@ -11,7 +11,7 @@ import { generateRandomVertexIds, generateBasePosTexture, generateUV2Texture } f
 import { calculateMVPMatrices, getModelMatrix } from "./utils/matrixUtils";
 import { usePointerTracking } from "./hooks/usePointerTracking";
 import { useParticleAnimation } from "./hooks/useParticleAnimation";
-import GlobalState from "@/components/common/GlobalStates";
+import GlobalState from "@site/_shared/state/GlobalStates";
 
 export default function VATParticleSystem({
     frame,

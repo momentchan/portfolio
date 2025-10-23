@@ -5,7 +5,7 @@ import { ParticleConfig, ParticleShaderConfig } from '@/lib/trail-gpu/types';
 import { customVelocityShader, customPositionShader } from '../particles';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
-import GlobalState from '@/components/common/GlobalStates';
+import GlobalState from '@site/_shared/state/GlobalStates';
 
 export function useParticleSystem(trailsNum: number) {
   const { started, paused } = GlobalState();
