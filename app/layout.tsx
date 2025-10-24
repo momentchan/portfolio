@@ -27,7 +27,8 @@ const pragmatica = localFont({
 
 export const metadata: Metadata = {
   title: "Ming Jyun Hung | Creative Technologist",
-  description: "Creative Technologist | Technical Artist",
+  description:
+    "Portfolio of Ming Jyun Hung — Creative Technologist and Technical Artist specializing in real-time graphics, interactive installations, and Web-based experiences.",
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
     maximumScale: 5,
     viewportFit: "cover",
   },
+  metadataBase: new URL("https://mingjyunhung.com"),
 };
 
 export default function RootLayout({
