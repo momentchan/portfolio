@@ -22,6 +22,15 @@ const InfoSection = ({ label, children }: { label: string; children: React.React
   </div>
 );
 
+const SectionDivider = () => (
+  <div
+    className="w-full h-px my-8"
+    style={{
+      background: 'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.1) 80%, transparent 100%)'
+    }}
+  />
+);
+
 export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) {
   // Build metadata sections
   const sections: Section[] = [
@@ -58,7 +67,6 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
     },
     meta.tags && meta.tags.length > 0 && {
       id: 'tags',
-      label: 'Tags',
       content: (
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {meta.tags.map(tag => (
@@ -69,20 +77,37 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
         </div>
       )
     },
-    meta.link && {
-      id: 'link',
+    (meta.link || meta.video) && {
+      id: 'links',
       content: (
-        <a
-          href={meta.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors underline text-sm sm:text-base"
-        >
-          Visit Website
-          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-          </svg>
-        </a>
+        <div className="flex flex-wrap gap-3">
+          {meta.link && (
+            <a
+              href={meta.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors underline text-sm sm:text-base"
+            >
+              Visit Website
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          )}
+          {meta.video && (
+            <a
+              href={meta.video}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors underline text-sm sm:text-base"
+            >
+              Watch Video
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+              </svg>
+            </a>
+          )}
+        </div>
       )
     }
   ].filter(Boolean) as Section[];
@@ -97,36 +122,54 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
           msOverflowStyle: 'none',
         }}
       >
-        {sections.map((section, index) => (
-          <div
-            key={section.id}
-            className="animate-crop-down"
-            style={{
-              animationDelay: `${index * 50}ms`,
-              opacity: 0,
-              animationFillMode: 'forwards',
-              marginBottom: section.id === 'title' ? '1.5rem' : '2rem'
-            }}
-          >
-            {section.id === 'title' || section.id === 'link' ? (
-              section.content
-            ) : (
-              <InfoSection label={section.label!}>{section.content}</InfoSection>
-            )}
-          </div>
-        ))}
+        {/* Metadata Sections */}
+        <div className="space-y-6">
+          {sections.map((section, index) => (
+            <div
+              key={section.id}
+              className="animate-crop-down"
+              style={{
+                animationDelay: `${index * 50}ms`,
+                opacity: 0,
+                animationFillMode: 'forwards',
+              }}
+            >
+              {section.id === 'title' || section.id === 'links' ? (
+                section.content
+              ) : (
+                <InfoSection label={section.label!}>{section.content}</InfoSection>
+              )}
+            </div>
+          ))}
+        </div>
 
-        {/* MDX Content - Rendered after metadata sections */}
+        {/* Visual Separator */}
         {mdxContent && (
           <div
-            className="animate-crop-down mt-8"
+            className="animate-crop-down"
             style={{
               animationDelay: `${sections.length * 50}ms`,
               opacity: 0,
               animationFillMode: 'forwards',
             }}
           >
-            {mdxContent}
+            <SectionDivider />
+          </div>
+        )}
+
+        {/* MDX Content */}
+        {mdxContent && (
+          <div
+            className="animate-crop-down"
+            style={{
+              animationDelay: `${(sections.length + 1) * 50}ms`,
+              opacity: 0,
+              animationFillMode: 'forwards',
+            }}
+          >
+            <div className="prose prose-invert max-w-none">
+              {mdxContent}
+            </div>
           </div>
         )}
       </div>
