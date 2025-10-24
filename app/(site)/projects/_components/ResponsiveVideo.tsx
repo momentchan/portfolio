@@ -36,19 +36,31 @@ export default function ResponsiveVideo({
         // Small delay to ensure video is loaded
         const playVideo = async () => {
             try {
-                // Reset video to start
-                video.load();
+                // Wait for video to be ready
+                if (video.readyState < 2) {
+                    await new Promise((resolve) => {
+                        const handleCanPlay = () => {
+                            video.removeEventListener('canplay', handleCanPlay);
+                            resolve(void 0);
+                        };
+                        video.addEventListener('canplay', handleCanPlay);
+                    });
+                }
 
                 // Try to play
                 await video.play();
             } catch (error) {
                 // Autoplay failed - this is normal for some browsers
                 // The video will play on user interaction
-                console.log('Video autoplay prevented:', error);
+                if (error.name !== 'AbortError') {
+                    console.log('Video autoplay prevented:', error);
+                }
             }
         };
 
-        playVideo();
+        // Add a small delay to prevent conflicts
+        const timeout = setTimeout(playVideo, 100);
+        return () => clearTimeout(timeout);
     }, [currentUrl, autoPlay]);
 
     return (
