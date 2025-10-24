@@ -28,7 +28,7 @@ function SocialLink({ href, children, isEmail = false }: SocialLinkProps) {
 }
 
 export default function AboutContent() {
-    const aboutContent = "I'm Ming Jyun Hung, a creative technologist and technical artist who creates digital experiences that connect technology, design, and emotion.\n\nI focus on interactive installations and real-time digital visuals — exploring how motion, perception, and responsiveness can turn interaction into a shared moment worth remembering.\n\nMy work spans exhibitions, brands, and digital platforms across Japan and Taiwan, where I collaborate with designers, engineers, and artists to bring ambitious ideas to life. I enjoy turning concepts into experiences that move people — visually and emotionally.\n\nIf you're working on something that pushes interactive storytelling or human-centered technology, I'd love to talk.";
+    const aboutContent = "I'm Ming Jyun Hung, a creative technologist and technical artist specializing in interactive installations and web-based experiences. I create digital work that blends real-time technology with design to shape how people perceive and engage with a space or interface.\n\nI approach interaction as something that should feel alive — systems that respond, evolve, and create a shared sense of presence between the audience and the work.\n\nI've collaborated with exhibitions, brands, and digital platforms across Japan and Taiwan, working closely with designers and engineers to turn ambitious ideas into polished, real-time experiences.\n\nIf you're exploring interactive storytelling or human-centered digital environments, I'd be excited to help bring it to life.";
 
 
     const socialLinks = [

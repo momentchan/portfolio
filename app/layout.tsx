@@ -28,6 +28,11 @@ const pragmatica = localFont({
 export const metadata: Metadata = {
   title: "Ming Jyun Hung | Creative Technologist",
   description: "Creative Technologist | Technical Artist",
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
