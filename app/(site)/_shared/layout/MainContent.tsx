@@ -14,16 +14,18 @@ export default function MainContent({ children }: { children: React.ReactNode })
     if (currentPath !== previousPath) {
       setIsVisible(false);
 
-      // Reset scroll position when navigating to a new page
-      // This prevents scroll position from affecting navbar visibility
+      // Check navigation scenarios
+      const isBackToProjects = currentPath === '/projects' && previousPath?.startsWith('/projects/');
+      const isToProjectDetail = currentPath?.startsWith('/projects/') && previousPath === '/projects';
+
       const timer = setTimeout(() => {
-        // Reset scroll position more reliably
-        const mainElement = document.querySelector('main');
-        if (mainElement) {
-          mainElement.scrollTop = 0;
+        // Reset scroll position when:
+        // 1. Going to project detail (should start at top)
+        // 2. Going to any other page (not back to projects)
+        if (isToProjectDetail || !isBackToProjects) {
+          const mainElement = document.querySelector('main');
+          if (mainElement) mainElement.scrollTop = 0;
         }
-        // Also reset window scroll if any
-        window.scrollTo(0, 0);
 
         setIsVisible(true);
       }, 150); // Half of transition duration for smoother effect
