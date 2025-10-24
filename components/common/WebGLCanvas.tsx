@@ -72,18 +72,21 @@ export default function WebGLCanvas({
     forceError = false,
     ...props
 }: WebGLCanvasProps) {
+    // Initial DPR value
+    const initialDPR = 1.5;
+
     // State management
     const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
     const [hasError, setHasError] = useState(false);
-    const [adaptiveDPR, setAdaptiveDPR] = useState(2);
+    const [adaptiveDPR, setAdaptiveDPR] = useState(initialDPR);
 
     // Performance monitoring refs
     const frameCountRef = useRef(0);
     const lastTimeRef = useRef(performance.now());
-    const dprRef = useRef(2);
     const lastDPRChangeRef = useRef(0);
     const consecutiveLowFPSRef = useRef(0);
     const consecutiveHighFPSRef = useRef(0);
+    const dprRef = useRef(initialDPR);
 
     // Adaptive DPR controls
     const perfControls = useControls('Performance', {
@@ -111,8 +114,9 @@ export default function WebGLCanvas({
             consecutiveHighFPSRef.current = 0;
 
             if (consecutiveLowFPSRef.current >= 1 && dprRef.current > perfControls.minDPR) {
-                dprRef.current = Math.max(perfControls.minDPR, dprRef.current - 0.25);
-                setAdaptiveDPR(dprRef.current);
+                const newDPR = Math.max(perfControls.minDPR, dprRef.current - 0.25);
+                dprRef.current = newDPR;
+                setAdaptiveDPR(newDPR);
                 lastDPRChangeRef.current = currentTime;
             }
         } else if (fps > perfControls.targetFPS + 15) {
@@ -121,8 +125,9 @@ export default function WebGLCanvas({
             consecutiveLowFPSRef.current = 0;
 
             if (consecutiveHighFPSRef.current >= 2 && dprRef.current < perfControls.maxDPR) {
-                dprRef.current = Math.min(perfControls.maxDPR, dprRef.current + 0.25);
-                setAdaptiveDPR(dprRef.current);
+                const newDPR = Math.min(perfControls.maxDPR, dprRef.current + 0.25);
+                dprRef.current = newDPR;
+                setAdaptiveDPR(newDPR);
                 lastDPRChangeRef.current = currentTime;
             }
         } else {
@@ -155,6 +160,10 @@ export default function WebGLCanvas({
         const animationId = requestAnimationFrame(monitorFPS);
         return () => cancelAnimationFrame(animationId);
     }, [webglAvailable, perfControls.enableAdaptiveDRP, adjustDPR]);
+
+    // useEffect(() => {
+    //     console.log('adaptiveDPR', adaptiveDPR);
+    // }, [adaptiveDPR]);
 
     // Canvas configuration
     const canvasConfig = {
