@@ -48,6 +48,18 @@ export default function ProjectDetail({ meta, mdxContent }: ProjectDetailProps) 
         </span>
       ))
     },
+    meta.client && {
+      id: 'client',
+      label: 'Client',
+      content: Array.isArray(meta.client)
+        ? meta.client.map((c, i) => (
+          <span key={c}>
+            {c}
+            {i < (meta.client as string[]).length - 1 && <span className="text-white/40"> / </span>}
+          </span>
+        ))
+        : <span>{meta.client}</span>
+    },
     meta.summary && {
       id: 'summary',
       label: 'Summary',

@@ -52,7 +52,7 @@ export default function ResponsiveVideo({
             } catch (error) {
                 // Autoplay failed - this is normal for some browsers
                 // The video will play on user interaction
-                if (error.name !== 'AbortError') {
+                if (error instanceof Error && error.name !== 'AbortError') {
                     console.log('Video autoplay prevented:', error);
                 }
             }
