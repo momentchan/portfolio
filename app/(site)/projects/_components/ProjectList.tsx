@@ -53,6 +53,24 @@ export default function ProjectList({ projects }: ProjectListProps) {
   // Initial mount animation
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
+
+    // If we navigated back from a detail page, restore scroll
+    try {
+      const shouldRestore = sessionStorage.getItem('restoreProjectsScroll') === '1';
+      const saved = sessionStorage.getItem('projectsScrollY');
+      if (shouldRestore && saved) {
+        const y = parseInt(saved, 10) || 0;
+        // Restore on main scrolling container
+        const main = document.querySelector('main') as HTMLElement | null;
+        if (main) {
+          main.scrollTop = y;
+        } else {
+          window.scrollTo(0, y);
+        }
+        // Clear the flag so future visits reset to top when appropriate
+        sessionStorage.removeItem('restoreProjectsScroll');
+      }
+    } catch { }
   }, []);
 
   // Category change animation effect

@@ -38,6 +38,14 @@ export default function ProjectCard({
         >
             <Link
                 href={`/projects/${project.slug}`}
+                onClick={() => {
+                    try {
+                        const main = document.querySelector('main') as HTMLElement | null;
+                        const y = main ? main.scrollTop : window.scrollY;
+                        sessionStorage.setItem('projectsScrollY', String(y));
+                        sessionStorage.setItem('restoreProjectsScroll', '1');
+                    } catch { }
+                }}
                 className="flex flex-col gap-2 text-xs sm:text-sm text-white transition-colors lg:text-white"
             >
                 {hasCover && (

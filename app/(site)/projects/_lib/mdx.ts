@@ -17,6 +17,8 @@ export type ProjectMeta = {
   media: string[]; // Combined media array (images and videos) - supports both local paths and URLs
   role?: string[]; // Roles like ["Fullstack Creative Development", "Motion"]
   link?: string; // Website URL
+  video?: string; // External full video URL
+  client?: string | string[]; // Client name(s)
   enabled?: boolean; // Show/hide project (default: true)
   file: string;
   _filename?: string; // Internal: used for filename-based sorting
