@@ -38,6 +38,7 @@ export default function ProjectCard({
         >
             <Link
                 href={`/projects/${project.slug}`}
+                scroll={false}
                 onClick={() => {
                     try {
                         const main = document.querySelector('main') as HTMLElement | null;

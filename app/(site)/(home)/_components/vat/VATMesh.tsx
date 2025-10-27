@@ -119,7 +119,7 @@ export function VATMesh({
     triggerRate.current.value -= delta
     triggerRate.current.value = Math.max(0, Math.min(triggerRate.current.value, 1))
 
-    setTime(time + delta * materialControls.waveSpeed * (1 + triggerRate.current.value * 1.2))
+    setTime(time + delta * materialControls.waveSpeed * (1 + triggerRate.current.value * 2.0))
 
     for (const material of materialsRef.current) {
       material.uniforms.uFrame.value = frame
