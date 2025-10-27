@@ -73,7 +73,7 @@ export default function WebGLCanvas({
     ...props
 }: WebGLCanvasProps) {
     // Initial DPR value
-    const initialDPR = 1.5;
+    const initialDPR = 1;
 
     // State management
     const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
