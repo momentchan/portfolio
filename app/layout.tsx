@@ -7,6 +7,7 @@ import PathTrackerProvider from "@site/_shared/providers/PathTrackerProvider";
 import MainContent from "@/app/(site)/_shared/layout/MainContent";
 import ViewportHeightProvider from "@site/_shared/providers/ViewportHeightProvider";
 import MobileDetectorProvider from "@site/_shared/providers/MobileDetectorProvider";
+import ErudaConsole from "@site/_shared/ui/ErudaConsole";
 
 const pragmatica = localFont({
   src: [
@@ -66,6 +67,9 @@ export default function RootLayout({
 
           {/* Main content area - pointer-events-none on homepage allows scene interaction */}
           <MainContent>{children}</MainContent>
+
+          {/* Eruda mobile console - loads on mobile devices or with ?dev=true */}
+          <ErudaConsole />
 
         </ViewportHeightProvider>
       </body>
