@@ -15,8 +15,8 @@ interface SoundRef {
 }
 
 const SOUND_FILES: SoundData[] = [
-    { file: '/audio/fever-dreams-3am.mp3', volume: 1 },
-    { file: '/audio/noise.mp3', volume: 0.4 },
+    { file: '/audio/fever-dreams-3am.m4a', volume: 1 },
+    { file: '/audio/noise.m4a', volume: 0.4 },
 ];
 
 const FADE_DURATION = 0.5; // seconds
