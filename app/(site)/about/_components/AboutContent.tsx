@@ -32,10 +32,11 @@ export default function AboutContent() {
 
 
     const socialLinks = [
-        { href: 'https://instagram.com/mingjyunhung', label: 'Instagram' },
-        { href: 'https://linkedin.com/in/mingjyunhung', label: 'LinkedIn' },
         { href: 'https://github.com/momentchan', label: 'GitHub' },
-        { href: 'mailto:mingjyunhung@gmail.com', label: 'Mail', isEmail: true }
+        { href: 'mailto:mingjyunhung@gmail.com', label: 'Mail', isEmail: true },
+        { href: 'https://linkedin.com/in/mingjyunhung', label: 'LinkedIn' },
+        { href: 'https://instagram.com/mingjyunhung', label: 'Instagram' },
+        { href: 'https://x.com/mingjyunhung', label: 'X' },
     ];
 
     const paragraphs = aboutContent.split('\n\n').filter(p => p.trim());
