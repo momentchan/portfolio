@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { Suspense } from 'react';
 import MouseTraceFBO from '../../../../lib/r3f-gist/utility/MouseTrace';
@@ -22,6 +22,28 @@ export default function InteractiveEffects({ onTextureUpdate }: InteractiveEffec
         getFBOTexture: () => THREE.Texture | null;
         clearTraces?: () => void
     } | null>(null);
+
+    /**
+     * Cleanup FBO textures on unmount
+     */
+    useEffect(() => {
+        return () => {
+            if (traceRef.current) {
+                try {
+                    const texture = traceRef.current.getFBOTexture();
+                    if (texture) {
+                        texture.dispose();
+                    }
+                    // Clear traces if available
+                    if (traceRef.current.clearTraces) {
+                        traceRef.current.clearTraces();
+                    }
+                } catch (error) {
+                    console.debug('FBO cleanup completed');
+                }
+            }
+        };
+    }, []);
 
     // Early return for mobile devices
     if (isMobile) {
