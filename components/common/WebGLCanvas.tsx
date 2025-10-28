@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef, ReactNode, useCallback } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useControls } from 'leva';
 import { Perf } from 'r3f-perf';
@@ -137,11 +137,11 @@ export default function WebGLCanvas({
         }
     }, [perfControls.targetFPS, perfControls.minDPR, perfControls.maxDPR]);
 
-    // FPS monitoring and adaptive DPR
-    useEffect(() => {
-        if (!webglAvailable || !perfControls.enableAdaptiveDRP) return;
+    // Performance Monitor Component (runs inside Canvas using useFrame)
+    const PerformanceMonitor = () => {
+        useFrame(() => {
+            if (!perfControls.enableAdaptiveDRP) return;
 
-        const monitorFPS = () => {
             const currentTime = performance.now();
             const deltaTime = currentTime - lastTimeRef.current;
             frameCountRef.current++;
@@ -153,13 +153,9 @@ export default function WebGLCanvas({
                 frameCountRef.current = 0;
                 lastTimeRef.current = currentTime;
             }
-
-            requestAnimationFrame(monitorFPS);
-        };
-
-        const animationId = requestAnimationFrame(monitorFPS);
-        return () => cancelAnimationFrame(animationId);
-    }, [webglAvailable, perfControls.enableAdaptiveDRP, adjustDPR]);
+        });
+        return null;
+    };
 
     // useEffect(() => {
     //     console.log('adaptiveDPR', adaptiveDPR);
@@ -174,6 +170,10 @@ export default function WebGLCanvas({
             antialias: true,
             alpha: false,
             powerPreference: "high-performance" as const,
+            failIfMajorPerformanceCaveat: false,
+            preserveDrawingBuffer: false,
+            stencil: false,
+            depth: true,
             ...gl
         },
         frameloop,
@@ -228,6 +228,7 @@ export default function WebGLCanvas({
     }
 
     return <Canvas {...canvasConfig}>
+        <PerformanceMonitor />
         {children}
         {perfControls.showPerf && <Perf />}
     </Canvas>;

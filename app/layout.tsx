@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import PersistentScene from "@site/_shared/PersistentScene";
@@ -35,13 +35,14 @@ export const metadata: Metadata = {
     shortcut: '/logo.png',
     apple: '/logo.png',
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    viewportFit: "cover",
-  },
   metadataBase: new URL("https://mingjyunhung.com"),
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

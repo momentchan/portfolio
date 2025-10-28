@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState, forwardRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { useControls } from 'leva'
@@ -11,7 +11,7 @@ import { cloneAndSetupVATScene, calculateVATFrame } from './utils/materialSetup'
 
 const HUE_CYCLE = 120
 
-export function VATMesh({
+export const VATMesh = forwardRef<THREE.Group, VATMeshProps>(function VATMesh({
   gltf,
   posTex,
   nrmTex = null,
@@ -28,7 +28,7 @@ export function VATMesh({
   globalRatio,
   manual = false,
   ...rest
-}: VATMeshProps) {
+}: VATMeshProps, ref) {
   const materialPropertiesControls = useControls('VAT.Material', {
     roughness: { value: 0.4, min: 0, max: 1, step: 0.01 },
     metalness: { value: 0.6, min: 0, max: 1, step: 0.01 },
@@ -134,7 +134,7 @@ export function VATMesh({
   })
 
   return (
-    <group ref={groupRef} {...rest}>
+    <group ref={ref || groupRef} {...rest}>
       {interactive && (
         <InteractiveTrigger
           size={triggerSize}
@@ -160,4 +160,4 @@ export function VATMesh({
       )}
     </group>
   )
-}
+})
