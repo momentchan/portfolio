@@ -25,6 +25,14 @@ function NavLinkInner({ href, children, className, showUnderline = true }: NavLi
   // Remove underline from className since we're using custom underline
   const cleanClassName = className || '';
 
+  // Prevent navigation if already on the target page
+  const handleClick = (e: React.MouseEvent) => {
+    if (pathname === href) {
+      e.preventDefault();
+      return false;
+    }
+  };
+
   return (
     <Link
       href={fullHref}
@@ -32,6 +40,7 @@ function NavLinkInner({ href, children, className, showUnderline = true }: NavLi
       style={{
         textDecoration: 'none',
       }}
+      onClick={handleClick}
     >
       <span className="relative inline-block">
         {children}
