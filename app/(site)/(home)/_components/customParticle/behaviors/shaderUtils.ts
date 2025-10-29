@@ -1,4 +1,4 @@
-import noise4D from '@/lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
+import noise4D from '@/lib/r3f-gist/shaders/cginc/noise/noise4D.glsl';
 
 /**
  * Common shader utilities for particle behaviors

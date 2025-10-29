@@ -2,7 +2,7 @@ import { ParticleBehavior } from "@/lib/particle-system";
 import * as THREE from 'three';
 import { FlowFieldBehaviorUniforms, createCommonUniforms } from './behaviorTypes';
 import { SHADER_UTILS } from './shaderUtils';
-import noise4D from '@/lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
+import noise4D from '@/lib/r3f-gist/shaders/cginc/noise/noise4D.glsl';
 
 /**
  * Flow field behavior with curl noise and pointer interaction

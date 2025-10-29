@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Scene from '@home/Scene';
 import LoadingPage from '@home/_landing/LoadingPage';
 import AudioUICanvas from './ui/audio/AudioUICanvas';
-import LevaWraper from '@lib/r3f-gist/utility/LevaWraper';
+import LevaWrapper from '@/lib/r3f-gist/components/ui/LevaWrapper';
 import { Leva } from 'leva';
 import GlobalState from './state/GlobalStates';
 
@@ -23,7 +23,7 @@ function PersistentSceneComponent() {
 
   return (
     <>
-      {isDev ? <LevaWraper initialHidden={true} /> : <Leva hidden={true} />}
+      {isDev ? <LevaWrapper initialHidden={true} /> : <Leva hidden={true} />}
       <div
         className="fixed inset-0 z-0 transition-opacity duration-2000 select-none"
         style={{

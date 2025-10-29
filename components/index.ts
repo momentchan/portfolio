@@ -1,3 +1,3 @@
 export * from './media';
 export * from './dev';
-export * from './common';
+export * from './common/UICanvas';

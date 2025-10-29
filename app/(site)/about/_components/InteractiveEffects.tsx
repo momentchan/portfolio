@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { Suspense } from 'react';
-import MouseTraceFBO from '../../../../lib/r3f-gist/utility/MouseTrace';
+import MouseTraceFBO from '../../../../lib/r3f-gist/components/interaction/MouseTrace';
 import { FBOTextureManager } from '@site/_shared/hooks/useFBOTextureManager';
 import RectangleSpawner from './RectangleSpawner';
 import GlobalState from '@site/_shared/state/GlobalStates';

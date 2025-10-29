@@ -2,7 +2,7 @@ import { ParticleBehavior } from "@/lib/particle-system";
 import * as THREE from 'three';
 import { VATBehaviorUniforms, createCommonUniforms } from './behaviorTypes';
 import { VAT_SAMPLING, SHADER_UTILS } from './shaderUtils';
-import noise4D from '@/lib/r3f-gist/shader/cginc/noise/noise4D.glsl';
+import noise4D from '@/lib/r3f-gist/shaders/cginc/noise/noise4D.glsl';
 
 /**
  * VAT behavior with lifetime management, noise-based movement, and mouse avoidance
