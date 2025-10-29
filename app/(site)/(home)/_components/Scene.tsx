@@ -1,7 +1,7 @@
 'use client';
 
 import { CameraControls, PerspectiveCamera, Preload } from '@react-three/drei';
-import { WebGLCanvas, WebGLLoadingComponent, WebGLErrorComponent } from '@lib/r3f-gist/components';
+import { WebGLCanvas, WebGLLoadingComponent, WebGLErrorComponent } from '@/packages/r3f-gist/components';
 import EnvironmentSetup from './EnvironmentSetup';
 import Effects from './effects/Effects';
 import { CustomTrail } from './customTrail/CustomTrail';

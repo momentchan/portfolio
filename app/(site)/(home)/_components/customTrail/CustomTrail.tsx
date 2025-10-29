@@ -1,4 +1,4 @@
-import { Ribbon, ParticleDebugPoints } from '@/lib/trail-gpu';
+import { Ribbon, ParticleDebugPoints } from '@/packages/trail-gpu';
 import { useFrame } from '@react-three/fiber';
 import { useTrailSystem, useParticleSystem, useRibbonSystem } from './hooks';
 import { gsap } from 'gsap';

@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useControls } from 'leva';
-import { useTrails } from '@/lib/trail-gpu';
-import { DistanceShaderPack } from '@/lib/trail-gpu/shaders/packs/distance';
-import { TrailConfig } from '@/lib/trail-gpu/types';
+import { useTrails } from '@/packages/trail-gpu';
+import { DistanceShaderPack } from '@/packages/trail-gpu/shaders/packs/distance';
+import { TrailConfig } from '@/packages/trail-gpu/types';
 
 export function useTrailSystem() {
   // Trail configuration controls

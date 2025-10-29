@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useControls } from 'leva';
-import { useParticles } from '@/lib/trail-gpu';
-import { ParticleConfig, ParticleShaderConfig } from '@/lib/trail-gpu/types';
+import { useParticles } from '@/packages/trail-gpu';
+import { ParticleConfig, ParticleShaderConfig } from '@/packages/trail-gpu/types';
 import { customVelocityShader, customPositionShader } from '../particles';
 import * as THREE from 'three';
 import { gsap } from 'gsap';

@@ -2,7 +2,7 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
-import snoise from '@/lib/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
+import snoise from '@/packages/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
 import * as THREE from 'three';
 
 interface DistortedCircleProps {

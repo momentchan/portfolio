@@ -1,4 +1,4 @@
-import photoshopMath from '@/lib/r3f-gist/shaders/cginc/math/blending.glsl?raw'
+import photoshopMath from '@/packages/r3f-gist/shaders/cginc/math/blending.glsl?raw'
 
 export type ParticleSystemType = 'vat' | 'flowField';
 

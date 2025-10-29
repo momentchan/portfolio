@@ -1,9 +1,9 @@
-[submodule "lib/r3f-gist"]
-	path = lib/r3f-gist
+[submodule "packages/r3f-gist"]
+	path = packages/r3f-gist
 	url = https://github.com/momentchan/r3f-gist.git
-[submodule "lib/particle-system"]
-	path = lib/particle-system
+[submodule "packages/particle-system"]
+	path = packages/particle-system
 	url = https://github.com/momentchan/particle-system.git
-[submodule "lib/trail-gpu"]
-	path = lib/trail-gpu
+[submodule "packages/trail-gpu"]
+	path = packages/trail-gpu
 	url = https://github.com/momentchan/trail-gpu.git

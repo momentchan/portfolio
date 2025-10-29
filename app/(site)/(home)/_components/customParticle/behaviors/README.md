@@ -136,12 +136,12 @@ behavior.uniforms.uPointer.value.set(pointer.x, pointer.y);
 To create a custom behavior:
 
 1. Import shared types and utilities
-2. Extend `ParticleBehavior` from `@/lib/particle-system`
+2. Extend `ParticleBehavior` from `@/packages/particle-system`
 3. Use factory functions for common uniforms
 4. Leverage shader utilities for common operations
 
 ```typescript
-import { ParticleBehavior } from "@/lib/particle-system";
+import { ParticleBehavior } from "@/packages/particle-system";
 import { createCommonUniforms, CommonBehaviorUniforms } from './behaviorTypes';
 import { createVelocityShaderPreamble, SHADER_UTILS } from './shaderUtils';
 

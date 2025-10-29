@@ -3,7 +3,7 @@
 import { useLayoutEffect, useState, useCallback, Suspense, useRef, useMemo } from 'react';
 import { Canvas, useLoader, useFrame } from '@react-three/fiber';
 import { TextureLoader, ShaderMaterial, VideoTexture } from 'three';
-import simplexNoise from '@/lib/r3f-gist/shaders/cginc/noise/simplexNoise.glsl?raw';
+import simplexNoise from '@/packages/r3f-gist/shaders/cginc/noise/simplexNoise.glsl?raw';
 
 // ============================================================================
 // TYPES

@@ -1,4 +1,4 @@
-import { ParticlePositionConfig } from "@/lib/particle-system";
+import { ParticlePositionConfig } from "@/packages/particle-system";
 
 // Enhanced position configurations
 export class RandomSpherePositionConfig extends ParticlePositionConfig {

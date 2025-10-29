@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useControls } from 'leva';
 import { useTexture } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useRibbonGeometry, useRibbonMaterials } from '@/lib/trail-gpu';
+import { useRibbonGeometry, useRibbonMaterials } from '@/packages/trail-gpu';
 import {
   customRibbonQuadVertexShader,
   customRibbonQuadFragmentShader

@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Scene from '@home/Scene';
 import LoadingPage from '@home/_landing/LoadingPage';
 import AudioUICanvas from './ui/audio/AudioUICanvas';
-import LevaWrapper from '@/lib/r3f-gist/components/ui/LevaWrapper';
+import LevaWrapper from '@/packages/r3f-gist/components/ui/LevaWrapper';
 import { Leva } from 'leva';
 import GlobalState from './state/GlobalStates';
 

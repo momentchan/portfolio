@@ -1,5 +1,5 @@
-import simplexNoise from '@/lib/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
-import utility from '@/lib/r3f-gist/shaders/cginc/math/utility.glsl';
+import simplexNoise from '@/packages/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
+import utility from '@/packages/r3f-gist/shaders/cginc/math/utility.glsl';
 
 // Custom Ribbon Quad Vertex Shader
 // Renders trails as 3D ribbons with proper geometry and lighting

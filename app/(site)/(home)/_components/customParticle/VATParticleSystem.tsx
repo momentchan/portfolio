@@ -1,4 +1,4 @@
-import { ParticleSystem, ZeroVelocityConfig, UniformColorConfig, RandomSizeConfig, RandomPositionConfig } from "@/lib/particle-system";
+import { ParticleSystem, ZeroVelocityConfig, UniformColorConfig, RandomSizeConfig, RandomPositionConfig } from "@/packages/particle-system";
 import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from 'three';

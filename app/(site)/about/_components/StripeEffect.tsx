@@ -4,10 +4,10 @@ import { useRef, useMemo, useState, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useControls } from 'leva';
-import simplexNoise from '@/lib/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
-import gradientNoise from '@/lib/r3f-gist/shaders/cginc/noise/gradientNoise.glsl';
+import simplexNoise from '@/packages/r3f-gist/shaders/cginc/noise/simplexNoise.glsl';
+import gradientNoise from '@/packages/r3f-gist/shaders/cginc/noise/gradientNoise.glsl';
 import fragment from './fragment.glsl';
-import utility from '@/lib/r3f-gist/shaders/cginc/math/utility.glsl';
+import utility from '@/packages/r3f-gist/shaders/cginc/math/utility.glsl';
 
 interface StripeEffectProps {
   traceTexture?: THREE.Texture | null;
