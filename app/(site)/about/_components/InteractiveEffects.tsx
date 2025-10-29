@@ -23,28 +23,6 @@ export default function InteractiveEffects({ onTextureUpdate }: InteractiveEffec
         clearTraces?: () => void
     } | null>(null);
 
-    /**
-     * Cleanup FBO textures on unmount
-     */
-    useEffect(() => {
-        return () => {
-            if (traceRef.current) {
-                try {
-                    const texture = traceRef.current.getFBOTexture();
-                    if (texture) {
-                        texture.dispose();
-                    }
-                    // Clear traces if available
-                    if (traceRef.current.clearTraces) {
-                        traceRef.current.clearTraces();
-                    }
-                } catch (error) {
-                    console.debug('FBO cleanup completed');
-                }
-            }
-        };
-    }, []);
-
     // Early return for mobile devices
     if (isMobile) {
         return null;

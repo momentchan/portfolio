@@ -24,57 +24,20 @@ export default function Scene() {
     trace: null,
   });
 
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const mountedRef = useRef(true);
-
   /**
    * Handles texture updates from the FBO texture manager
    * Updates the trace texture used by StripeEffect
    */
   const handleTextureUpdate = (newTextures: Array<THREE.Texture | null>) => {
-    if (!mountedRef.current) return;
     setTextures({
       trace: newTextures[0] || null,
     });
   };
 
-  /**
-   * Handle Canvas creation to get renderer reference
-   */
-  const handleCanvasCreated = (state: any) => {
-    if (state.gl && mountedRef.current) {
-      rendererRef.current = state.gl;
-    }
-  };
-
-  /**
-   * Proper cleanup on unmount
-   */
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-
-      // Clean up textures
-      if (textures.trace) {
-        textures.trace.dispose();
-      }
-
-      // Clean up renderer if available
-      if (rendererRef.current) {
-        try {
-          rendererRef.current.dispose();
-        } catch (error) {
-          console.debug('Renderer cleanup completed');
-        }
-      }
-    };
-  }, [textures.trace]);
-
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <WebGLCanvas
         frameloop="always"
-        onCreated={handleCanvasCreated}
       >
         <Suspense fallback={null}>
           <color attach="background" args={['#000000']} />

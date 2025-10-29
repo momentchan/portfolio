@@ -16,8 +16,6 @@ interface StripeEffectProps {
 export default function StripeEffect({ traceTexture }: StripeEffectProps) {
   const { camera, size } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
-  const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
 
   // State for animation
   const [offset, setOffset] = useState(0.0);
@@ -65,7 +63,8 @@ export default function StripeEffect({ traceTexture }: StripeEffectProps) {
 
   // Stripe Effect shader material using FBO texture or external texture
   const shaderMaterial = useMemo(() => {
-    const material = new THREE.ShaderMaterial({
+
+    return new THREE.ShaderMaterial({
       vertexShader: /* glsl */`
         varying vec2 vUv;
         void main() {
@@ -101,34 +100,7 @@ export default function StripeEffect({ traceTexture }: StripeEffectProps) {
       },
       toneMapped: false,
     });
-
-    materialRef.current = material;
-    return material;
   }, [controls, traceTexture]);
-
-  // Create geometry
-  const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(planeDimensions.width, planeDimensions.height);
-    geometryRef.current = geo;
-    return geo;
-  }, [planeDimensions.width, planeDimensions.height]);
-
-  /**
-   * Cleanup materials and geometries on unmount
-   */
-  useEffect(() => {
-    return () => {
-      // Dispose material
-      if (materialRef.current) {
-        materialRef.current.dispose();
-      }
-
-      // Dispose geometry
-      if (geometryRef.current) {
-        geometryRef.current.dispose();
-      }
-    };
-  }, []);
 
   // Update texture when FBO texture changes
   useEffect(() => {
@@ -190,6 +162,8 @@ export default function StripeEffect({ traceTexture }: StripeEffectProps) {
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0, -1]} material={shaderMaterial} geometry={geometry} />
+    <mesh ref={meshRef} position={[0, 0, -1]} material={shaderMaterial}>
+      <planeGeometry args={[planeDimensions.width, planeDimensions.height]} />
+    </mesh>
   );
 }
