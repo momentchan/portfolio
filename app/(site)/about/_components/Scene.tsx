@@ -1,13 +1,14 @@
 'use client';
 
 import { OrthographicCamera, Preload } from '@react-three/drei';
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import WebGLCanvas from '../../../../packages/r3f-gist/components/webgl/WebGLCanvas';
 import StripeEffect from './StripeEffect';
 import DynamicCamera from './DynamicCamera';
 import InteractiveEffects from './InteractiveEffects';
 import { Perf } from 'r3f-perf'
+import { AdaptiveDPRMonitor } from '@/packages/r3f-gist/components/webgl/AdaptiveDPRMonitor';
 
 /**
  * About Scene - 3D interactive background for the about page
@@ -28,11 +29,12 @@ export default function Scene() {
    * Handles texture updates from the FBO texture manager
    * Updates the trace texture used by StripeEffect
    */
-  const handleTextureUpdate = (newTextures: Array<THREE.Texture | null>) => {
+  const handleTextureUpdate = useCallback((newTextures: Array<THREE.Texture | null>) => {
     setTextures({
       trace: newTextures[0] || null,
     });
-  };
+  }, []);
+
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -41,6 +43,8 @@ export default function Scene() {
       >
         <Suspense fallback={null}>
           <color attach="background" args={['#000000']} />
+
+          <AdaptiveDPRMonitor initialDPR={1.25} />
 
           <OrthographicCamera
             makeDefault

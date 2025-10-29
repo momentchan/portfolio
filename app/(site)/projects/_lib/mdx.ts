@@ -48,9 +48,19 @@ function extractFrontmatter(src: string): { data: any; content: string; hasConte
       
       if (endIndex !== -1) {
         const objStr = src.substring(startIndex, endIndex);
-        // Use Function constructor to safely evaluate the object literal
-        const frontmatter = new Function(`'use strict'; return (${objStr})`)();
-        return { data: frontmatter, content: '', hasContent: false };
+        // Use JSON.parse for safer evaluation of object literal
+        // First, we need to convert the object literal to valid JSON
+        try {
+          // Replace single quotes with double quotes and handle unquoted keys
+          const jsonStr = objStr
+            .replace(/(\w+):/g, '"$1":') // Add quotes around unquoted keys
+            .replace(/'/g, '"'); // Replace single quotes with double quotes
+          const frontmatter = JSON.parse(jsonStr);
+          return { data: frontmatter, content: '', hasContent: false };
+        } catch (e) {
+          console.error('Failed to parse JavaScript frontmatter as JSON:', e);
+          return { data: {}, content: '', hasContent: false };
+        }
       }
     } catch (e) {
       console.error('Failed to parse JavaScript frontmatter:', e);

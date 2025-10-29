@@ -14,6 +14,7 @@ import GlobalState from '@site/_shared/state/GlobalStates';
 import { getEnvironment } from '@site/_shared/utils/environment';
 import HintMessage from './HintMessage';
 import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
+import { AdaptiveDPRMonitor } from '@/packages/r3f-gist/components/webgl/AdaptiveDPRMonitor';
 
 export default function Scene() {
   const { setPaused, paused, setEnvironment, isProd, isMobile } = GlobalState();
@@ -82,6 +83,8 @@ export default function Scene() {
         >
           <Suspense fallback={null}>
             <color attach="background" args={['#000000']} />
+
+            <AdaptiveDPRMonitor initialDPR={1} />
 
             <PerspectiveCamera
               makeDefault
