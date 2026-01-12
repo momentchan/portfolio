@@ -9,16 +9,16 @@ import ViewportHeightProvider from "@site/_shared/providers/ViewportHeightProvid
 import MobileDetectorProvider from "@site/_shared/providers/MobileDetectorProvider";
 import ErudaConsole from "@site/_shared/ui/ErudaConsole";
 
-const pragmatica = localFont({
+const inter = localFont({
   src: [
-    { path: "../public/fonts/pragmatica/Pragmatica_Book.otf", weight: "400", style: "normal" },
-    { path: "../public/fonts/pragmatica/Pragmatica_Light.otf", weight: "300", style: "normal" },
-    { path: "../public/fonts/pragmatica/Pragmatica_Bold.otf", weight: "700", style: "normal" },
-    { path: "../public/fonts/pragmatica/Pragmatica_Black.otf", weight: "900", style: "normal" },
-    { path: "../public/fonts/pragmatica/Pragmatica_Book_Obl.otf", weight: "400", style: "italic" },
-    { path: "../public/fonts/pragmatica/Pragmatica_Bold_Obl.otf", weight: "700", style: "italic" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-Light.ttf", weight: "300", style: "normal" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-Bold.ttf", weight: "700", style: "normal" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-LightItalic.ttf", weight: "300", style: "italic" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-Italic.ttf", weight: "400", style: "italic" },
+    { path: "../public/fonts/Inter/static/Inter_18pt-BoldItalic.ttf", weight: "700", style: "italic" },
   ],
-  variable: "--font-pragmatica",
+  variable: "--font-inter",
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
   preload: true,
@@ -52,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${pragmatica.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         <ViewportHeightProvider>
           {/* Initialize mobile detection */}
           <MobileDetectorProvider />

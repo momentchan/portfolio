@@ -9,11 +9,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-pragmatica);
+  --font-sans: var(--font-inter);
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-bold: 700;
-  --font-weight-black: 900;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,7 +25,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-pragmatica), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   overflow: hidden; /* Disable page scroll */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
