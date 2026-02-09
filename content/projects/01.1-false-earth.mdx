@@ -1,0 +1,45 @@
+---
+title: 'False Earth'
+slug: 'false-earth'
+date: '2026-02-09'
+role: ['Creative Director', 'Technical Developer']
+category: 'web'
+featured: true
+link: 'https://false-earth.mingjyunhung.com/'
+video: 'https://vimeo.com/1163264059?fl=ip&fe=ec'
+cover: 'https://media.mingjyunhung.com/projects/false-earth/false-earth_reel-1080p.mp4'
+media:
+  [
+    'https://media.mingjyunhung.com/projects/false-earth/false-earth_reel-1080p.mp4',
+    'https://media.mingjyunhung.com/projects/false-earth/false-earth_demo-1080p.mp4',
+  ]
+summary:
+  'An interactive WebGPU experience continuing the journey of Drift—a continuous landscape generated
+  in real time through GPU-based simulations, where the ground responds and transforms underfoot.'
+tags: ['WebGPU', 'Three.js', 'React Three Fiber', 'TSL']
+---
+
+False Earth is an interactive WebGPU experience that continues the journey of Drift—presenting a
+continuous landscape generated in real time through GPU-based simulations. Set after the long drift
+through space, the project follows an astronaut who arrives on a surface that resembles Earth, yet
+does not behave like one.
+
+### The Experience
+
+As the astronaut moves forward, the ground responds and transforms, leaving visible traces across an
+endless field. Rather than telling a story through words, the experience unfolds through motion and
+change—where distance never closes and the environment reveals its nature only through interaction.
+By navigating this unfamiliar terrain, visitors encounter a world that appears stable at first
+glance, but gradually exposes uncertain form.
+
+### Technical Approach
+
+- **WebGPU grass**: Compute shaders (TSL) for blade position, Voronoi clumping, wind, terrain
+  sampling, and character push—with a stable, tile-free pattern via PCG hash and CPU grid indexing
+- **LOD**: Distance-based level of detail with configurable segment counts and draw buffers
+- **Procedural terrain**: FBM-based height and normals sampled in compute
+- **VAT roses**: Vertex Animation Texture roses with LOD and compute-driven spawn and update
+- **Character**: Third-person character with camera modes (Follow / FPV / Detached) and grass push
+  interaction
+- **Cosmic beams**: Animated beam effects in a separate scene
+- **Post-processing**: TSL pipeline with Bloom, DoF, SMAA; PerformanceMonitor for adaptive DPR
