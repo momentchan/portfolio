@@ -15,6 +15,10 @@ import { getEnvironment } from '@site/_shared/utils/environment';
 import HintMessage from './HintMessage';
 import { GyroscopeProvider, GyroscopePermissionUI } from './gyroscope';
 import { AdaptiveDPRMonitor } from '@/packages/r3f-gist/components/webgl/AdaptiveDPRMonitor';
+import { Canvas } from '@react-three/fiber';
+import { WebGPURenderer } from "three/webgpu";
+import FlowFieldParticleSystemWebGPU from './customParticle/FlowFieldParticleSystemWebGPU';
+
 
 export default function Scene() {
   const { setPaused, paused, setEnvironment, isProd, isMobile } = GlobalState();
@@ -73,13 +77,27 @@ export default function Scene() {
   return (
     <GyroscopeProvider>
       <div style={{ width: '100%', height: '100%' }}>
-        <WebGLCanvas
+        <Canvas
           shadows
           frameloop={paused ? 'never' : 'always'}
-          loadingComponent={<WebGLLoadingComponent />}
-          errorComponent={<WebGLErrorComponent />}
-          forceLoading={forceLoading}
-          forceError={forceError}
+          gl={(canvas) => {
+            const renderer = new WebGPURenderer({
+              ...canvas as any,
+              powerPreference: "high-performance",
+              antialias: true,
+              alpha: true,
+            });
+            renderer.setClearColor('#000000');
+            renderer.autoClear = true;
+            // renderer.inspector = new Inspector();
+            renderer.sortObjects = false;
+
+            return renderer.init().then(() => renderer);
+          }}
+        // loadingComponent={<WebGLLoadingComponent />}
+        // errorComponent={<WebGLErrorComponent />}
+        // forceLoading={forceLoading}
+        // forceError={forceError}
         >
           <Suspense fallback={null}>
             <color attach="background" args={['#000000']} />
@@ -96,15 +114,15 @@ export default function Scene() {
             />
             <CameraRotator />
             {/* <CameraControls /> */}
-            <CustomTrail />
-            <FlowFieldParticleSystem particleCount={particleCount} />
-            <VATMeshSpawner />
+            {/* <CustomTrail /> */}
+            <FlowFieldParticleSystemWebGPU />
+            {/* <VATMeshSpawner /> */}
             <EnvironmentSetup quality={environmentQuality} />
             <DirectionalLights shadowQuality={shadowQuality} />
-            <Effects />
+            {/* <Effects /> */}
           </Suspense>
           <Preload all />
-        </WebGLCanvas>
+        </Canvas>
         <HintMessage />
         <GyroscopePermissionUI />
       </div >
